@@ -30,7 +30,9 @@ let observer: IntersectionObserver | undefined
  * 实例要占 3 个（sigma-edges / sigma-nodes / sigma-hoverNodes 三张画布走 WebGL，
  * 另外四张是 2D）。超出后最早的上下文被强制丢弃，画布直接变空白。
  *
- * rootMargin 取 20% 时同屏最多四个实例、12 个上下文，留出余量给卸载与挂载交叠的那一瞬。
+ * rootMargin 必须是 0：一张卡不一定只有一个实例（多实例示例就带两个），
+ * 放宽到 20% 时 SigmaGraph 那页能凑到 6 个实例、18 个上下文，仍会超。
+ * 只挂载真正进入视口的卡，同屏最多三张，留出余量给卸载与挂载交叠的那一瞬。
  */
 onMounted(() => {
   if (!root.value) {
@@ -41,7 +43,7 @@ onMounted(() => {
     (entries) => {
       active.value = entries.some(entry => entry.isIntersecting)
     },
-    { rootMargin: '20% 0px' }
+    { rootMargin: '0px' }
   )
   observer.observe(root.value)
 })

@@ -59,13 +59,21 @@ export function demoGraph(options: DemoGraphOptions = {}): SerializedGraph {
 
   const edges: SerializedGraph['edges'] = []
 
+  // 非多重图上同一对端点只能有一条边，随机补边必然撞车，得先去重
+  const pairs = new Set<string>()
+
+  function connect(source: number, target: number, label: string) {
+    const pair = `${Math.min(source, target)}-${Math.max(source, target)}`
+    if (!multi && pairs.has(pair)) {
+      return
+    }
+    pairs.add(pair)
+    edges.push({ source: `n${source}`, target: `n${target}`, attributes: { label } })
+  }
+
   // 先连成一棵树，保证连通；再按 extraEdges 补随机边，制造度数差异
   for (let index = 1; index < count; index++) {
-    edges.push({
-      source: `n${Math.floor(random() * index)}`,
-      target: `n${index}`,
-      attributes: { label: RELATIONS[index % RELATIONS.length] }
-    })
+    connect(Math.floor(random() * index), index, RELATIONS[index % RELATIONS.length]!)
   }
 
   for (let index = 0; index < count * extraEdges; index++) {
@@ -74,11 +82,7 @@ export function demoGraph(options: DemoGraphOptions = {}): SerializedGraph {
     if (source === target) {
       continue
     }
-    edges.push({
-      source: `n${source}`,
-      target: `n${target}`,
-      attributes: { label: RELATIONS[index % RELATIONS.length] }
-    })
+    connect(source, target, RELATIONS[index % RELATIONS.length]!)
   }
 
   return {
@@ -102,6 +106,9 @@ export function createScaleGraph(nodeCount: number, edgeRatio = 3): SerializedGr
 
   // 优先连接的候选池：节点每被连一次就多一个副本，被选中的概率随度数增长
   const pool: number[] = [0]
+
+  // 优先连接会反复选中同一个高度数节点，非多重图上必须去重
+  const pairs = new Set<string>()
 
   for (let index = 0; index < nodeCount; index++) {
     const angle = random() * Math.PI * 2
@@ -130,6 +137,13 @@ export function createScaleGraph(nodeCount: number, edgeRatio = 3): SerializedGr
       if (target === index) {
         continue
       }
+
+      const pair = `${Math.min(index, target)}-${Math.max(index, target)}`
+      if (pairs.has(pair)) {
+        continue
+      }
+      pairs.add(pair)
+
       edges.push({ source: `n${index}`, target: `n${target}` })
       pool.push(index, target)
     }
