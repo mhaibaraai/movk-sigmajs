@@ -1,0 +1,157 @@
+{
+  "name": "@movk/sigma",
+  "type": "module",
+  "version": "0.0.1",
+  "packageManager": "pnpm@11.17.0",
+  "description": "基于 sigma v3 的知识图谱可视化 Nuxt 模块：SigmaGraph 等声明式组件与 composables，覆盖渲染、交互、布局、分析与 DOM 覆盖层，面向 1000+ 节点的大规模图谱。",
+  "author": "YiXuan <mhaibaraai@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mhaibaraai/movk-sigmajs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mhaibaraai/movk-sigmajs/issues"
+  },
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "keywords": [
+    "nuxt",
+    "nuxt-module",
+    "nuxt4",
+    "vue",
+    "sigma",
+    "sigmajs",
+    "graphology",
+    "graph",
+    "knowledge-graph",
+    "network-visualization",
+    "webgl",
+    "composables"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/types.d.mts",
+      "style": "./dist/runtime/index.css",
+      "import": "./dist/module.mjs"
+    },
+    "./index.css": "./dist/runtime/index.css",
+    "./runtime/*": "./dist/runtime/*",
+    "./utils/*": {
+      "types": "./dist/runtime/utils/*.d.ts",
+      "import": "./dist/runtime/utils/*.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      ".": [
+        "./dist/types.d.mts"
+      ],
+      "runtime/*": [
+        "./dist/runtime/*"
+      ],
+      "utils/*": [
+        "./dist/runtime/utils/*.d.ts"
+      ]
+    }
+  },
+  "style": "./dist/runtime/index.css",
+  "main": "./dist/module.mjs",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prepack": "nuxt-module-build build",
+    "build": "nuxt-module-build build",
+    "dev": "nuxt dev playground",
+    "dev:build": "nuxt build playground",
+    "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxt prepare playground",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "typecheck": "vue-tsc --noEmit && nuxt typecheck playground",
+    "release": "release-it && npm publish"
+  },
+  "dependencies": {
+    "@movk/core": "^1.3.1",
+    "@nuxt/kit": "^4.5.0",
+    "@vueuse/core": "^14.3.0",
+    "consola": "^3.4.2",
+    "defu": "^6.1.7"
+  },
+  "peerDependencies": {
+    "@sigma/edge-curve": ">=3.0.0",
+    "@sigma/export-image": ">=3.0.0",
+    "@sigma/node-border": ">=3.0.0",
+    "@sigma/node-image": ">=3.0.0",
+    "@sigma/utils": ">=3.0.0",
+    "graphology": ">=0.26.0",
+    "graphology-communities-louvain": ">=2.0.0",
+    "graphology-layout": ">=0.6.0",
+    "graphology-layout-forceatlas2": ">=0.10.0",
+    "graphology-layout-noverlap": ">=0.4.0",
+    "graphology-metrics": ">=2.0.0",
+    "graphology-traversal": ">=0.3.0",
+    "sigma": ">=3.0.0",
+    "vue": ">=3.5.0"
+  },
+  "peerDependenciesMeta": {
+    "@sigma/edge-curve": {
+      "optional": true
+    },
+    "@sigma/export-image": {
+      "optional": true
+    },
+    "@sigma/node-border": {
+      "optional": true
+    },
+    "@sigma/node-image": {
+      "optional": true
+    },
+    "@sigma/utils": {
+      "optional": true
+    },
+    "graphology-communities-louvain": {
+      "optional": true
+    },
+    "graphology-layout": {
+      "optional": true
+    },
+    "graphology-layout-forceatlas2": {
+      "optional": true
+    },
+    "graphology-layout-noverlap": {
+      "optional": true
+    },
+    "graphology-metrics": {
+      "optional": true
+    },
+    "graphology-traversal": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@nuxt/devtools": "^3.2.4",
+    "@nuxt/eslint-config": "^1.16.0",
+    "@nuxt/module-builder": "^1.0.2",
+    "@nuxt/schema": "^4.5.0",
+    "@nuxt/test-utils": "^4.0.3",
+    "@release-it/conventional-changelog": "^11.0.1",
+    "@types/node": "latest",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "@vue/test-utils": "^2.4.11",
+    "eslint": "^10.7.0",
+    "graphology": "^0.26.0",
+    "graphology-types": "^0.24.8",
+    "happy-dom": "^20.11.1",
+    "nuxt": "^4.5.0",
+    "release-it": "^20.2.1",
+    "sigma": "^3.0.3",
+    "typescript": "~6.0.3",
+    "vitest": "^4.1.10",
+    "vue": "^3.5.40",
+    "vue-tsc": "^3.3.7"
+  }
+}

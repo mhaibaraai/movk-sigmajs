@@ -1,0 +1,13 @@
+packages:
+  - playground
+  - test/fixtures/*
+
+ignoreWorkspaceRootCheck: true
+linkWorkspacePackages: true
+minimumReleaseAge: 0
+
+allowBuilds:
+  '@parcel/watcher': false
+  esbuild: false
+  unrs-resolver: false
+  vue-demi: false
