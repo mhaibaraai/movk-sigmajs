@@ -111,6 +111,7 @@ pnpm lint
 
 - 覆盖层定位有两套坐标：节点用 `framedGraphToViewport()`（`getNodeDisplayData()` 返回的是归一化后的 framed 坐标），原始图坐标才用 `graphToViewport()`，混用会整体错位
 - 覆盖层用 `v-show` 保留 DOM，隐藏时插槽内容必须另用 `v-if` 跳过，否则使用方拿到空作用域且隐藏内容仍可点击
+- `SigmaGraph` 的默认插槽排在占满高度的画布之后，走的是正常文档流。插槽内的任何面板都必须自行 `position: absolute`，否则会被挤到容器之外并被 `overflow` 裁掉
 
 - 根 `tsconfig.json` 必须 `extends: "./.nuxt/tsconfig.json"`。改成 project references 写法会让 `vue-tsc --noEmit` 完全跳过 `src/`，typecheck 空转却仍退出码 0
 - 组件 emits 的类型要逐条写出。用 `{ [K in SigmaEventType]: ... }` 这类映射类型派生，`vue-tsc` 能过但 `pnpm build` 会失败——`@vue/compiler-sfc` 要在编译期静态提取事件名，解析不了跨包映射类型
