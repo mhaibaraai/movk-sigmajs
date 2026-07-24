@@ -94,7 +94,7 @@ describe('SigmaGraph 出口兼容', () => {
 
     // 传给 sigma 的是链，不是原函数：链要替只返回补丁的归约补全 x / y，
     // 否则 sigma 拿不到完整显示数据会直接抛错
-    const chained = state.calls[0]!.settings.nodeReducer!
+    const chained = state.calls[0]!.settings.nodeReducer as (key: string, data: Record<string, unknown>) => Record<string, unknown>
     const result = chained('n1', { x: 1, y: 2, label: 'N1' })
 
     expect(nodeReducer).toHaveBeenCalledWith('n1', expect.objectContaining({ label: 'N1' }))
