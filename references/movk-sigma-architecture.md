@@ -180,7 +180,7 @@ graph.value.setNodeAttribute('n1', 'color', '#f43f5e')
 | --- | --- | --- |
 | `graphology-types` | `SerializedGraph`、`SerializedNode`、`SerializedEdge`、`Attributes`、`NodeEntry`、`EdgeEntry` | 图数据契约。直接用 `SerializedGraph`，不自造 `GraphData` 接口 |
 | `graphology` | `Graph`（`dist/graphology.d.ts` 自带） | 图实例 |
-| `sigma/settings` | `Settings`、`NodeReducer`、`EdgeReducer` | 渲染配置与归约函数签名 |
+| `sigma/settings` | `Settings` | 渲染配置。sigma **未**单独导出 `NodeReducer` / `EdgeReducer`，它们是 `Settings` 上的内联字段类型，库内经 `NonNullable<Settings['nodeReducer']>` 派生 |
 | `sigma/types` | `NodeDisplayData`、`EdgeDisplayData`、`CameraState`、`Coordinates`、`MouseCoords` 及各事件 payload | 事件、相机、显示数据 |
 | `sigma/rendering` | `NodeProgramType`、`EdgeProgramType` | `programs` prop 的类型约束 |
 | `graphology-layout*` / `-metrics` / `-communities-louvain` / `-traversal` | 各自 `index.d.ts` | 布局与分析选项 |
@@ -214,7 +214,7 @@ graphology 的 `Graph` 是纯可变对象，Vue 的响应式系统完全抓不�
 
 天真的 `graph.clear()` 加 `graph.import()` 会让所有节点坐标重置，视觉上整张图跳一次。
 
-方案：`applyGraphDiff(graph, next, options)` 逐项 diff 增删改，已存在节点的 `x` / `y` 一律保留，只有新增节点才需要布局。
+方案：`applyGraphDiff(graph, next, options)` 逐项 diff 增删改。节点属性按新数据整体替换，唯一例外是坐标：新数据显式给出 `x` / `y` 时以新值为准（服务端重算布局的场景），未给出则沿用图上现有坐标（避免跳动）。只有新增节点才需要布局。
 
 ### 4. DOM 覆盖层与相机的坐标同步
 
@@ -323,7 +323,7 @@ Nuxt 官方明确：已发布模块的 `src/runtime/` 内不能依赖自动导�
 
 图与 sigma 领域的逻辑，不属于 core 范畴，放在 `src/runtime/utils/`：
 
-- `applyGraphDiff(graph, next, options)` —— 增量 diff，保留已有 `x` / `y`。见难点 3
+- `applyGraphDiff(graph, next, options)` —— 增量 diff，`preservePositions` 保留已有 `x` / `y`，`prune` 控制是否剪除新数据外的节点与边。见难点 3
 - `mergeGraphData(a, b)` —— 合并邻域展开返回的 `SerializedGraph`
 - `sampleGraph(graph, n)` —— 大图概览抽样（按度数取 Top-N 及其邻边）
 - `degreeToSize(graph, range)` / `communityToColor(graph, palette)` —— 视觉映射
@@ -406,7 +406,7 @@ movk-sigmajs/
 ### module.ts 的 setup 要点
 
 - `createResolver` 取绝对路径
-- `addComponentsDir` 注册 `runtime/components`，文件名已带 `Sigma` 前缀，用 `pathPrefix: false`
+- `addComponentsDir` 注册 `runtime/components`，组件文件名不带前缀，由 `prefix` 选项（默认 `'Sigma'`）统一加上，并用 `pathPrefix: false` 让目录层级不参与命名
 - `addImportsDir` 注册 `runtime/composables` 与 `runtime/utils`
 - `meta.configKey` 用 `sigma`，`meta.compatibility` 声明 Nuxt 版本约束
 - `defaults` 承载全局默认 `settings`，与组件级 `settings` 用 `@movk/core` 的 `deepMerge` 合并
