@@ -25,10 +25,10 @@ const data = ref<SerializedGraph>({
   attributes: {},
   options: { type: 'mixed', multi: false, allowSelfLoops: true },
   nodes: [
-    { key: 'a', attributes: { label: '制度 A', x: 0, y: 0, size: 14, color: '#f43f5e' } },
-    { key: 'b', attributes: { label: '制度 B', x: 12, y: 5, size: 11, color: '#3b82f6' } },
-    { key: 'c', attributes: { label: '制度 C', x: 6, y: -7, size: 9, color: '#22c55e' } },
-    { key: 'd', attributes: { label: '制度 D', x: -9, y: 6, size: 10, color: '#a855f7' } }
+    { key: 'a', attributes: { label: '制度 A', category: '管理制度', x: 0, y: 0, size: 14, color: '#f43f5e' } },
+    { key: 'b', attributes: { label: '制度 B', category: '技术标准', x: 12, y: 5, size: 11, color: '#3b82f6' } },
+    { key: 'c', attributes: { label: '制度 C', category: '技术标准', x: 6, y: -7, size: 9, color: '#22c55e' } },
+    { key: 'd', attributes: { label: '制度 D', category: '管理制度', x: -9, y: 6, size: 10, color: '#a855f7' } }
   ],
   edges: [
     { source: 'a', target: 'b', attributes: { label: '引用' } },
@@ -42,7 +42,7 @@ const data = ref<SerializedGraph>({
   <main class="page">
     <header>
       <h1>@movk/sigma playground</h1>
-      <p>M3 布局与分析：worker 布局、检索、过滤、社区与中心性，以及延迟加载的渲染程序。</p>
+      <p>M4 内置控件：缩放、全屏、检索、图例、小地图与导出，外观全部由 CSS 变量驱动。</p>
     </header>
 
     <section>
@@ -60,6 +60,17 @@ const data = ref<SerializedGraph>({
           :programs="programs"
           :settings="{ renderEdgeLabels: true, enableEdgeEvents: true, defaultNodeType: 'border', defaultEdgeType: 'curve' }"
         >
+          <SigmaControls position="top-right">
+            <SigmaSearchControl :fields="['label']" />
+            <SigmaZoomControl />
+            <SigmaFullscreenControl />
+            <SigmaLegend field="category" />
+          </SigmaControls>
+
+          <SigmaControls position="bottom-left">
+            <SigmaMiniMap />
+          </SigmaControls>
+
           <GraphAnalysis />
           <GraphInteraction />
         </SigmaGraph>

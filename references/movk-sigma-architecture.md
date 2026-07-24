@@ -279,14 +279,22 @@ Nuxt 官方明确：已发布模块的 `src/runtime/` 内不能依赖自动导�
 
 零第三方依赖，行为与无障碍结构由库提供，外观可全接管。
 
+**不内置 Tailwind。** Tailwind 是构建期工具：发布到 npm 后类名只是字符串，必须由使用方的 Tailwind 扫到我们的 `dist` 才能生成 CSS，一旦漏配扫描路径控件就是完全没样式的裸 DOM，与「零依赖、开箱可用」直接冲突。改为预编译 CSS 发出去，则 Tailwind 只剩内部写法糖，还要在「带 preflight 污染使用方全局 reset」和「不带 preflight 导致跨项目表现不一致」之间二选一。CSS 变量方案下换肤只需覆盖一行，零构建配置，且不受 Tailwind v3 → v4 破坏性变更牵连。Tailwind 属于 `playgrounds/ui`，用来演示插槽接管外观。
+
+样式实现要点：
+
+- 变量分两层，primitive 是配色与尺寸的原子值，semantic 按用途引用 primitive。换主题通常只覆盖 primitive
+- 选择器一律包 `:where()` 把优先级降到 0，使用方无需 `!important`
+- **深色模式走两条通道**：`prefers-color-scheme` 与 `.dark` 类。只监听前者的话，用户在 Nuxt UI / Tailwind 里手动切深色时控件不会跟着变；系统偏好那条还要排除应用强制浅色（`.light`）的情况
+
 | 组件 | 职责 |
 | --- | --- |
-| `SigmaControls` | 控件容器，`position` 控制四角停靠 |
-| `SigmaZoomControl` | 放大 / 缩小 / 复位 |
-| `SigmaFullscreenControl` | 全屏切换 |
-| `SigmaSearchControl` | 节点检索输入与结果列表，选中后相机聚焦 |
-| `SigmaLegend` | 按分类字段聚合图例，点击切换显隐（落到 reducer 的 `hidden`） |
-| `SigmaMiniMap` | 缩略图与视口框 |
+| `SigmaControls` | 控件容器，`position` 控制四角停靠，`direction` 控制排布方向。停靠信息落到 `data-position` / `data-direction` 上由 CSS 消费 |
+| `SigmaZoomControl` | 放大 / 缩小 / 复位，图标经具名插槽接管 |
+| `SigmaFullscreenControl` | 全屏切换。对 `closest('.sigma-root')` 取全屏目标，覆盖层与其他控件一起进入，且不依赖根组件的 DOM 结构 |
+| `SigmaSearchControl` | 节点检索输入与结果列表，选中后相机聚焦。输入即时回显、检索按防抖触发，命中片段用 `@movk/core` 的 `splitHighlight` 高亮 |
+| `SigmaLegend` | 按分类字段聚合图例，点击切换显隐（落到 reducer 的 `hidden`）。`field` 默认取 `type`，但 sigma 里 `type` 是渲染程序名，领域分类应显式传业务字段 |
+| `SigmaMiniMap` | 缩略图与视口框。全程使用 framed 坐标——`getNodeDisplayData` 与相机的 `x` / `y` 同在这个坐标系，画点、画视口框、点击换算三者不必来回转换 |
 
 导出不做成组件——`useSigmaExport()` 加一个调用方自己的按钮即可，包一层没有增量价值。
 
@@ -319,7 +327,7 @@ Nuxt 官方明确：已发布模块的 `src/runtime/` 内不能依赖自动导�
 | --- | --- |
 | `useSigmaLayout(name, options)` | 统一布局入口，`name` 取 `forceatlas2` / `noverlap` / `circular` / `circlepack` / `random`；返回 `{ assign, start, stop, isRunning }`，迭代型才有 `start` / `stop`。worker 生命周期托管，见难点 6 |
 | `useSigmaMetrics()` | 度数走核心 graphology 不引入依赖；中心性与 Louvain 社区依赖可选 peer，用到时才动态导入，并按 `version` 缓存。**注意 `graphology-metrics@2.4.0` 的 betweenness 在链状图上正确，但分叉节点偏低、首个插入的节点恒为 0（4 节点星形的星心得 0，正确值是 3），依赖它做判断前请自行核对** |
-| `useSigmaExport()` | `toPNG` / `download`，基于 `@sigma/export-image` |
+| `useSigmaExport()` | `toBlob` / `download`，依赖可选 peer `@sigma/export-image`，用到时才动态导入。上游会按格式自行追加扩展名，因此 `download('x.png')` 与 `download('x')` 归一为同一结果，避免出现 `x.png.png` |
 
 ## 八、工具函数与 @movk/core 复用
 

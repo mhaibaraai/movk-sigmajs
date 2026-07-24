@@ -6,6 +6,7 @@ const { only, reset, hiddenCount } = useSigmaFilter()
 
 const forceAtlas2 = useSigmaLayout('forceatlas2')
 const circular = useSigmaLayout('circular')
+const { download, isExporting } = useSigmaExport()
 
 const palette = ['#f43f5e', '#3b82f6', '#22c55e', '#a855f7', '#f59e0b', '#14b8a6']
 const communityCount = ref(0)
@@ -108,6 +109,13 @@ function filterHubs() {
       >
         取消过滤
       </button>
+      <button
+        type="button"
+        :disabled="isExporting"
+        @click="download('graph.png', { backgroundColor: '#fff' })"
+      >
+        {{ isExporting ? '导出中…' : '导出 PNG' }}
+      </button>
       <span class="tag">最大度 {{ maxDegree }} · 已隐藏 {{ hiddenCount }}</span>
     </div>
 
@@ -122,10 +130,11 @@ function filterHubs() {
 </template>
 
 <style scoped>
-/* 插槽内容跟在占满高度的画布之后按正常流排布，不绝对定位就会被挤出舞台 */
+/* 插槽内容跟在占满高度的画布之后按正常流排布，不绝对定位就会被挤出舞台。
+   左侧留出小地图的宽度，避免压住它 */
 .panel {
   position: absolute;
-  inset: auto 8px 8px;
+  inset: auto 8px 8px 160px;
   z-index: 5;
   display: flex;
   flex-direction: column;
