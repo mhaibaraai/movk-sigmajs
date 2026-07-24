@@ -1,0 +1,249 @@
+<script setup lang="ts">
+import Graph from 'graphology'
+import { useResizeObserver } from '@vueuse/core'
+import { defu } from 'defu'
+import { computed, onBeforeUnmount, onMounted, provide, readonly, shallowRef, toRaw, watch } from 'vue'
+import type Sigma from 'sigma'
+import type { SerializedGraph } from 'graphology-types'
+import type { Settings } from 'sigma/settings'
+import type { EdgeProgramType, NodeProgramType } from 'sigma/rendering'
+import type { SigmaEdgeEventPayload, SigmaEventType, SigmaNodeEventPayload, SigmaStageEventPayload } from 'sigma/types'
+import { registerSigma } from '../composables/use-sigma'
+import { SIGMA_CONTEXT_KEY, SIGMA_EVENTS } from '../types'
+import type { SigmaContext, SigmaPrograms } from '../types'
+import { applyGraphDiff } from '../utils/apply-graph-diff'
+import type { ApplyGraphDiffOptions } from '../utils/apply-graph-diff'
+import { getSigmaDefaults } from '../utils/global-settings'
+
+defineOptions({ name: 'SigmaGraph', inheritAttrs: false })
+
+const props = defineProps<{
+  /**
+   * 图数据，经 `applyGraphDiff` 增量同步。
+   * 传了 `graph` 时本项失效，两者互斥
+   */
+  data?: SerializedGraph
+  /**
+   * 外部 graphology 实例。传入后本组件完全不碰数据，只负责渲染与生命周期，
+   * 可自由使用 graphology 生态的任何方式操作图。省略则内部创建一个并经 `update:graph` 回传
+   */
+  graph?: Graph
+  /**
+   * sigma 渲染配置，整体透传，不逐字段枚举也不过滤未知键
+   * @see https://www.sigmajs.org/docs/typedoc/sigma/src/settings/interfaces/Settings
+   */
+  settings?: Partial<Settings>
+  /**
+   * 自定义渲染程序，与 sigma 内置程序合并。
+   * 接受任何符合官方程序类型的实现，不限于 `@sigma/*` 官方包
+   */
+  programs?: SigmaPrograms
+  /** 实例 id，登记后可经 `useSigmaById(id)` 在组件树之外访问 */
+  id?: string
+  /** `applyGraphDiff` 的行为选项 */
+  diffOptions?: ApplyGraphDiffOptions
+}>()
+
+/**
+ * sigma 事件全集，payload 类型与上游一致。
+ *
+ * 这里必须逐条写出而非用映射类型派生：`@vue/compiler-sfc` 需要在编译期静态提取事件名，
+ * 它解析不了跨包的映射类型（`vue-tsc` 能过但打包会失败）。
+ * 上游新增事件时，`runtime/types` 里的 `Record<SigmaEventType, true>` 会先报错提示同步这里。
+ */
+const emit = defineEmits<{
+  'clickNode': [payload: SigmaNodeEventPayload]
+  'doubleClickNode': [payload: SigmaNodeEventPayload]
+  'rightClickNode': [payload: SigmaNodeEventPayload]
+  'wheelNode': [payload: SigmaNodeEventPayload]
+  'downNode': [payload: SigmaNodeEventPayload]
+  'upNode': [payload: SigmaNodeEventPayload]
+  'enterNode': [payload: SigmaNodeEventPayload]
+  'leaveNode': [payload: SigmaNodeEventPayload]
+  'clickEdge': [payload: SigmaEdgeEventPayload]
+  'doubleClickEdge': [payload: SigmaEdgeEventPayload]
+  'rightClickEdge': [payload: SigmaEdgeEventPayload]
+  'wheelEdge': [payload: SigmaEdgeEventPayload]
+  'downEdge': [payload: SigmaEdgeEventPayload]
+  'upEdge': [payload: SigmaEdgeEventPayload]
+  'enterEdge': [payload: SigmaEdgeEventPayload]
+  'leaveEdge': [payload: SigmaEdgeEventPayload]
+  'clickStage': [payload: SigmaStageEventPayload]
+  'doubleClickStage': [payload: SigmaStageEventPayload]
+  'rightClickStage': [payload: SigmaStageEventPayload]
+  'wheelStage': [payload: SigmaStageEventPayload]
+  'downStage': [payload: SigmaStageEventPayload]
+  'upStage': [payload: SigmaStageEventPayload]
+  'enterStage': [payload: SigmaStageEventPayload]
+  'leaveStage': [payload: SigmaStageEventPayload]
+  'moveBody': [payload: SigmaStageEventPayload]
+  'beforeClear': []
+  'afterClear': []
+  'beforeProcess': []
+  'afterProcess': []
+  'beforeRender': []
+  'afterRender': []
+  'resize': []
+  'kill': []
+  'ready': [sigma: Sigma]
+  'update:graph': [graph: Graph]
+}>()
+
+const containerRef = shallowRef<HTMLElement | null>(null)
+const sigma = shallowRef<Sigma | null>(null)
+const isReady = shallowRef(false)
+
+// props 会被 Vue 包成响应式代理，必须剥回原对象再交给 sigma 与 graphology，
+// 否则下发出去的就不是「原生实例」了，instanceof 与内部状态都可能出问题
+const graph = shallowRef<Graph>(props.graph ? toRaw(props.graph) : new Graph())
+const isExternalGraph = computed(() => props.graph !== undefined)
+
+let resolveReady: ((instance: Sigma) => void) | undefined
+let readyPromise = new Promise<Sigma>((resolve) => {
+  resolveReady = resolve
+})
+
+/**
+ * sigma 的内置渲染程序表。
+ * 只能在客户端拿到——见下方 onMounted 里对动态导入的说明
+ */
+let programDefaults: {
+  node: Record<string, NodeProgramType>
+  edge: Record<string, EdgeProgramType>
+} | null = null
+
+const baseSettings = computed<Partial<Settings>>(() => defu(
+  props.settings ?? {},
+  getSigmaDefaults(),
+  // 容器尺寸为 0 时不让 sigma 直接抛错，随后由 ResizeObserver 补一次 resize
+  { allowInvalidContainer: true }
+) as Partial<Settings>)
+
+function resolveSettings(): Partial<Settings> {
+  const base = baseSettings.value
+  const { node, edge } = props.programs ?? {}
+
+  if (!programDefaults || (!node && !edge)) {
+    return base
+  }
+
+  return {
+    ...base,
+    ...(node && {
+      nodeProgramClasses: { ...programDefaults.node, ...base.nodeProgramClasses, ...node }
+    }),
+    ...(edge && {
+      edgeProgramClasses: { ...programDefaults.edge, ...base.edgeProgramClasses, ...edge }
+    })
+  }
+}
+
+const context: SigmaContext = {
+  sigma,
+  graph,
+  isReady: readonly(isReady),
+  whenReady: () => (sigma.value ? Promise.resolve(sigma.value) : readyPromise)
+}
+
+provide(SIGMA_CONTEXT_KEY, context)
+
+function syncData() {
+  if (!props.data || isExternalGraph.value) {
+    return
+  }
+  applyGraphDiff(graph.value, props.data, props.diffOptions)
+}
+
+watch(() => props.data, syncData, { immediate: true })
+
+watch(() => props.graph, (next) => {
+  const raw = next ? toRaw(next) : null
+  if (!raw || raw === graph.value) {
+    return
+  }
+  graph.value = raw
+  sigma.value?.setGraph(raw)
+})
+
+watch([baseSettings, () => props.programs], () => {
+  sigma.value?.setSettings(resolveSettings())
+}, { deep: true })
+
+useResizeObserver(containerRef, () => {
+  sigma.value?.resize()
+})
+
+let disposed = false
+
+onMounted(async () => {
+  if (import.meta.dev && props.data && isExternalGraph.value) {
+    console.warn('[@movk/sigma] data 与 graph 互斥，已传入外部 graph，data 将被忽略')
+  }
+
+  // sigma 在模块顶层就读取 WebGL2RenderingContext 建常量表，静态导入会让 SSR 直接 ReferenceError。
+  // 必须推迟到客户端挂载后再加载，graphology 无此问题可以正常静态导入
+  const [{ default: Sigma }, { DEFAULT_NODE_PROGRAM_CLASSES, DEFAULT_EDGE_PROGRAM_CLASSES }] = await Promise.all([
+    import('sigma'),
+    import('sigma/settings')
+  ])
+
+  const container = containerRef.value
+  if (disposed || !container) {
+    return
+  }
+
+  programDefaults = { node: DEFAULT_NODE_PROGRAM_CLASSES, edge: DEFAULT_EDGE_PROGRAM_CLASSES }
+
+  const instance = new Sigma(graph.value, container, resolveSettings())
+
+  for (const event of SIGMA_EVENTS) {
+    instance.on(event as SigmaEventType, (payload: unknown) => {
+      emit(event as never, payload as never)
+    })
+  }
+
+  sigma.value = instance
+  isReady.value = true
+  resolveReady?.(instance)
+
+  if (!isExternalGraph.value) {
+    emit('update:graph', graph.value)
+  }
+
+  emit('ready', instance)
+})
+
+if (props.id) {
+  const unregister = registerSigma(props.id, context)
+  onBeforeUnmount(unregister)
+}
+
+onBeforeUnmount(() => {
+  disposed = true
+  sigma.value?.kill()
+  sigma.value = null
+  isReady.value = false
+  readyPromise = new Promise<Sigma>((resolve) => {
+    resolveReady = resolve
+  })
+})
+
+defineExpose({ sigma, graph })
+</script>
+
+<template>
+  <div
+    class="sigma-root"
+    v-bind="$attrs"
+  >
+    <div
+      ref="containerRef"
+      class="sigma-canvas"
+    />
+    <slot
+      v-if="isReady"
+      :sigma="sigma!"
+      :graph="graph"
+    />
+  </div>
+</template>
