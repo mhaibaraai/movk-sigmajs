@@ -371,7 +371,7 @@ Nuxt 官方明确：已发布模块的 `src/runtime/` 内不能依赖自动导�
 
 `clamp`、`mapRange`、`createRegistry`、`pipe` 原本暂存在本库的 `core-candidates.ts`，现已由 `@movk/core` 提供，本库不再自带。其中两条结论值得记下，避免后人重复评估：
 
-**`createRegistry({ reactive: true })` 修好了一个真实缺陷。** 此前 `useSigmaById(id)` 是一次性查表，调用方若在目标实例挂载前取值就永远停在 `undefined`——出口兼容里「树外访问」这条通道实际是断的。core 的响应式注册表底层是 `shallowReactive(Map)`，`get` 可被 `computed` 追踪，于是 `useSigmaById` 改为返回 `ComputedRef`。**必须是 `shallowReactive` 而非 `reactive`**：前者不深度包装值，取出的 `SigmaContext` 仍是原对象，`sigma` 与 `graph` 不被代理，第三节第 1 条红线才守得住。`onDuplicate` 顺带补上了同 id 重复注册的开发期告警。
+**`createRegistry({ reactive: true })` 修好了一个真实缺陷。** 此前 `useSigmaById(id)` 是一次性查表，调用方若在目标实例挂载前取值就永远停在 `undefined`——出口兼容里「树外访问」这条通道实际是断的。core 的响应式注册表底层是 `shallowReactive(Map)`，`get` 可被 `computed` 追踪，于是 `useSigmaById` 改为返回 `ComputedRef`。**必须是 `shallowReactive` 而非 `reactive`**：前者不深度包装值，取出的 `SigmaContext` 仍是原对象，`sigma` 与 `graph` 不被代理，第三节第 1 条红线才守得住。同 id 重复注册也补了开发期告警，但**没有用注册表自带的 `onDuplicate`**：它同步触发，会把「交接」误判成「冲突」。组件被替换时（HMR 重载、路由切换、过渡动画）新实例在 setup 期就注册、旧实例要到 `onBeforeUnmount` 才注销，同步判断必然误报。改为推迟一拍，等旧实例有机会注销后仍在册才告警。
 
 **`pipe` 不能用于 reducer 链。** 它的语义是「首个函数收全部入参，后续只收上一个的返回值」（单参）。本库的 reducer 是 `(key, data) => Partial<D>`，链式折叠只滚动第二个参数、`key` 要原样透传给每一环，用 `pipe` 会让第二环的 `key` 形参收到前一环的返回对象。除非把 `SigmaReducer` 改成柯里化，但那是为了复用工具函数而扭曲公开 API。`chainReducers` 保留。
 

@@ -147,6 +147,7 @@ pnpm lint
 - 组件测试用 `@vue/test-utils`，WebGL 相关 mock 掉 Sigma 构造
 - **同一用例内不要并发挂载多个 `SigmaGraph`**：组件在 `onMounted` 里动态 `import('sigma')`，同一 tick 内的并发导入会让 vitest 的 mock 漏掉一个，第二个实例拿到真实 sigma 后崩在 WebGL 上。顺序挂载即可（先 `await` 前一个就绪）
 - 需要真实 Nuxt 环境的场景用 `@nuxt/test-utils` 加 `test/fixtures/*`
+- `import.meta.dev` 是 Nuxt 注入的，vitest 里取不到值。`vitest.config.ts` 里有个 transform 插件把它替换为 `true`，否则仅在开发环境生效的告警在测试中就是死代码（Vite 的 `define` 不处理 `import.meta.*`）
 
 ## 代码风格
 

@@ -124,7 +124,7 @@ describe('实例注册表', () => {
     expect(ids.value.length).toBe(before)
   })
 
-  it('同 id 重复注册时告警，避免静默互相覆盖', async () => {
+  it('两个实例真的抢同一个 id 时告警', async () => {
     const warn = vi.spyOn(consola, 'warn').mockImplementation(() => {})
 
     // 顺序挂载，理由同上
@@ -132,9 +132,29 @@ describe('实例注册表', () => {
     await waitReady(first)
     const second = mountGraph('clash')
     await waitReady(second)
+    await nextTick()
 
     expect(warn).toHaveBeenCalledOnce()
     expect(String(warn.mock.calls[0]![0])).toContain('clash')
+
+    warn.mockRestore()
+  })
+
+  it('组件替换时的交接不误报', async () => {
+    const warn = vi.spyOn(consola, 'warn').mockImplementation(() => {})
+
+    // 新实例在 setup 期注册、旧实例到 onBeforeUnmount 才注销，
+    // 同步判断会把这种正常交接当成冲突。HMR、路由切换、过渡动画都是这个时序
+    const outgoing = mountGraph('handover')
+    await waitReady(outgoing)
+
+    const incoming = mountGraph('handover')
+    outgoing.unmount()
+    await waitReady(incoming)
+    await nextTick()
+
+    expect(warn).not.toHaveBeenCalled()
+    expect(useSigmaById('handover').value).toBeDefined()
 
     warn.mockRestore()
   })
