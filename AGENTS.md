@@ -44,6 +44,12 @@ runtime 代码里 sigma 一律 `await import('sigma')`，放在 `onMounted` 之�
 
 连带的三条：异步 `onMounted` 要能在实例化完成前被卸载中断；测试需要 `test/setup/webgl-globals.ts` 补桩才能加载真实的 `sigma/settings`；所有可选 peer（布局、metrics、louvain）一律 `await import()` 并在 `catch` 里给出「装哪个包」的可操作提示。
 
+### 模块级状态必须客户端隔离
+
+`src/runtime/` 里任何模块级的可变状态（如实例注册表）都是整个 Node 进程共享的单例。SSR 期组件的 `setup` 照常执行、但 `onBeforeUnmount` 永远不会触发，写入的条目只增不减，既跨请求残留又会误判冲突。
+
+这类写入一律加 `import.meta.client` 保护。判断依据很简单：服务端的 `sigma` 恒为 `null`（实例在 `onMounted` 才创建），凡是依赖实例的登记在服务端本就没有意义。
+
 ### 出口兼容不可破坏
 
 封装是加法，不是围墙。
@@ -147,7 +153,7 @@ pnpm lint
 - 组件测试用 `@vue/test-utils`，WebGL 相关 mock 掉 Sigma 构造
 - **同一用例内不要并发挂载多个 `SigmaGraph`**：组件在 `onMounted` 里动态 `import('sigma')`，同一 tick 内的并发导入会让 vitest 的 mock 漏掉一个，第二个实例拿到真实 sigma 后崩在 WebGL 上。顺序挂载即可（先 `await` 前一个就绪）
 - 需要真实 Nuxt 环境的场景用 `@nuxt/test-utils` 加 `test/fixtures/*`
-- `import.meta.dev` 是 Nuxt 注入的，vitest 里取不到值。`vitest.config.ts` 里有个 transform 插件把它替换为 `true`，否则仅在开发环境生效的告警在测试中就是死代码（Vite 的 `define` 不处理 `import.meta.*`）
+- `import.meta.dev` 与 `import.meta.client` 是 Nuxt 注入的，vitest 里取不到值。`vitest.config.ts` 里有个 transform 插件把它们替换为 `true`，否则仅开发环境生效的告警与仅客户端执行的分支在测试中都是死代码（Vite 的 `define` 不处理 `import.meta.*`）
 
 ## 代码风格
 

@@ -4,16 +4,13 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-overrides:
-  '@movk/core': https://pkg.pr.new/@movk/core@96ee38f
-
 importers:
 
   .:
     dependencies:
       '@movk/core':
-        specifier: https://pkg.pr.new/@movk/core@96ee38f
-        version: https://pkg.pr.new/@movk/core@96ee38f(vue@3.5.40(typescript@6.0.3))
+        specifier: ^1.4.0
+        version: 1.4.0(vue@3.5.40(typescript@6.0.3))
       '@nuxt/kit':
         specifier: ^4.5.0
         version: 4.5.0(magic-string@1.1.0)(magicast@0.5.3)(oxc-parser@0.140.0)(rolldown@1.2.0)(unplugin@3.3.0(esbuild@0.28.1)(rolldown@1.2.0)(rollup@4.62.2)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0)))
@@ -955,9 +952,8 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
-  '@movk/core@https://pkg.pr.new/@movk/core@96ee38f':
-    resolution: {integrity: sha512-nZKWO0uqGGBxRZzVhOYf08aWa+2Wldri8CJIePufFKeDIKK58FhugMk4uVrh6NBbdR0MclzxU+QYtan0M+jiqQ==, tarball: https://pkg.pr.new/@movk/core@96ee38f}
-    version: 1.3.1
+  '@movk/core@1.4.0':
+    resolution: {integrity: sha512-Y5GAfl+hehB+PiLpH14mY6AuiPKMDpZiaeWD34pY7WrddTgxGh1kj9KMJdfPal9/s8mTTnICPmkQBi9c791qFA==}
     hasBin: true
     peerDependencies:
       vue: ^3.5.25
@@ -6460,7 +6456,7 @@ snapshots:
       - encoding
       - supports-color
 
-  '@movk/core@https://pkg.pr.new/@movk/core@96ee38f(vue@3.5.40(typescript@6.0.3))':
+  '@movk/core@1.4.0(vue@3.5.40(typescript@6.0.3))':
     dependencies:
       '@vueuse/core': 14.3.0(vue@3.5.40(typescript@6.0.3))
       vue: 3.5.40(typescript@6.0.3)

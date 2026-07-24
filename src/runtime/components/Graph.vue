@@ -298,7 +298,12 @@ onMounted(async () => {
   emit('ready', instance)
 })
 
-if (props.id) {
+/**
+ * 只在客户端登记。注册表是模块级单例，而服务端不会触发 `onBeforeUnmount`，
+ * SSR 期注册的条目只增不减，既跨请求残留又会把后续渲染误判成 id 冲突。
+ * 何况服务端的 `sigma` 恒为 `null`（实例在 `onMounted` 才创建），登记本身没有意义。
+ */
+if (props.id && import.meta.client) {
   const unregister = registerSigma(props.id, context)
   onBeforeUnmount(unregister)
 }
