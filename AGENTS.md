@@ -13,7 +13,6 @@ src/
     ├── components/       # core 与 controls 两组，文件名不带前缀
     ├── composables/
     ├── utils/
-    │   └── core-candidates.ts   # 待移入 @movk/core 的通用函数
     ├── types/
     └── index.css         # 可选样式表
 playground/               # Nuxt 演示应用，含「纯原生逃生舱」示例
@@ -82,7 +81,9 @@ export type SigmaEdgeReducer = NonNullable<Settings['edgeReducer']>
 
 写任何工具函数前，先用 `movk-core` MCP 检索是否已有（`list-functions` / `search-composables`）。已确认可复用的有 `debounce`、`throttle`、`splitHighlight`、`triggerDownload`、`convertSvgToPng`、`deepMerge`、`getRandomUUID`、`simpleHash`、`pick`、`omit`、`unique`、`lengthToPx`、`isEmpty` 等。
 
-core 里确实没有的通用能力，写进 `src/runtime/utils/core-candidates.ts`，并在 JSDoc 标注 `@todo 待移入 @movk/core`，便于后续整体搬迁。图与 sigma 领域的逻辑（`applyGraphDiff`、`chainReducers` 等）不属于 core 范畴，正常放 `src/runtime/utils/`。
+已迁入 core 的还有 `clamp`、`mapRange`、`createRegistry`、`pipe`，本库不再自带。
+
+core 里确实没有的通用能力，先写在 `src/runtime/utils/` 并在 JSDoc 标注 `@todo 待移入 @movk/core`，便于后续搬迁。图与 sigma 领域的逻辑（`applyGraphDiff`、`chainReducers`、`curveParallelEdges` 等）不属于 core 范畴，正常放 `src/runtime/utils/`。
 
 ## 命名约定
 
@@ -144,6 +145,7 @@ pnpm lint
 - 工具函数与 composables 必须有单测，重点覆盖：`applyGraphDiff` 的坐标保留、`chainReducers` 的合成顺序、`useSigmaGraph` 的 version 递增、`useSigmaNeighborhood` 的 BFS 深度
 - 出口兼容专项断言：`settings` 未知键透传后仍能从 `sigma.getSettings()` 读回、用户自带 reducer 位于链首且被调用
 - 组件测试用 `@vue/test-utils`，WebGL 相关 mock 掉 Sigma 构造
+- **同一用例内不要并发挂载多个 `SigmaGraph`**：组件在 `onMounted` 里动态 `import('sigma')`，同一 tick 内的并发导入会让 vitest 的 mock 漏掉一个，第二个实例拿到真实 sigma 后崩在 WebGL 上。顺序挂载即可（先 `await` 前一个就绪）
 - 需要真实 Nuxt 环境的场景用 `@nuxt/test-utils` 加 `test/fixtures/*`
 
 ## 代码风格

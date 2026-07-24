@@ -353,21 +353,29 @@ Nuxt 官方明确：已发布模块的 `src/runtime/` 内不能依赖自动导�
 图与 sigma 领域的逻辑，不属于 core 范畴，放在 `src/runtime/utils/`：
 
 - `applyGraphDiff(graph, next, options)` —— 增量 diff，`preservePositions` 保留已有 `x` / `y`，`prune` 控制是否剪除新数据外的节点与边。见难点 3
-- `mergeGraphData(a, b)` —— 合并邻域展开返回的 `SerializedGraph`
-- `sampleGraph(graph, n)` —— 大图概览抽样（按度数取 Top-N 及其邻边）
-- `degreeToSize(graph, range)` / `communityToColor(graph, palette)` —— 视觉映射
-- `chainReducers(...fns)` —— reducer 链合成。见难点 2
+- `sampleGraph(graph, size)` —— 大图概览抽样，按度数取 Top-N 及两端都入选的边。基于 `graph.export()` 过滤，图级 `attributes` 与 `options` 原样保留
+- `degreeToSize(graph, range)` —— 度数映射尺寸，内核是 core 的 `mapRange(..., { clamp: true })`
+- `communityToColor(communities, palette)` —— 社区映射配色。入参是社区划分结果而非图，因此不依赖 `graphology-communities-louvain` 这个可选 peer
+- `chainReducers(fns)` —— reducer 链合成。见难点 2
+- `curveParallelEdges(graph, options)` —— 平行边与自环分配曲率。见下
 
-### core 缺口：先写在本仓库，后续移入 core
+`mergeGraphData` 不单独实现：合并邻域展开数据的职责已由 `applyGraphDiff(graph, next, { prune: false })` 承担，`useSigmaNeighborhood().expand()` 走的就是这条路径。
 
-这几个是通用能力但 core 目前没有。统一放在 `src/runtime/utils/core-candidates.ts`，文件头与每个函数的 JSDoc 标注 `@todo 待移入 @movk/core`，便于后续整体搬迁：
+### 平行边为什么要两步
 
-| 函数 | 说明 | 本库用处 |
-| --- | --- | --- |
-| `clamp(value, min, max)` | 数值区间钳制。core 没有任何数值类工具 | 相机 ratio 约束、尺寸映射 |
-| `mapRange(value, inRange, outRange)` | 线性区间映射 | `degreeToSize` 的内核 |
-| `createRegistry<T>()` | 按 id 注册 / 获取 / 注销实例的通用注册表 | `useSigmaById`。`@movk/mapbox` 的 `useMapbox` 是同款需求，最该进 core 的一个 |
-| `pipe(...fns)` | 同签名函数链式合成的泛型形式 | `chainReducers` 的底层 |
+`@sigma/edge-curve` 的 `indexParallelEdgesIndex` 只写 `parallelIndex` / `parallelMinIndex` / `parallelMaxIndex`，**不写 `curvature`**，而渲染程序读的是后者——只调它边不会弯。`curveParallelEdges` 补上第二步：按官方示例的指数衰减公式把索引换算成曲率，并设置边 `type`。曲率有渐近上界 `3.5 × DEFAULT_EDGE_CURVATURE`，平行边再多也不会失控。
+
+配套约束：无 `key` 的边在多重图上一律新增，否则按端点匹配会把三条 `a→b` 压成一条；代价是全量同步时边 key 会重新生成，需要稳定边身份或用 `prune: false` 增量合入时请显式给 `key`。`SigmaGraph` 的内部图也按 `data.options` 创建，否则 `multi: true` 的数据会被降级。
+
+### 从 @movk/core 迁入的四个函数
+
+`clamp`、`mapRange`、`createRegistry`、`pipe` 原本暂存在本库的 `core-candidates.ts`，现已由 `@movk/core` 提供，本库不再自带。其中两条结论值得记下，避免后人重复评估：
+
+**`createRegistry({ reactive: true })` 修好了一个真实缺陷。** 此前 `useSigmaById(id)` 是一次性查表，调用方若在目标实例挂载前取值就永远停在 `undefined`——出口兼容里「树外访问」这条通道实际是断的。core 的响应式注册表底层是 `shallowReactive(Map)`，`get` 可被 `computed` 追踪，于是 `useSigmaById` 改为返回 `ComputedRef`。**必须是 `shallowReactive` 而非 `reactive`**：前者不深度包装值，取出的 `SigmaContext` 仍是原对象，`sigma` 与 `graph` 不被代理，第三节第 1 条红线才守得住。`onDuplicate` 顺带补上了同 id 重复注册的开发期告警。
+
+**`pipe` 不能用于 reducer 链。** 它的语义是「首个函数收全部入参，后续只收上一个的返回值」（单参）。本库的 reducer 是 `(key, data) => Partial<D>`，链式折叠只滚动第二个参数、`key` 要原样透传给每一环，用 `pipe` 会让第二环的 `key` 形参收到前一环的返回对象。除非把 `SigmaReducer` 改成柯里化，但那是为了复用工具函数而扭曲公开 API。`chainReducers` 保留。
+
+`chainReducers` 另做了一处热路径优化：合成后的函数每帧对每个节点与边各跑一次，原先每环都 `{ ...acc, ...fn() }` 新建对象，现改为入口复制一次、之后 `Object.assign` 原地累积。随之确立的契约是**归约函数收到的 `data` 只在本次调用内有效**，需要跨调用留存请自行复制；调用方传入的原始对象不受影响。
 
 ## 九、规模与性能策略
 
@@ -416,7 +424,6 @@ movk-sigmajs/
 │       ├── components/       # core / controls 两组
 │       ├── composables/
 │       ├── utils/
-│       │   └── core-candidates.ts   # 待移入 @movk/core 的通用函数
 │       ├── types/
 │       └── index.css         # 可选样式表
 ├── playground/               # Nuxt 演示应用，M4 起拆为 playgrounds/basic 与 playgrounds/ui
@@ -477,7 +484,7 @@ playground 不在 `files: ["dist"]` 内，不进用户依赖树，「控件零�
 
 - dependencies：`@movk/core`、`@vueuse/core`、`consola`
 - peer：`vue@>=3.5`、`sigma@>=3`、`graphology@>=0.26`
-- optional peer（`peerDependenciesMeta.optional`）：`@sigma/node-image`、`@sigma/node-border`、`@sigma/edge-curve`、`@sigma/export-image`、`@sigma/utils`、`graphology-layout`、`graphology-layout-forceatlas2`、`graphology-layout-noverlap`、`graphology-metrics`、`graphology-communities-louvain`、`graphology-traversal`
+- optional peer（`peerDependenciesMeta.optional`）：`@sigma/node-image`、`@sigma/node-border`、`@sigma/node-square`、`@sigma/node-piechart`、`@sigma/edge-curve`、`@sigma/export-image`、`@sigma/utils`、`graphology-layout`、`graphology-layout-forceatlas2`、`graphology-layout-noverlap`、`graphology-metrics`、`graphology-communities-louvain`、`graphology-traversal`
 - devDependencies 里加 `graphology-types`（纯类型声明包）
 - 不安装任何 `@types/*`，该生态全部包自带类型
 
@@ -496,7 +503,7 @@ playground 不在 `files: ["dist"]` 内，不进用户依赖树，「控件零�
 | 阶段 | 内容 |
 | --- | --- |
 | M0 脚手架 | `pnpm create nuxt -t module` 初始化；补齐 `.mcp.json` / `AGENTS.md` / `README.md`；`playground/` 与 `test/` 骨架跑通 |
-| M1 地基 | `useSigmaGraph` 响应式桥接、`SigmaGraph` 根组件（含 SSR、容器尺寸、出口兼容三条通道）、`useSigma` / `useSigmaById` / `useSigmaEvents` / `useSigmaSettings` / `useSigmaCamera`、`applyGraphDiff`、`core-candidates.ts`；playground 的「纯原生逃生舱」示例 |
+| M1 地基 | `useSigmaGraph` 响应式桥接、`SigmaGraph` 根组件（含 SSR、容器尺寸、出口兼容三条通道）、`useSigma` / `useSigmaById` / `useSigmaEvents` / `useSigmaSettings` / `useSigmaCamera`、`applyGraphDiff`；playground 的「纯原生逃生舱」示例 |
 | M2 交互原语 | `useSigmaReducer` 与 `chainReducers`、`useSigmaSelection`、`useSigmaNeighborhood`、`SigmaOverlay` / `Tooltip` / `Popover` / `ContextMenu` |
 | M3 布局与分析 | `useSigmaLayout`（worker 生命周期）、`useSigmaMetrics`、`useSigmaSearch`、`useSigmaFilter`、`programs` prop 与官方渲染程序接入 |
 | M4 控件与样式 | `SigmaControls` 全家、`runtime/index.css` 与 CSS 变量体系、`useSigmaExport`；playground 拆为 `playgrounds/basic` 与 `playgrounds/ui`，后者接入 `@movk/nuxt` 演示插槽接管外观 |
