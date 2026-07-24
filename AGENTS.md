@@ -10,7 +10,7 @@
 src/
 ├── module.ts             # defineNuxtModule：meta / defaults / setup
 └── runtime/
-    ├── components/       # core 与 controls 两组，文件名带 Sigma 前缀
+    ├── components/       # core 与 controls 两组，文件名不带前缀
     ├── composables/
     ├── utils/
     │   └── core-candidates.ts   # 待移入 @movk/core 的通用函数
@@ -53,9 +53,16 @@ references/               # 架构方案与背景资料
 | --- | --- |
 | `graphology-types` | `SerializedGraph`、`SerializedNode`、`SerializedEdge`、`Attributes` |
 | `graphology` | `Graph` |
-| `sigma/settings` | `Settings`、`NodeReducer`、`EdgeReducer` |
+| `sigma/settings` | `Settings`（reducer 类型未单独导出，见下） |
 | `sigma/types` | `NodeDisplayData`、`EdgeDisplayData`、`CameraState`、`Coordinates`、`MouseCoords` |
 | `sigma/rendering` | `NodeProgramType`、`EdgeProgramType` |
+
+sigma **没有**导出 `NodeReducer` / `EdgeReducer`，它们只是 `Settings` 上的内联字段类型。库内一律派生，不要自己重写一份签名：
+
+```ts
+export type SigmaNodeReducer = NonNullable<Settings['nodeReducer']>
+export type SigmaEdgeReducer = NonNullable<Settings['edgeReducer']>
+```
 
 ### 通用方法先查 @movk/core
 
@@ -70,6 +77,8 @@ Nuxt 模块最佳实践要求所有导出加模块名前缀防冲突：
 - 组件：`SigmaGraph`、`SigmaTooltip`、`SigmaZoomControl`
 - Composables：`useSigma`、`useSigmaCamera`、`useSigmaLayout`
 - 模块配置键：`sigma`
+
+**组件文件名不带前缀**，前缀由 `addComponentsDir` 的 `prefix` 选项统一加上（默认 `'Sigma'`，用户可改）。即 `components/Graph.vue` 注册为 `<SigmaGraph>`，`components/controls/ZoomControl.vue` 注册为 `<SigmaZoomControl>`。目录层级不参与命名（`pathPrefix: false`）。
 
 ## 开发流程
 
