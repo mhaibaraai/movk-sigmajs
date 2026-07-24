@@ -76,7 +76,7 @@ function animateOptions() {
       @click="camera.reset({ duration })"
     >
       <slot name="reset">
-        ⤢
+        ⌖
       </slot>
     </button>
   </div>

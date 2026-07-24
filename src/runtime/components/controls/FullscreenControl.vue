@@ -47,7 +47,7 @@ const label = computed(() => (isFullscreen.value ? props.labels[1] : props.label
         :is-fullscreen="isFullscreen"
         name="default"
       >
-        {{ isFullscreen ? '⤡' : '⤢' }}
+        {{ isFullscreen ? '⤡' : '⛶' }}
       </slot>
     </button>
   </div>
