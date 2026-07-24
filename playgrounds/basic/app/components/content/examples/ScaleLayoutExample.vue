@@ -1,0 +1,57 @@
+<script setup lang="ts">
+import { shallowRef } from 'vue'
+import type { SerializedGraph } from 'graphology-types'
+
+const data = shallowRef<SerializedGraph | null>(null)
+const buildMs = shallowRef(0)
+const startedAt = shallowRef(0)
+
+function load() {
+  startedAt.value = performance.now()
+  const t0 = performance.now()
+  const next = createScaleGraph(2000)
+  buildMs.value = performance.now() - t0
+  data.value = next
+}
+</script>
+
+<template>
+  <div class="wrap">
+    <SigmaGraph v-if="data" :data="data" :settings="{ hideEdgesOnMove: true, labelRenderedSizeThreshold: 10 }">
+      <ScaleLayoutPanel />
+      <ScaleStatsPanel :build-ms="buildMs" :started-at="startedAt" />
+    </SigmaGraph>
+
+    <p v-else class="idle">
+      <button type="button" @click="load">
+        加载 2k 节点
+      </button>
+    </p>
+  </div>
+</template>
+
+<style scoped>
+.wrap {
+  position: relative;
+  height: 100%;
+}
+
+.idle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin: 0;
+}
+
+.idle button {
+  padding: 6px 14px;
+  border: 1px solid var(--sigma-color-border);
+  border-radius: 6px;
+  background: var(--sigma-color-bg);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+}
+</style>
