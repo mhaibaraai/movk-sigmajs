@@ -35,13 +35,15 @@ M4 起 `playground/` 拆为 `playgrounds/basic` 与 `playgrounds/ui`，见「演
 
 **不准开 `shamefully-hoist=true`。** 它把所有依赖提升到根 `node_modules`，会让漏写的 import 也能解析成功，正好掩盖上面这类 bug。某些依赖（如 `@movk/nuxt` 要求的 `tailwindcss`）的安装文档会建议开它，一律改用「在需要的 workspace 里显式安装」绕开。
 
-### sigma 只能动态导入
+### sigma 与 @sigma/* 只能动态导入
 
 sigma 在模块顶层就读 `WebGL2RenderingContext`，服务端与 happy-dom 都没有这个全局，**静态 `import 'sigma'` 或 `import 'sigma/settings'` 会让 SSR 直接 ReferenceError**。
 
 runtime 代码里 sigma 一律 `await import('sigma')`，放在 `onMounted` 之后；类型侧用 `import type`，编译期擦除不影响。graphology 无此问题，可正常静态导入。
 
-连带的两条：异步 `onMounted` 要能在实例化完成前被卸载中断；测试需要 `test/setup/webgl-globals.ts` 补桩才能加载真实的 `sigma/settings`。
+`@sigma/node-image`、`@sigma/node-border`、`@sigma/edge-curve`、`@sigma/export-image` 同样如此，**使用方也不能静态 import 它们**。所以 `programs` prop 支持 `defineSigmaProgram(() => import('@sigma/node-border').then(...))` 这种延迟声明，组件会在建实例前解析完。
+
+连带的三条：异步 `onMounted` 要能在实例化完成前被卸载中断；测试需要 `test/setup/webgl-globals.ts` 补桩才能加载真实的 `sigma/settings`；所有可选 peer（布局、metrics、louvain）一律 `await import()` 并在 `catch` 里给出「装哪个包」的可操作提示。
 
 ### 出口兼容不可破坏
 
@@ -109,6 +111,7 @@ pnpm lint
 
 - 覆盖层定位有两套坐标：节点用 `framedGraphToViewport()`（`getNodeDisplayData()` 返回的是归一化后的 framed 坐标），原始图坐标才用 `graphToViewport()`，混用会整体错位
 - 覆盖层用 `v-show` 保留 DOM，隐藏时插槽内容必须另用 `v-if` 跳过，否则使用方拿到空作用域且隐藏内容仍可点击
+- `SigmaGraph` 的默认插槽排在占满高度的画布之后，走的是正常文档流。插槽内的任何面板都必须自行 `position: absolute`，否则会被挤到容器之外并被 `overflow` 裁掉
 
 - 根 `tsconfig.json` 必须 `extends: "./.nuxt/tsconfig.json"`。改成 project references 写法会让 `vue-tsc --noEmit` 完全跳过 `src/`，typecheck 空转却仍退出码 0
 - 组件 emits 的类型要逐条写出。用 `{ [K in SigmaEventType]: ... }` 这类映射类型派生，`vue-tsc` 能过但 `pnpm build` 会失败——`@vue/compiler-sfc` 要在编译期静态提取事件名，解析不了跨包映射类型

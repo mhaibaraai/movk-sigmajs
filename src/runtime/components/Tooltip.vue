@@ -112,7 +112,6 @@ defineExpose({ hide })
     class="sigma-tooltip"
     v-bind="$attrs"
   >
-    <!-- 插槽的键名用 id 而非 key：key 是 Vue 的保留属性，工具链会按特殊属性处理 -->
     <slot
       v-if="hit"
       :id="hit.key"

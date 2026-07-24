@@ -10,7 +10,8 @@ import type { EdgeProgramType, NodeProgramType } from 'sigma/rendering'
 import type { EdgeDisplayData, NodeDisplayData, SigmaEdgeEventPayload, SigmaEventType, SigmaNodeEventPayload, SigmaStageEventPayload } from 'sigma/types'
 import { registerSigma } from '../composables/use-sigma'
 import { SIGMA_CONTEXT_KEY, SIGMA_EVENTS } from '../types'
-import type { SigmaContext, SigmaPrograms, SigmaReducer, SigmaReducerEntry } from '../types'
+import type { SigmaContext, SigmaProgramSource, SigmaPrograms, SigmaReducer, SigmaReducerEntry } from '../types'
+import { isLazySigmaProgram } from '../utils/define-sigma-program'
 import { applyGraphDiff } from '../utils/apply-graph-diff'
 import type { ApplyGraphDiffOptions } from '../utils/apply-graph-diff'
 import { chainReducers } from '../utils/chain-reducers'
@@ -113,6 +114,29 @@ let programDefaults: {
   edge: Record<string, EdgeProgramType>
 } | null = null
 
+/** 解析完成的自定义程序，`defineSigmaProgram()` 声明的已在此兑现 */
+const resolvedPrograms = shallowRef<{
+  node?: Record<string, NodeProgramType>
+  edge?: Record<string, EdgeProgramType>
+}>({})
+
+async function resolveProgramSources<T>(
+  sources?: Record<string, SigmaProgramSource<T>>
+): Promise<Record<string, T> | undefined> {
+  if (!sources) {
+    return undefined
+  }
+
+  const entries = await Promise.all(
+    Object.entries(sources).map(async ([type, source]) => [
+      type,
+      isLazySigmaProgram<T>(source) ? await source.__sigmaLazyProgram() : source
+    ] as const)
+  )
+
+  return Object.fromEntries(entries)
+}
+
 const baseSettings = computed<Partial<Settings>>(() => defu(
   props.settings ?? {},
   getSigmaDefaults(),
@@ -151,7 +175,7 @@ function refreshReducers() {
 
 function resolveSettings(): Partial<Settings> {
   const base = baseSettings.value
-  const { node, edge } = props.programs ?? {}
+  const { node, edge } = resolvedPrograms.value
   const sorted = [...reducerEntries].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 
   return {
@@ -203,9 +227,19 @@ watch(() => props.graph, (next) => {
   sigma.value?.setGraph(raw)
 })
 
-watch([baseSettings, () => props.programs], () => {
+watch([baseSettings, resolvedPrograms], () => {
   sigma.value?.setSettings(resolveSettings())
 }, { deep: true })
+
+watch(() => props.programs, async (sources) => {
+  if (!sigma.value) {
+    return
+  }
+  resolvedPrograms.value = {
+    node: await resolveProgramSources(sources?.node),
+    edge: await resolveProgramSources(sources?.edge)
+  }
+})
 
 useResizeObserver(containerRef, () => {
   sigma.value?.resize()
@@ -220,9 +254,12 @@ onMounted(async () => {
 
   // sigma 在模块顶层就读取 WebGL2RenderingContext 建常量表，静态导入会让 SSR 直接 ReferenceError。
   // 必须推迟到客户端挂载后再加载，graphology 无此问题可以正常静态导入
-  const [{ default: Sigma }, { DEFAULT_NODE_PROGRAM_CLASSES, DEFAULT_EDGE_PROGRAM_CLASSES }] = await Promise.all([
+  const [{ default: Sigma }, { DEFAULT_NODE_PROGRAM_CLASSES, DEFAULT_EDGE_PROGRAM_CLASSES }, node, edge] = await Promise.all([
     import('sigma'),
-    import('sigma/settings')
+    import('sigma/settings'),
+    // 自定义程序在建实例前解析完，避免节点带着尚未注册的 type 先渲染
+    resolveProgramSources(props.programs?.node),
+    resolveProgramSources(props.programs?.edge)
   ])
 
   const container = containerRef.value
@@ -231,6 +268,7 @@ onMounted(async () => {
   }
 
   programDefaults = { node: DEFAULT_NODE_PROGRAM_CLASSES, edge: DEFAULT_EDGE_PROGRAM_CLASSES }
+  resolvedPrograms.value = { node, edge }
 
   const instance = new Sigma(graph.value, container, resolveSettings())
 

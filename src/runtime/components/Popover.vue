@@ -42,8 +42,6 @@ function close() {
     class="sigma-popover"
     v-bind="$attrs"
   >
-    <!-- 隐藏时不渲染插槽：覆盖层用 v-show 保留 DOM，若插槽照常渲染，
-         使用方会拿到 node 为 null 的作用域，且隐藏内容仍可被点击 -->
     <slot
       v-if="visible && node"
       :node="node"
