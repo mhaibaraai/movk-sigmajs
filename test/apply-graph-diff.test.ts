@@ -122,3 +122,32 @@ describe('applyGraphDiff', () => {
     expect(graph.getNodeAttribute('a', 'size')).toBeUndefined()
   })
 })
+
+describe('applyGraphDiff 端点缺失的边', () => {
+  it('跳过端点不在图中的边，不抛错', () => {
+    const graph = new Graph()
+    graph.addNode('a')
+
+    expect(() => applyGraphDiff(graph, serialized({
+      nodes: [{ key: 'a', attributes: {} }],
+      edges: [{ source: 'a', target: '尚未加载', attributes: {} }]
+    }), { prune: false })).not.toThrow()
+
+    expect(graph.size).toBe(0)
+    expect(graph.order).toBe(1)
+  })
+
+  it('端点齐备的边照常创建', () => {
+    const graph = new Graph()
+
+    applyGraphDiff(graph, serialized({
+      nodes: [{ key: 'a', attributes: {} }, { key: 'b', attributes: {} }],
+      edges: [
+        { source: 'a', target: 'b', attributes: {} },
+        { source: 'a', target: '缺失', attributes: {} }
+      ]
+    }))
+
+    expect(graph.size).toBe(1)
+  })
+})
