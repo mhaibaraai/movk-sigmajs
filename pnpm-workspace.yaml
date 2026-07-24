@@ -6,6 +6,11 @@ ignoreWorkspaceRootCheck: true
 linkWorkspacePackages: true
 minimumReleaseAge: 0
 
+# clamp / mapRange / createRegistry / pipe 尚未进入 @movk/core 的正式版，
+# 本地与 CI 先用预览构建。core 发布 1.4.0 后删掉此项，dependencies 的 ^1.4.0 即可正常解析
+overrides:
+  '@movk/core': https://pkg.pr.new/@movk/core@96ee38f
+
 allowBuilds:
   '@parcel/watcher': false
   esbuild: false
