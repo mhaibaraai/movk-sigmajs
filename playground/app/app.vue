@@ -17,13 +17,14 @@ const programs = {
     )
   },
   edge: {
-    curve: defineSigmaProgram(() => import('@sigma/edge-curve').then(m => m.default))
+    curved: defineSigmaProgram(() => import('@sigma/edge-curve').then(m => m.default)),
+    straight: defineSigmaProgram(() => import('sigma/rendering').then(m => m.EdgeRectangleProgram))
   }
 }
 
 const data = ref<SerializedGraph>({
   attributes: {},
-  options: { type: 'mixed', multi: false, allowSelfLoops: true },
+  options: { type: 'mixed', multi: true, allowSelfLoops: true },
   nodes: [
     { key: 'a', attributes: { label: '制度 A', category: '管理制度', x: 0, y: 0, size: 14, color: '#f43f5e' } },
     { key: 'b', attributes: { label: '制度 B', category: '技术标准', x: 12, y: 5, size: 11, color: '#3b82f6' } },
@@ -31,7 +32,10 @@ const data = ref<SerializedGraph>({
     { key: 'd', attributes: { label: '制度 D', category: '管理制度', x: -9, y: 6, size: 10, color: '#a855f7' } }
   ],
   edges: [
+    // a→b 三条平行边，用来演示 curveParallelEdges 分配曲率
     { source: 'a', target: 'b', attributes: { label: '引用' } },
+    { source: 'a', target: 'b', attributes: { label: '废止' } },
+    { source: 'a', target: 'b', attributes: { label: '替代' } },
     { source: 'b', target: 'c', attributes: { label: '引用' } },
     { source: 'a', target: 'd', attributes: { label: '引用' } }
   ]
@@ -42,7 +46,7 @@ const data = ref<SerializedGraph>({
   <main class="page">
     <header>
       <h1>@movk/sigma playground</h1>
-      <p>M4 内置控件：缩放、全屏、检索、图例、小地图与导出，外观全部由 CSS 变量驱动。</p>
+      <p>本轮：节点拖拽、平行边分离、度数与社区的视觉映射，以及响应式实例注册表。</p>
     </header>
 
     <section>
@@ -58,7 +62,7 @@ const data = ref<SerializedGraph>({
           id="demo"
           :data="data"
           :programs="programs"
-          :settings="{ renderEdgeLabels: true, enableEdgeEvents: true, defaultNodeType: 'border', defaultEdgeType: 'curve' }"
+          :settings="{ renderEdgeLabels: true, enableEdgeEvents: true, defaultNodeType: 'border', defaultEdgeType: 'straight' }"
         >
           <SigmaControls position="top-right">
             <SigmaSearchControl :fields="['label']" />

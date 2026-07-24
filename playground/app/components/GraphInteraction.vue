@@ -30,6 +30,9 @@ const { order, size, version } = useSigmaGraph()
 const { selected, hovered, focused, highlighted, clear } = useSigmaSelection()
 const { expand, expanded, isExpanding, neighborhood } = useSigmaNeighborhood()
 
+// 拖拽与迭代型布局互斥，布局在跑时会持续回写坐标盖掉手动摆位
+const { dragged, isDragging } = useSigmaDrag()
+
 watch(selected, (key) => {
   if (key) {
     loadDetail(key)
@@ -43,6 +46,7 @@ watch(selected, (key) => {
       <span>节点 {{ order }} · 边 {{ size }} · v{{ version }}</span>
       <span>悬浮 {{ hovered ?? '—' }} · 选中 {{ selected ?? '—' }}</span>
       <span v-if="focused">二度邻域 {{ neighborhood(focused, 2).size }} 个 · 高亮 {{ highlighted.size }} 个</span>
+      <span v-if="isDragging">拖拽中 {{ dragged }}</span>
     </div>
 
     <SigmaTooltip>
