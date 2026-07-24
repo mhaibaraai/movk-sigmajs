@@ -78,7 +78,12 @@ export function applyGraphDiff(
     }
 
     const attributes: Attributes = { ...edge.attributes }
-    const existingKey = edge.key === undefined ? graph.edge(source, target) : String(edge.key)
+
+    // 多重图上无 key 的边一律新增：按端点匹配会让三条 a→b 压成一条。
+    // 代价是每次全量同步边 key 会重新生成，需要稳定边身份或用 prune: false 增量合入时请显式给 key
+    const existingKey = edge.key !== undefined
+      ? String(edge.key)
+      : (graph.multi ? undefined : graph.edge(source, target))
 
     if (existingKey !== undefined && graph.hasEdge(existingKey)) {
       graph.replaceEdgeAttributes(existingKey, attributes)

@@ -199,18 +199,18 @@ describe('SigmaGraph 生命周期与实例访问', () => {
     await mountGraph({ id: 'main' })
 
     const context = useSigmaById('main')
-    expect(context).toBeDefined()
-    expect(context!.isReady.value).toBe(true)
-    expect(context!.sigma.value).not.toBeNull()
+    expect(context.value).toBeDefined()
+    expect(context.value!.isReady.value).toBe(true)
+    expect(context.value!.sigma.value).not.toBeNull()
   })
 
   it('卸载后从注册表移除并销毁实例', async () => {
     const wrapper = await mountGraph({ id: 'disposable' })
-    expect(useSigmaById('disposable')).toBeDefined()
+    expect(useSigmaById('disposable').value).toBeDefined()
 
     wrapper.unmount()
 
-    expect(useSigmaById('disposable')).toBeUndefined()
+    expect(useSigmaById('disposable').value).toBeUndefined()
     expect(state.killed).toBe(1)
   })
 

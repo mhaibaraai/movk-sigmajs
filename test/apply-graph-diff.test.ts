@@ -151,3 +151,50 @@ describe('applyGraphDiff 端点缺失的边', () => {
     expect(graph.size).toBe(1)
   })
 })
+
+describe('applyGraphDiff 与多重图', () => {
+  it('多重图上无 key 的平行边不会被压成一条', () => {
+    const graph = new Graph({ multi: true })
+
+    applyGraphDiff(graph, serialized({
+      nodes: [{ key: 'a', attributes: {} }, { key: 'b', attributes: {} }],
+      edges: [
+        { source: 'a', target: 'b', attributes: { label: '引用' } },
+        { source: 'a', target: 'b', attributes: { label: '废止' } },
+        { source: 'a', target: 'b', attributes: { label: '替代' } }
+      ]
+    }))
+
+    expect(graph.size).toBe(3)
+  })
+
+  it('非多重图仍按端点匹配，重复同步不会累积', () => {
+    const graph = new Graph()
+    const data = serialized({
+      nodes: [{ key: 'a', attributes: {} }, { key: 'b', attributes: {} }],
+      edges: [{ source: 'a', target: 'b', attributes: { label: '引用' } }]
+    })
+
+    applyGraphDiff(graph, data)
+    applyGraphDiff(graph, data)
+
+    expect(graph.size).toBe(1)
+  })
+
+  it('多重图上带 key 的边可重复同步而不累积', () => {
+    const graph = new Graph({ multi: true })
+    const data = serialized({
+      nodes: [{ key: 'a', attributes: {} }, { key: 'b', attributes: {} }],
+      edges: [
+        { key: 'e1', source: 'a', target: 'b', attributes: { label: '引用' } },
+        { key: 'e2', source: 'a', target: 'b', attributes: { label: '废止' } }
+      ]
+    })
+
+    applyGraphDiff(graph, data)
+    applyGraphDiff(graph, data)
+
+    expect(graph.size).toBe(2)
+    expect(graph.getEdgeAttribute('e2', 'label')).toBe('废止')
+  })
+})

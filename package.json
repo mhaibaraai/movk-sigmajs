@@ -72,10 +72,11 @@
     "test": "vitest run",
     "test:watch": "vitest watch",
     "typecheck": "vue-tsc --noEmit && nuxt typecheck playground",
-    "release": "release-it && npm publish"
+    "release": "release-it && npm publish",
+    "clean": "movk-clean"
   },
   "dependencies": {
-    "@movk/core": "^1.3.1",
+    "@movk/core": "^1.4.0",
     "@nuxt/kit": "^4.5.0",
     "@vueuse/core": "^14.3.0",
     "consola": "^3.4.2",
@@ -86,6 +87,8 @@
     "@sigma/export-image": ">=3.0.0",
     "@sigma/node-border": ">=3.0.0",
     "@sigma/node-image": ">=3.0.0",
+    "@sigma/node-piechart": ">=3.0.0",
+    "@sigma/node-square": ">=3.0.0",
     "@sigma/utils": ">=3.0.0",
     "graphology": ">=0.26.0",
     "graphology-communities-louvain": ">=2.0.0",
@@ -108,6 +111,12 @@
       "optional": true
     },
     "@sigma/node-image": {
+      "optional": true
+    },
+    "@sigma/node-piechart": {
+      "optional": true
+    },
+    "@sigma/node-square": {
       "optional": true
     },
     "@sigma/utils": {

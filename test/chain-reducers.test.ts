@@ -26,7 +26,13 @@ describe('chainReducers', () => {
   })
 
   it('后一个 reducer 拿到的是前序累积的结果', () => {
-    const second = vi.fn((_key: string, data: Record<string, unknown>) => ({ size: Number(data.size) * 2 }))
+    // 累积对象在链内被复用以省下每环一次分配，断言必须在调用当时快照，
+    // 直接比对引用会读到后续环改过的值
+    const seen: Array<Record<string, unknown>> = []
+    const second = vi.fn((_key: string, data: Record<string, unknown>) => {
+      seen.push({ ...data })
+      return { size: Number(data.size) * 2 }
+    })
 
     const chained = chainReducers<NodeDisplayData>([
       (_key, data) => ({ ...data, size: 5 }),
@@ -35,7 +41,7 @@ describe('chainReducers', () => {
 
     const result = chained?.('n1', { size: 1 })
 
-    expect(second).toHaveBeenCalledWith('n1', expect.objectContaining({ size: 5 }))
+    expect(seen[0]).toMatchObject({ size: 5 })
     expect(result).toMatchObject({ size: 10 })
   })
 
@@ -59,5 +65,17 @@ describe('chainReducers', () => {
     ])?.('n1', data)
 
     expect(data).toEqual({ label: 'N1' })
+  })
+
+  it('不就地修改调用方传入的 data', () => {
+    const input = { label: 'N1', size: 3 }
+    const chained = chainReducers<{ size: number, color: string }>([
+      (_key, data) => ({ size: Number(data.size) * 2 }),
+      () => ({ color: '#f00' })
+    ])!
+
+    chained('n1', input)
+
+    expect(input).toEqual({ label: 'N1', size: 3 })
   })
 })

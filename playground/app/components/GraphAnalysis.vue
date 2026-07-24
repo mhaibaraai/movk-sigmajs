@@ -8,19 +8,30 @@ const forceAtlas2 = useSigmaLayout('forceatlas2')
 const circular = useSigmaLayout('circular')
 const { download, isExporting } = useSigmaExport()
 
-const palette = ['#f43f5e', '#3b82f6', '#22c55e', '#a855f7', '#f59e0b', '#14b8a6']
+const curved = ref(false)
+
+/** 平行边默认完全重叠，分配曲率后才分得开 */
+async function separateParallelEdges() {
+  await curveParallelEdges(graph.value)
+  curved.value = true
+}
+
+/** 度数映射尺寸 + 社区着色，两个视觉映射工具的组合 */
+async function applyVisualMapping() {
+  const sizes = degreeToSize(graph.value, [8, 24])
+  for (const [node, size] of Object.entries(sizes)) {
+    graph.value.setNodeAttribute(node, 'size', size)
+  }
+
+  const colors = communityToColor(await communities())
+  for (const [node, color] of Object.entries(colors)) {
+    graph.value.setNodeAttribute(node, 'color', color)
+  }
+  communityCount.value = new Set(Object.values(colors)).size
+}
+
 const communityCount = ref(0)
 const topCentral = ref('')
-
-/** 社区着色直接改图属性，与走 reducer 的过滤、高亮互不干扰 */
-async function colorByCommunity() {
-  const result = await communities()
-  communityCount.value = new Set(Object.values(result)).size
-
-  for (const [node, community] of Object.entries(result)) {
-    graph.value.setNodeAttribute(node, 'color', palette[community % palette.length])
-  }
-}
 
 async function computeCentrality() {
   const result = await centrality('betweenness')
@@ -87,9 +98,16 @@ function filterHubs() {
       <label>分析</label>
       <button
         type="button"
-        @click="colorByCommunity"
+        @click="applyVisualMapping"
       >
-        社区着色
+        度数尺寸 + 社区着色
+      </button>
+      <button
+        type="button"
+        :disabled="curved"
+        @click="separateParallelEdges"
+      >
+        {{ curved ? '平行边已分开' : '分开平行边' }}
       </button>
       <button
         type="button"

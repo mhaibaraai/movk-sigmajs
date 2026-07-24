@@ -95,9 +95,18 @@ const containerRef = shallowRef<HTMLElement | null>(null)
 const sigma = shallowRef<Sigma | null>(null)
 const isReady = shallowRef(false)
 
-// props 会被 Vue 包成响应式代理，必须剥回原对象再交给 sigma 与 graphology，
-// 否则下发出去的就不是「原生实例」了，instanceof 与内部状态都可能出问题
-const graph = shallowRef<Graph>(props.graph ? toRaw(props.graph) : new Graph())
+/**
+ * 内部图按 `data.options` 建，否则 `multi: true` 的数据会被降级：
+ * 无 key 的平行边在非多重图上会命中同一条边，三条 a→b 合并成一条。
+ *
+ * props 会被 Vue 包成响应式代理，必须 `toRaw` 剥回原对象再交给 sigma 与 graphology，
+ * 否则下发出去的就不是「原生实例」了，instanceof 与内部状态都可能出问题
+ */
+function createInternalGraph(): Graph {
+  return new Graph(props.data?.options)
+}
+
+const graph = shallowRef<Graph>(props.graph ? toRaw(props.graph) : createInternalGraph())
 const isExternalGraph = computed(() => props.graph !== undefined)
 
 let resolveReady: ((instance: Sigma) => void) | undefined
@@ -289,7 +298,12 @@ onMounted(async () => {
   emit('ready', instance)
 })
 
-if (props.id) {
+/**
+ * 只在客户端登记。注册表是模块级单例，而服务端不会触发 `onBeforeUnmount`，
+ * SSR 期注册的条目只增不减，既跨请求残留又会把后续渲染误判成 id 冲突。
+ * 何况服务端的 `sigma` 恒为 `null`（实例在 `onMounted` 才创建），登记本身没有意义。
+ */
+if (props.id && import.meta.client) {
   const unregister = registerSigma(props.id, context)
   onBeforeUnmount(unregister)
 }
