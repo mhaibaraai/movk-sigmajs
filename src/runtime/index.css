@@ -132,8 +132,25 @@
   font-size: var(--sigma-font-size);
 }
 
+/* 交叉轴不拉伸，每个控件按自身内容定宽；否则纵向排布时窄控件会被最宽的那个撑开，
+   缩放按钮组会变成一个空盒子。
+   这几条 align-items 一律写在 :where() 里保持优先级为 0，
+   写进上面的基础规则会因优先级更高而盖掉后续的停靠侧覆盖 */
+:where(.sigma-controls) {
+  align-items: flex-start;
+}
+
 :where(.sigma-controls[data-direction="vertical"]) {
   flex-direction: column;
+}
+
+/* 靠右停靠时向右对齐，各控件的右边缘才齐平 */
+:where(.sigma-controls[data-direction="vertical"][data-position$="right"]) {
+  align-items: flex-end;
+}
+
+:where(.sigma-controls[data-direction="horizontal"]) {
+  align-items: center;
 }
 
 :where(.sigma-controls[data-position^="top"]) {
