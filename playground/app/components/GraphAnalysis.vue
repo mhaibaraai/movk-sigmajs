@@ -122,14 +122,18 @@ function filterHubs() {
 </template>
 
 <style scoped>
+/* 插槽内容跟在占满高度的画布之后按正常流排布，不绝对定位就会被挤出舞台 */
 .panel {
+  position: absolute;
+  inset: auto 8px 8px;
+  z-index: 5;
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding: 10px 12px;
   border: 1px solid #d0d7de;
   border-radius: 8px;
-  margin-bottom: 12px;
+  background: rgb(255 255 255 / 92%);
   font-size: 14px;
 }
 

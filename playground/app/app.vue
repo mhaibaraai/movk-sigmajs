@@ -90,7 +90,7 @@ section {
 }
 
 .stage {
-  height: 360px;
+  height: 480px;
   border: 1px solid #d0d7de;
   border-radius: 8px;
   overflow: hidden;
