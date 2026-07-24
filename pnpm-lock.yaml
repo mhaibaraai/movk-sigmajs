@@ -124,11 +124,11 @@ importers:
         specifier: ^3.3.7
         version: 3.3.8(typescript@6.0.3)
 
-  playground:
+  playgrounds/basic:
     dependencies:
       '@movk/sigma':
         specifier: workspace:*
-        version: link:..
+        version: link:../..
       graphology:
         specifier: ^0.26.0
         version: 0.26.0(graphology-types@0.24.8)
