@@ -22,7 +22,7 @@ export type SigmaEdgeReducer = NonNullable<Settings['edgeReducer']>
 
 /**
  * reducer 链中的一条登记。sigma 各只接受一个 reducer，库内按 order 升序合成为单个函数。
- * 用户经 `settings` 直接传入的 reducer 以最低 order 作为链的基座。
+ * 用户经 `settings` 直接传入的 reducer 始终作为链的基座先执行。
  */
 export interface SigmaReducerEntry {
   node?: SigmaReducer<NodeDisplayData>
@@ -58,6 +58,13 @@ export interface SigmaContext {
   isReady: Readonly<Ref<boolean>>
   /** 等待实例就绪，已就绪时立即兑现 */
   whenReady: () => Promise<Sigma>
+  /**
+   * 往 reducer 链登记一条，返回注销函数。
+   * 由 `useSigmaReducer()` 调用，通常不必直接使用
+   */
+  registerReducer: (entry: SigmaReducerEntry) => () => void
+  /** 重新合成 reducer 链并让 sigma 重绘 */
+  refreshReducers: () => void
 }
 
 export const SIGMA_CONTEXT_KEY: InjectionKey<SigmaContext> = Symbol('movk-sigma')
