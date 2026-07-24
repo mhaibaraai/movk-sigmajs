@@ -220,11 +220,17 @@ graphology 的 `Graph` 是纯可变对象，Vue 的响应式系统完全抓不�
 
 方案：`applyGraphDiff(graph, next, options)` 逐项 diff 增删改。节点属性按新数据整体替换，唯一例外是坐标：新数据显式给出 `x` / `y` 时以新值为准（服务端重算布局的场景），未给出则沿用图上现有坐标（避免跳动）。只有新增节点才需要布局。
 
+端点不在图中的边会被跳过并在开发环境告警。「概览 + 按需扩展」模式下增量数据引用尚未加载的节点是正常情况，交给 graphology 只会抛出难以定位的 `NotFoundGraphError`。
+
 ### 4. DOM 覆盖层与相机的坐标同步
 
 sigma 没有 Mapbox 那样的 Marker / Popup 概念，覆盖层要自己算位置。
 
-方案：`SigmaOverlay` 订阅相机 `updated` 事件，经 `sigma.graphToViewport()` 换算并写入 CSS transform；节点被隐藏或移出视口时自动隐藏。Tooltip / Popover / ContextMenu 全部基于它。
+**两套坐标不能混用。** `getNodeDisplayData()` 返回的是 sigma 归一化后的 framed 坐标，必须走 `framedGraphToViewport()`（sigma 自身定位标签与 hover 就是这么做的）；用户直接给的原始图坐标才用 `graphToViewport()`。搞混会让覆盖层整体错位。
+
+方案：`SigmaOverlay` 按锚定方式选择换算函数，订阅 `afterRender` 事件同步位置——相机移动、图变更、容器缩放都会触发重绘，跟着重绘走即可覆盖全部情况。节点不存在或被隐藏时自动隐藏。Tooltip / Popover / ContextMenu 全部基于它。
+
+覆盖层用 `v-show` 保留 DOM 以避免频繁重建，因此**隐藏时必须用 `v-if` 跳过插槽内容**：否则使用方会拿到空的作用域参数，隐藏的内容也仍可被点击。
 
 ### 5. SSR 与容器尺寸
 
@@ -261,7 +267,7 @@ Nuxt 官方明确：已发布模块的 `src/runtime/` 内不能依赖自动导�
 | --- | --- | --- |
 | `SigmaGraph` | 根组件。客户端创建 Sigma 实例与 graphology 图，下发 `SigmaContext`，注册到全局注册表 | props: `data`（`SerializedGraph`）、`graph`（`v-model`，外部 `Graph` 实例）、`settings`（`Partial<Settings>`）、`programs`、`id`、`autoFit`、`diff`；emits: sigma 事件全集与 `ready`；slot: default，作用域暴露 `{ sigma, graph }` |
 | `SigmaOverlay` | 通用锚定层，锚到 `node`（key）或 `position`（`Coordinates`），随相机同步 | props: `node`、`position`、`offset` |
-| `SigmaTooltip` | 悬浮 / 点击触发，插槽暴露命中的 node 或 edge 及其 attributes | props: `trigger`、`target` |
+| `SigmaTooltip` | 悬浮 / 点击触发，插槽以 `{ type, id, attributes }` 暴露命中项。键名用 `id` 而非 `key`，后者是 Vue 的保留属性 | props: `trigger`、`target`、`offset` |
 | `SigmaPopover` | 锚定到指定节点的常驻浮层，插槽自定义内容。「点击节点展示详情」的落点 | props: `node`、`open`（`v-model`）、`placement` |
 | `SigmaContextMenu` | 右键菜单，插槽暴露命中项 | props: `target` |
 
@@ -299,7 +305,7 @@ Nuxt 官方明确：已发布模块的 `src/runtime/` 内不能依赖自动导�
 | --- | --- |
 | `useSigmaCamera()` | `{ zoomIn, zoomOut, reset, goto, gotoNode, fitTo, getState, toViewport }`，基于原生 `camera` 的 `animatedZoom` / `animatedUnzoom` / `animatedReset` / `animate`。`fitTo` 依赖可选 peer `@sigma/utils`，用到时才动态导入，未安装则给出可操作的报错 |
 | `useSigmaSelection()` | hover / selected / focused 状态机，内建高亮与淡出 reducer。核心交互原语 |
-| `useSigmaNeighborhood()` | N 度邻域（`graphology-traversal` BFS），并提供 `expand(key)` 拉取远端邻域后增量合并。「点击展开」的落点 |
+| `useSigmaNeighborhood()` | N 度邻域 BFS，并提供 `expand(key, loader)` 拉取远端邻域后增量合并。BFS 走核心的 `graph.neighbors()`（有向图上同时返回出入两侧，正是图谱浏览要的可达性语义），不引入 `graphology-traversal` 这个可选 peer。「点击展开」的落点 |
 | `useSigmaSearch(options)` | 按 label 与属性模糊检索节点与边 |
 | `useSigmaFilter()` | 声明式过滤（按类型、属性、度数），落到 reducer 的 `hidden` |
 

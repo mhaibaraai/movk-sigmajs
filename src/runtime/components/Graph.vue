@@ -7,12 +7,13 @@ import type Sigma from 'sigma'
 import type { SerializedGraph } from 'graphology-types'
 import type { Settings } from 'sigma/settings'
 import type { EdgeProgramType, NodeProgramType } from 'sigma/rendering'
-import type { SigmaEdgeEventPayload, SigmaEventType, SigmaNodeEventPayload, SigmaStageEventPayload } from 'sigma/types'
+import type { EdgeDisplayData, NodeDisplayData, SigmaEdgeEventPayload, SigmaEventType, SigmaNodeEventPayload, SigmaStageEventPayload } from 'sigma/types'
 import { registerSigma } from '../composables/use-sigma'
 import { SIGMA_CONTEXT_KEY, SIGMA_EVENTS } from '../types'
-import type { SigmaContext, SigmaPrograms } from '../types'
+import type { SigmaContext, SigmaPrograms, SigmaReducer, SigmaReducerEntry } from '../types'
 import { applyGraphDiff } from '../utils/apply-graph-diff'
 import type { ApplyGraphDiffOptions } from '../utils/apply-graph-diff'
+import { chainReducers } from '../utils/chain-reducers'
 import { getSigmaDefaults } from '../utils/global-settings'
 
 defineOptions({ name: 'SigmaGraph', inheritAttrs: false })
@@ -119,20 +120,55 @@ const baseSettings = computed<Partial<Settings>>(() => defu(
   { allowInvalidContainer: true }
 ) as Partial<Settings>)
 
+/**
+ * reducer 链。sigma 的 nodeReducer / edgeReducer 各只接受一个函数，后设置的会覆盖先设置的，
+ * 于是高亮、淡出、过滤、图例显隐这些独立关注点无法共存。
+ * 这里维护一条按 order 升序的链，合成为单个函数交给 sigma。
+ */
+const reducerEntries: SigmaReducerEntry[] = []
+
+function registerReducer(entry: SigmaReducerEntry): () => void {
+  reducerEntries.push(entry)
+  refreshReducers()
+
+  return () => {
+    const index = reducerEntries.indexOf(entry)
+    if (index !== -1) {
+      reducerEntries.splice(index, 1)
+      refreshReducers()
+    }
+  }
+}
+
+function refreshReducers() {
+  const instance = sigma.value
+  if (!instance) {
+    return
+  }
+  instance.setSettings(resolveSettings())
+  instance.refresh()
+}
+
 function resolveSettings(): Partial<Settings> {
   const base = baseSettings.value
   const { node, edge } = props.programs ?? {}
-
-  if (!programDefaults || (!node && !edge)) {
-    return base
-  }
+  const sorted = [...reducerEntries].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
 
   return {
     ...base,
-    ...(node && {
+    // 用户自带的 reducer 永远排在链首作为基座，库注册的在其后叠加，不得被吞掉
+    nodeReducer: chainReducers<NodeDisplayData>([
+      base.nodeReducer as SigmaReducer<NodeDisplayData> | null | undefined,
+      ...sorted.map(entry => entry.node)
+    ]) as Settings['nodeReducer'],
+    edgeReducer: chainReducers<EdgeDisplayData>([
+      base.edgeReducer as SigmaReducer<EdgeDisplayData> | null | undefined,
+      ...sorted.map(entry => entry.edge)
+    ]) as Settings['edgeReducer'],
+    ...(programDefaults && node && {
       nodeProgramClasses: { ...programDefaults.node, ...base.nodeProgramClasses, ...node }
     }),
-    ...(edge && {
+    ...(programDefaults && edge && {
       edgeProgramClasses: { ...programDefaults.edge, ...base.edgeProgramClasses, ...edge }
     })
   }
@@ -142,7 +178,9 @@ const context: SigmaContext = {
   sigma,
   graph,
   isReady: readonly(isReady),
-  whenReady: () => (sigma.value ? Promise.resolve(sigma.value) : readyPromise)
+  whenReady: () => (sigma.value ? Promise.resolve(sigma.value) : readyPromise),
+  registerReducer,
+  refreshReducers
 }
 
 provide(SIGMA_CONTEXT_KEY, context)

@@ -67,6 +67,16 @@ export function applyGraphDiff(
   for (const edge of next.edges) {
     const source = String(edge.source)
     const target = String(edge.target)
+
+    // 增量合入局部数据时，边可能指向尚未加载的节点。这属于「概览 + 按需扩展」的正常情况，
+    // 跳过即可；直接交给 graphology 只会抛出难以定位的 NotFoundGraphError
+    if (!graph.hasNode(source) || !graph.hasNode(target)) {
+      if (import.meta.dev) {
+        console.warn(`[@movk/sigma] 边 ${source} → ${target} 的端点不在图中，已跳过`)
+      }
+      continue
+    }
+
     const attributes: Attributes = { ...edge.attributes }
     const existingKey = edge.key === undefined ? graph.edge(source, target) : String(edge.key)
 
