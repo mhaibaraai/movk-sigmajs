@@ -7,60 +7,39 @@ const data = ref<SerializedGraph>({
   nodes: [
     { key: 'a', attributes: { label: '制度 A', x: 0, y: 0, size: 14, color: '#f43f5e' } },
     { key: 'b', attributes: { label: '制度 B', x: 12, y: 5, size: 11, color: '#3b82f6' } },
-    { key: 'c', attributes: { label: '制度 C', x: 6, y: -7, size: 9, color: '#22c55e' } }
+    { key: 'c', attributes: { label: '制度 C', x: 6, y: -7, size: 9, color: '#22c55e' } },
+    { key: 'd', attributes: { label: '制度 D', x: -9, y: 6, size: 10, color: '#a855f7' } }
   ],
   edges: [
     { source: 'a', target: 'b', attributes: { label: '引用' } },
-    { source: 'b', target: 'c', attributes: { label: '引用' } }
+    { source: 'b', target: 'c', attributes: { label: '引用' } },
+    { source: 'a', target: 'd', attributes: { label: '引用' } }
   ]
 })
-
-const lastEvent = ref('（尚未交互）')
-
-function expand() {
-  // 服务端只回增量，且不带坐标；已有节点的布局结果不应被冲掉
-  data.value = {
-    ...data.value,
-    nodes: [
-      ...data.value.nodes.map(node => ({ key: node.key, attributes: { ...node.attributes, x: undefined, y: undefined } })),
-      { key: 'd', attributes: { label: '制度 D', x: -9, y: 6, size: 10, color: '#a855f7' } }
-    ],
-    edges: [...data.value.edges, { source: 'c', target: 'd', attributes: { label: '引用' } }]
-  } as SerializedGraph
-}
 </script>
 
 <template>
   <main class="page">
     <header>
       <h1>@movk/sigma playground</h1>
-      <p>M1 地基：根组件、响应式桥接、相机与事件。控件与覆盖层在后续里程碑。</p>
+      <p>M2 交互原语：reducer 链、选中高亮、邻域展开与覆盖层。</p>
     </header>
 
     <section>
       <h2>1. 声明式用法</h2>
-      <div class="actions">
-        <button
-          type="button"
-          @click="expand"
-        >
-          增量展开（新数据不带坐标）
-        </button>
-      </div>
+      <p class="hint">
+        悬浮看提示，点击节点高亮邻居并弹出详情面板（详情按需加载，不随图数据下发），
+        面板里可展开邻域，右键节点也能展开。
+      </p>
       <div class="stage">
         <SigmaGraph
           id="demo"
           :data="data"
-          :settings="{ renderEdgeLabels: true }"
-          @click-node="lastEvent = `clickNode: ${$event.node}`"
-          @enter-node="lastEvent = `enterNode: ${$event.node}`"
+          :settings="{ renderEdgeLabels: true, enableEdgeEvents: true }"
         >
-          <GraphStats />
+          <GraphInteraction />
         </SigmaGraph>
       </div>
-      <p class="hint">
-        最近事件：{{ lastEvent }}
-      </p>
     </section>
 
     <section>
@@ -87,14 +66,10 @@ section {
 }
 
 .stage {
-  height: 320px;
+  height: 360px;
   border: 1px solid #d0d7de;
   border-radius: 8px;
   overflow: hidden;
-}
-
-.actions {
-  margin-bottom: 12px;
 }
 
 .hint {
