@@ -11,9 +11,13 @@ describe('chainReducers', () => {
     expect(chainReducers([null, undefined])).toBeNull()
   })
 
-  it('只有一条时原样返回，不额外包装', () => {
-    const reducer: NodeReducer = (_key, data) => data
-    expect(chainReducers([null, reducer, undefined])).toBe(reducer)
+  it('只有一条时也合并，返回补丁的归约不会丢掉坐标', () => {
+    // sigma 拿归约的返回值当完整显示数据用，缺 x / y 会直接抛错。
+    // 单条若原样透传，同一个归约函数在链上多一条同伴就换一种语义
+    const reducer: NodeReducer = () => ({ size: 20 })
+    const chained = chainReducers<NodeDisplayData>([null, reducer, undefined])
+
+    expect(chained?.('n1', { x: 1, y: 2, label: 'N1' })).toMatchObject({ x: 1, y: 2, label: 'N1', size: 20 })
   })
 
   it('按数组顺序执行，后者覆盖前者的同名字段', () => {
