@@ -21,6 +21,8 @@ test/                     # vitest + happy-dom + @vue/test-utils
 references/               # 架构方案与背景资料
 ```
 
+M4 起 `playground/` 拆为 `playgrounds/basic` 与 `playgrounds/ui`，见「演示应用」一节。
+
 ## 红线
 
 以下几条违反即视为缺陷，评审必须拦。
@@ -30,6 +32,8 @@ references/               # 架构方案与背景资料
 已发布模块的 `src/runtime/` 内**不能依赖 Nuxt 自动导入**（`node_modules` 内出于性能不启用）。Vue API、`@movk/core`、`@vueuse/core` 以及库内的 composables 与工具函数，全部必须显式 `import`。
 
 本地 playground 会因为源码不在 `node_modules` 而「碰巧通过」，发布后才炸。写完 runtime 代码务必自查一遍 import 是否齐全。
+
+**不准开 `shamefully-hoist=true`。** 它把所有依赖提升到根 `node_modules`，会让漏写的 import 也能解析成功，正好掩盖上面这类 bug。某些依赖（如 `@movk/nuxt` 要求的 `tailwindcss`）的安装文档会建议开它，一律改用「在需要的 workspace 里显式安装」绕开。
 
 ### 出口兼容不可破坏
 
@@ -92,6 +96,27 @@ pnpm lint
 ```
 
 改动 `src/` 后若 playground 表现异常，先重跑 `pnpm dev:prepare`。
+
+## 演示应用
+
+文档站不排期，演示职责全部由 playground 承担。它同时是「模块能否装进一个干净 Nuxt 项目」的验证信号，因此对 UI 依赖有明确分区。
+
+**M4 之前：不引入任何 UI 库。** M1 到 M3 展示的是渲染与交互原语，一个按钮加一段 `<pre>` 就够，引入 UI 库只有负担没有信息量。
+
+**M4 起拆成两个：**
+
+| 目录 | UI 依赖 | 承载内容 |
+| --- | --- | --- |
+| `playgrounds/basic` | 零，永远不引入 | 核心渲染、内置控件的原样外观、**纯原生逃生舱示例** |
+| `playgrounds/ui` | `@movk/nuxt` | 插槽接管控件外观、完整知识图谱场景 |
+
+必须分区的三条理由：
+
+- 逃生舱示例的全部说服力来自「不用库的任何东西也能跑」，混进 UI 库就废了
+- 内置控件自带极简 CSS 与 CSS 变量，若外观全被 UI 库接管，这套样式无人可见也就无人验证
+- 混入大型 UI 模块后，样式冲突、自动导入冲突、构建失败都难以归因，验证信号被污染
+
+选 `@movk/nuxt` 而不是直接用 `@nuxt/ui`：前者本身就建在后者之上，且演示两个 movk 库如何配合更贴近实际项目。引入时它要求的 `tailwindcss` 装进 `playgrounds/ui` 这个 workspace，**不准用 `shamefully-hoist=true` 绕过**，理由见红线第一条。
 
 ## 测试要求
 
