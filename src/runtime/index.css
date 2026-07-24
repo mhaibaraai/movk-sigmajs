@@ -1,0 +1,31 @@
+/* 控件与覆盖层的默认外观。全部经 CSS 变量覆写，也可用 sigma.css 选项整体关闭 */
+:where(.sigma-root) {
+  --sigma-control-size: 32px;
+  --sigma-control-gap: 4px;
+  --sigma-control-radius: 6px;
+  --sigma-control-bg: #fff;
+  --sigma-control-fg: #1f2328;
+  --sigma-control-border: rgb(0 0 0 / 12%);
+  --sigma-control-shadow: 0 1px 3px rgb(0 0 0 / 12%);
+  --sigma-overlay-z: 10;
+}
+
+@media (prefers-color-scheme: dark) {
+  :where(.sigma-root) {
+    --sigma-control-bg: #1f2328;
+    --sigma-control-fg: #e6edf3;
+    --sigma-control-border: rgb(255 255 255 / 15%);
+    --sigma-control-shadow: 0 1px 3px rgb(0 0 0 / 40%);
+  }
+}
+
+.sigma-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.sigma-canvas {
+  width: 100%;
+  height: 100%;
+}
