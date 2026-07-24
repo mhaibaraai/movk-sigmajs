@@ -140,6 +140,10 @@ emits 的类型必须**逐条写出**，不能用 `{ [K in SigmaEventType]: Para
 
 `programs` prop 接受任何符合 `NodeProgramType` / `EdgeProgramType` 的类——官方 `@sigma/*` 包、社区实现、用户手写的 WebGL 程序都一样。库不维护白名单，也不限制只能用官方程序。
 
+**`@sigma/*` 程序包与 sigma 本体一样在模块顶层读 WebGL 全局**，在 Nuxt 页面里静态 `import` 会崩 SSR，写成 `import(...)` 的 Promise 也不行——那同样会在服务端求值。因此提供 `defineSigmaProgram(loader)` 声明「用到时才加载」，组件会在创建实例前把它们解析完，不存在节点带着未注册 type 先渲染的时间窗（sigma 遇到未注册的 type 是 `throw`，不是降级）。
+
+加载函数与程序类都是 function，无法靠 `typeof` 区分，所以 `defineSigmaProgram` 返回一个带标记的对象而非裸函数。
+
 ### 6. reducer 链不吞掉用户的 reducer
 
 用户在 `settings` 里直接传的 `nodeReducer` / `edgeReducer`，会被当作链的基座（`order` 最低）执行，库注册的在其后叠加，语义明确且不丢失。
@@ -314,7 +318,7 @@ Nuxt 官方明确：已发布模块的 `src/runtime/` 内不能依赖自动导�
 | Composable | 返回 / 职责 |
 | --- | --- |
 | `useSigmaLayout(name, options)` | 统一布局入口，`name` 取 `forceatlas2` / `noverlap` / `circular` / `circlepack` / `random`；返回 `{ assign, start, stop, isRunning }`，迭代型才有 `start` / `stop`。worker 生命周期托管，见难点 6 |
-| `useSigmaMetrics()` | 度数、中心性、Louvain 社区，惰性计算并按 `version` 缓存 |
+| `useSigmaMetrics()` | 度数走核心 graphology 不引入依赖；中心性与 Louvain 社区依赖可选 peer，用到时才动态导入，并按 `version` 缓存。**注意 `graphology-metrics@2.4.0` 的 betweenness 在链状图上正确，但分叉节点偏低、首个插入的节点恒为 0（4 节点星形的星心得 0，正确值是 3），依赖它做判断前请自行核对** |
 | `useSigmaExport()` | `toPNG` / `download`，基于 `@sigma/export-image` |
 
 ## 八、工具函数与 @movk/core 复用

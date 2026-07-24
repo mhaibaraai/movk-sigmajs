@@ -35,13 +35,15 @@ M4 起 `playground/` 拆为 `playgrounds/basic` 与 `playgrounds/ui`，见「演
 
 **不准开 `shamefully-hoist=true`。** 它把所有依赖提升到根 `node_modules`，会让漏写的 import 也能解析成功，正好掩盖上面这类 bug。某些依赖（如 `@movk/nuxt` 要求的 `tailwindcss`）的安装文档会建议开它，一律改用「在需要的 workspace 里显式安装」绕开。
 
-### sigma 只能动态导入
+### sigma 与 @sigma/* 只能动态导入
 
 sigma 在模块顶层就读 `WebGL2RenderingContext`，服务端与 happy-dom 都没有这个全局，**静态 `import 'sigma'` 或 `import 'sigma/settings'` 会让 SSR 直接 ReferenceError**。
 
 runtime 代码里 sigma 一律 `await import('sigma')`，放在 `onMounted` 之后；类型侧用 `import type`，编译期擦除不影响。graphology 无此问题，可正常静态导入。
 
-连带的两条：异步 `onMounted` 要能在实例化完成前被卸载中断；测试需要 `test/setup/webgl-globals.ts` 补桩才能加载真实的 `sigma/settings`。
+`@sigma/node-image`、`@sigma/node-border`、`@sigma/edge-curve`、`@sigma/export-image` 同样如此，**使用方也不能静态 import 它们**。所以 `programs` prop 支持 `defineSigmaProgram(() => import('@sigma/node-border').then(...))` 这种延迟声明，组件会在建实例前解析完。
+
+连带的三条：异步 `onMounted` 要能在实例化完成前被卸载中断；测试需要 `test/setup/webgl-globals.ts` 补桩才能加载真实的 `sigma/settings`；所有可选 peer（布局、metrics、louvain）一律 `await import()` 并在 `catch` 里给出「装哪个包」的可操作提示。
 
 ### 出口兼容不可破坏
 
