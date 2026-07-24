@@ -275,27 +275,38 @@ describe('SigmaPopover', () => {
 })
 
 describe('SigmaContextMenu', () => {
-  it('右键节点后显示并阻止 sigma 默认行为', async () => {
+  it('右键节点后显示，并同时拦住 sigma 与浏览器的默认行为', async () => {
     const preventSigmaDefault = vi.fn()
+    const preventDefault = vi.fn()
     const { wrapper, instance } = await mountInGraph(() =>
       h(SigmaContextMenu, null, { default: () => '菜单' })
     )
 
-    instance.handlers.rightClickNode?.({ node: 'a', event: { preventSigmaDefault } })
+    instance.handlers.rightClickNode?.({
+      node: 'a',
+      event: { preventSigmaDefault, original: { preventDefault } }
+    })
     await nextTick()
 
     expect(preventSigmaDefault).toHaveBeenCalledOnce()
+    // 不拦原生事件的话浏览器菜单会和自定义菜单一起弹出来
+    expect(preventDefault).toHaveBeenCalledOnce()
     expect(wrapper.text()).toContain('菜单')
   })
 
-  it('未声明的目标类型不响应', async () => {
+  it('未声明的目标类型不响应，也不拦浏览器菜单', async () => {
+    const preventDefault = vi.fn()
     const { wrapper, instance } = await mountInGraph(() =>
       h(SigmaContextMenu, null, { default: () => '菜单' })
     )
 
-    instance.handlers.rightClickEdge?.({ edge: 'e', event: { preventSigmaDefault: vi.fn() } })
+    instance.handlers.rightClickEdge?.({
+      edge: 'e',
+      event: { preventSigmaDefault: vi.fn(), original: { preventDefault } }
+    })
     await nextTick()
 
+    expect(preventDefault).not.toHaveBeenCalled()
     expect(wrapper.find('.sigma-context-menu').attributes('style')).toContain('display: none')
   })
 
@@ -304,7 +315,9 @@ describe('SigmaContextMenu', () => {
       h(SigmaContextMenu, { target: ['stage'] }, { default: () => '菜单' })
     )
 
-    instance.handlers.rightClickStage?.({ event: { x: 10, y: 20, preventSigmaDefault: vi.fn() } })
+    instance.handlers.rightClickStage?.({
+      event: { x: 10, y: 20, preventSigmaDefault: vi.fn(), original: { preventDefault: vi.fn() } }
+    })
     await nextTick()
 
     expect(instance.graphCalls).toBeGreaterThan(0)
@@ -315,7 +328,10 @@ describe('SigmaContextMenu', () => {
       h(SigmaContextMenu, null, { default: () => '菜单' })
     )
 
-    instance.handlers.rightClickNode?.({ node: 'a', event: { preventSigmaDefault: vi.fn() } })
+    instance.handlers.rightClickNode?.({
+      node: 'a',
+      event: { preventSigmaDefault: vi.fn(), original: { preventDefault: vi.fn() } }
+    })
     await nextTick()
     instance.handlers.clickStage?.({})
     await nextTick()

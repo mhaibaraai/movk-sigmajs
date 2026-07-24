@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, shallowRef } from 'vue'
 import type { Attributes } from 'graphology-types'
-import type { Coordinates } from 'sigma/types'
+import type { Coordinates, MouseCoords } from 'sigma/types'
 import { useSigma } from '../composables/use-sigma'
 import { useSigmaEvents } from '../composables/use-sigma-events'
 import SigmaOverlay from './Overlay.vue'
@@ -61,16 +61,29 @@ function close() {
   hit.value = null
 }
 
+/**
+ * 接管这次右键。
+ *
+ * `preventSigmaDefault()` 只拦 sigma 自己的默认行为，浏览器原生菜单照样弹出。
+ * sigma 的鼠标捕获器直接监听 DOM 的 `contextmenu` 事件且未调用 `preventDefault()`，
+ * 我们的处理函数是在那个监听器里同步执行的，因此在此拦住原生事件即可。
+ * 只在确实接管的目标上拦截，未接管的仍让浏览器菜单正常弹出。
+ */
+function take(event: MouseCoords) {
+  event.preventSigmaDefault()
+  event.original.preventDefault()
+}
+
 useSigmaEvents({
   rightClickNode: ({ node, event }) => {
     if (accepts('node')) {
-      event.preventSigmaDefault()
+      take(event)
       hit.value = { type: 'node', key: node }
     }
   },
   rightClickEdge: ({ edge, event }) => {
     if (accepts('edge')) {
-      event.preventSigmaDefault()
+      take(event)
       hit.value = { type: 'edge', key: edge }
     }
   },
@@ -79,7 +92,7 @@ useSigmaEvents({
       close()
       return
     }
-    event.preventSigmaDefault()
+    take(event)
     const instance = sigma.value
     hit.value = {
       type: 'stage',
