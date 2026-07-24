@@ -37,13 +37,24 @@ export interface SigmaReducerEntry {
 /** 内置布局算法名 */
 export type SigmaLayoutName = 'forceatlas2' | 'noverlap' | 'circular' | 'circlepack' | 'random'
 
+/** `defineSigmaProgram()` 的产物，组件会在创建实例前解析它 */
+export interface SigmaLazyProgram<T> {
+  __sigmaLazyProgram: () => T | Promise<T>
+}
+
+/** 渲染程序，或一个延迟加载它的声明 */
+export type SigmaProgramSource<T> = T | SigmaLazyProgram<T>
+
 /**
  * 自定义渲染程序。接受任何符合官方程序类型的实现，
  * 不限于 `@sigma/*` 官方包，也不维护白名单。
+ *
+ * `@sigma/*` 程序包在模块顶层读取 WebGL 全局，在 Nuxt 里必须经
+ * `defineSigmaProgram()` 延迟加载，否则 SSR 会崩。
  */
 export interface SigmaPrograms {
-  node?: Record<string, NodeProgramType>
-  edge?: Record<string, EdgeProgramType>
+  node?: Record<string, SigmaProgramSource<NodeProgramType>>
+  edge?: Record<string, SigmaProgramSource<EdgeProgramType>>
 }
 
 /**
