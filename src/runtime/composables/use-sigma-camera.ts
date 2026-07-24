@@ -17,7 +17,11 @@ export interface UseSigmaCameraReturn {
   fitTo: (nodes?: string[], options?: { animate?: boolean }) => Promise<void>
   /** 当前相机状态，未就绪时为 `null` */
   getState: () => CameraState | null
-  /** 图坐标转屏幕坐标，未就绪时为 `null` */
+  /**
+   * 原始图坐标转屏幕坐标，未就绪时为 `null`。
+   * 节点位置请用 `sigma.framedGraphToViewport(getNodeDisplayData(key))`，
+   * 那套坐标已被 sigma 归一化，走这里会错位
+   */
   toViewport: (point: Coordinates) => Coordinates | null
 }
 
@@ -57,6 +61,9 @@ export function useSigmaCamera(): UseSigmaCameraReturn {
         return
       }
 
+      // 这里直接把显示坐标交给相机，不做换算：getNodeDisplayData 返回的是归一化后的
+      // framed 坐标，相机的 x / y 恰好也在这个坐标系（sigma 自己的 fitViewportToNodes 同样如此）。
+      // 覆盖层那边要走 framedGraphToViewport，是因为目标坐标系是屏幕像素，两件事不要混淆
       const { ratio, ...animateOptions } = options ?? {}
       await instance.getCamera().animate(
         { x: display.x, y: display.y, ...(ratio === undefined ? {} : { ratio }) },

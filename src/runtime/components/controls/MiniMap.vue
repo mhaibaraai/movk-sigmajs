@@ -34,14 +34,15 @@ const props = withDefaults(defineProps<{
   duration: 300
 })
 
+/**
+ * 全程使用 framed 坐标：`getNodeDisplayData` 返回的是它，相机的 x / y 也是它，
+ * 于是画点、画视口框、点击回写三者同在一个坐标系里，不必来回转换。
+ */
 const { sigma } = useSigma()
 const canvasRef = useTemplateRef<HTMLCanvasElement>('canvas')
 const rootRef = useTemplateRef<HTMLDivElement>('root')
 
-/**
- * 全程使用 framed 坐标：`getNodeDisplayData` 返回的是它，相机的 x / y 也是它，
- * 于是画点、画视口框、点击换算三者同在一个坐标系里，不必来回转换。
- */
+/** 全图在 framed 坐标系下的包围盒 */
 interface Extent {
   minX: number
   maxX: number
@@ -87,6 +88,10 @@ function computeExtent(): Extent | null {
   return { minX, maxX: minX + spanX, minY, maxY: minY + spanY }
 }
 
+/**
+ * 把 framed 坐标等比缩放并居中到缩略图画布上。
+ * 一并返回 `scale` 与偏移量，供点击时做逆运算，两处共用同一套参数才不会错位。
+ */
 function project(point: { x: number, y: number }, box: Extent, width: number, height: number) {
   const inner = props.padding
   const scale = Math.min(
