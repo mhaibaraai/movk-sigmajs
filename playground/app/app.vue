@@ -1,6 +1,26 @@
 <script setup lang="ts">
 import type { SerializedGraph } from 'graphology-types'
 
+/**
+ * `@sigma/*` 程序包在模块顶层读取 WebGL 全局，SSR 阶段静态 import 会直接崩，
+ * 必须经 defineSigmaProgram 声明成「用到时才加载」
+ */
+const programs = {
+  node: {
+    border: defineSigmaProgram(() =>
+      import('@sigma/node-border').then(m => m.createNodeBorderProgram({
+        borders: [
+          { size: { value: 0.1 }, color: { attribute: 'borderColor', defaultValue: '#3b82f6' } },
+          { size: { fill: true }, color: { attribute: 'color' } }
+        ]
+      }))
+    )
+  },
+  edge: {
+    curve: defineSigmaProgram(() => import('@sigma/edge-curve').then(m => m.default))
+  }
+}
+
 const data = ref<SerializedGraph>({
   attributes: {},
   options: { type: 'mixed', multi: false, allowSelfLoops: true },
@@ -22,21 +42,25 @@ const data = ref<SerializedGraph>({
   <main class="page">
     <header>
       <h1>@movk/sigma playground</h1>
-      <p>M2 交互原语：reducer 链、选中高亮、邻域展开与覆盖层。</p>
+      <p>M3 布局与分析：worker 布局、检索、过滤、社区与中心性，以及延迟加载的渲染程序。</p>
     </header>
 
     <section>
       <h2>1. 声明式用法</h2>
       <p class="hint">
         悬浮看提示，点击节点高亮邻居并弹出详情面板（详情按需加载，不随图数据下发），
-        面板里可展开邻域，右键节点也能展开。
+        面板里可展开邻域，右键节点也能展开。节点用 <code>@sigma/node-border</code> 渲染，
+        边用 <code>@sigma/edge-curve</code>，两者都经 <code>defineSigmaProgram</code> 延迟加载——
+        它们和 sigma 本体一样在模块顶层读 WebGL 全局，静态 import 会崩 SSR。
       </p>
       <div class="stage">
         <SigmaGraph
           id="demo"
           :data="data"
-          :settings="{ renderEdgeLabels: true, enableEdgeEvents: true }"
+          :programs="programs"
+          :settings="{ renderEdgeLabels: true, enableEdgeEvents: true, defaultNodeType: 'border', defaultEdgeType: 'curve' }"
         >
+          <GraphAnalysis />
           <GraphInteraction />
         </SigmaGraph>
       </div>
