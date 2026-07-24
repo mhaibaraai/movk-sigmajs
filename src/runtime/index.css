@@ -1,32 +1,82 @@
-/* 控件与覆盖层的默认外观。全部经 CSS 变量覆写，也可用 sigma.css 选项整体关闭 */
+/**
+ * 控件与覆盖层的默认外观。
+ *
+ * 变量分两层：primitive 是配色与尺寸的原子值，semantic 按用途引用 primitive。
+ * 改主题通常只需覆盖 primitive；要单独调某个控件再覆盖对应的 semantic。
+ * 选择器一律包 :where() 把优先级降到 0，使用方无需 !important 即可覆盖。
+ * 整份样式可用模块的 `sigma.css` 选项关闭。
+ */
+
 :where(.sigma-root) {
+  /* primitive */
+  --sigma-color-bg: #fff;
+  --sigma-color-fg: #1f2328;
+  --sigma-color-muted: #57606a;
+  --sigma-color-border: rgb(0 0 0 / 12%);
+  --sigma-color-hover: rgb(0 0 0 / 5%);
+  --sigma-color-active: rgb(0 0 0 / 9%);
+  --sigma-color-accent: #3b82f6;
+  --sigma-shadow-sm: 0 1px 3px rgb(0 0 0 / 12%);
+  --sigma-shadow-md: 0 2px 8px rgb(0 0 0 / 15%);
+  --sigma-radius: 6px;
+  --sigma-space: 4px;
+  --sigma-font-size: 13px;
+  --sigma-font: system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* semantic：控件 */
   --sigma-control-size: 32px;
-  --sigma-control-gap: 4px;
-  --sigma-control-radius: 6px;
-  --sigma-control-bg: #fff;
-  --sigma-control-fg: #1f2328;
-  --sigma-control-border: rgb(0 0 0 / 12%);
-  --sigma-control-shadow: 0 1px 3px rgb(0 0 0 / 12%);
+  --sigma-control-gap: var(--sigma-space);
+  --sigma-control-inset: 8px;
+  --sigma-control-radius: var(--sigma-radius);
+  --sigma-control-bg: var(--sigma-color-bg);
+  --sigma-control-fg: var(--sigma-color-fg);
+  --sigma-control-border: var(--sigma-color-border);
+  --sigma-control-shadow: var(--sigma-shadow-sm);
+  --sigma-control-z: 5;
+
+  /* semantic：覆盖层 */
   --sigma-overlay-z: 10;
-  --sigma-overlay-bg: #fff;
-  --sigma-overlay-fg: #1f2328;
-  --sigma-overlay-border: rgb(0 0 0 / 12%);
-  --sigma-overlay-radius: 6px;
+  --sigma-overlay-bg: var(--sigma-color-bg);
+  --sigma-overlay-fg: var(--sigma-color-fg);
+  --sigma-overlay-border: var(--sigma-color-border);
+  --sigma-overlay-radius: var(--sigma-radius);
   --sigma-overlay-padding: 6px 10px;
-  --sigma-overlay-shadow: 0 2px 8px rgb(0 0 0 / 15%);
+  --sigma-overlay-shadow: var(--sigma-shadow-md);
+
+  /* semantic：小地图 */
+  --sigma-minimap-size: 140px;
+  --sigma-minimap-node: var(--sigma-color-muted);
+  --sigma-minimap-viewport: var(--sigma-color-accent);
 }
 
+/**
+ * 深色模式走两条通道，因为两种切换方式都很常见：
+ * 系统偏好，以及 Nuxt UI / Tailwind 的 .dark 类策略。
+ * 系统偏好那条要排除应用强制浅色（.light）的情况，否则手动切浅色时控件仍是深的。
+ */
 @media (prefers-color-scheme: dark) {
-  :where(.sigma-root) {
-    --sigma-control-bg: #1f2328;
-    --sigma-control-fg: #e6edf3;
-    --sigma-control-border: rgb(255 255 255 / 15%);
-    --sigma-control-shadow: 0 1px 3px rgb(0 0 0 / 40%);
-    --sigma-overlay-bg: #1f2328;
-    --sigma-overlay-fg: #e6edf3;
-    --sigma-overlay-border: rgb(255 255 255 / 15%);
-    --sigma-overlay-shadow: 0 2px 8px rgb(0 0 0 / 50%);
+  :where(html:not(.light)) :where(.sigma-root) {
+    --sigma-color-bg: #1f2328;
+    --sigma-color-fg: #e6edf3;
+    --sigma-color-muted: #8b949e;
+    --sigma-color-border: rgb(255 255 255 / 15%);
+    --sigma-color-hover: rgb(255 255 255 / 8%);
+    --sigma-color-active: rgb(255 255 255 / 14%);
+    --sigma-shadow-sm: 0 1px 3px rgb(0 0 0 / 40%);
+    --sigma-shadow-md: 0 2px 8px rgb(0 0 0 / 50%);
   }
+}
+
+:where(html.dark) :where(.sigma-root),
+:where(.sigma-root[data-sigma-scheme="dark"]) {
+  --sigma-color-bg: #1f2328;
+  --sigma-color-fg: #e6edf3;
+  --sigma-color-muted: #8b949e;
+  --sigma-color-border: rgb(255 255 255 / 15%);
+  --sigma-color-hover: rgb(255 255 255 / 8%);
+  --sigma-color-active: rgb(255 255 255 / 14%);
+  --sigma-shadow-sm: 0 1px 3px rgb(0 0 0 / 40%);
+  --sigma-shadow-md: 0 2px 8px rgb(0 0 0 / 50%);
 }
 
 .sigma-root {
@@ -40,7 +90,7 @@
   height: 100%;
 }
 
-/* 覆盖层由 JS 写入 transform 定位，锚点在左上角，用 translate(-50%, -100%) 挪到锚点上方居中 */
+/* 覆盖层由 JS 写入 transform 定位，锚点在左上角 */
 .sigma-overlay {
   position: absolute;
   top: 0;
@@ -49,20 +99,20 @@
   pointer-events: none;
 }
 
-.sigma-tooltip,
-.sigma-popover,
-.sigma-context-menu {
+:where(.sigma-tooltip, .sigma-popover, .sigma-context-menu) {
   color: var(--sigma-overlay-fg);
   background: var(--sigma-overlay-bg);
   border: 1px solid var(--sigma-overlay-border);
   border-radius: var(--sigma-overlay-radius);
   padding: var(--sigma-overlay-padding);
   box-shadow: var(--sigma-overlay-shadow);
-  font-size: 13px;
+  font-family: var(--sigma-font);
+  font-size: var(--sigma-font-size);
   white-space: nowrap;
 }
 
-.sigma-tooltip {
+.sigma-tooltip,
+.sigma-popover {
   translate: -50% -100%;
 }
 
@@ -72,6 +122,214 @@
   white-space: normal;
 }
 
-.sigma-popover {
-  translate: -50% -100%;
+/* 控件容器：按停靠角绝对定位。插槽内容走正常流，必须自行定位，容器替使用方做了这件事 */
+.sigma-controls {
+  position: absolute;
+  z-index: var(--sigma-control-z);
+  display: flex;
+  gap: var(--sigma-control-gap);
+  font-family: var(--sigma-font);
+  font-size: var(--sigma-font-size);
+}
+
+:where(.sigma-controls[data-direction="vertical"]) {
+  flex-direction: column;
+}
+
+:where(.sigma-controls[data-position^="top"]) {
+  top: var(--sigma-control-inset);
+}
+
+:where(.sigma-controls[data-position^="bottom"]) {
+  bottom: var(--sigma-control-inset);
+}
+
+:where(.sigma-controls[data-position$="left"]) {
+  left: var(--sigma-control-inset);
+}
+
+:where(.sigma-controls[data-position$="right"]) {
+  right: var(--sigma-control-inset);
+}
+
+/* 控件组：一列按钮共用一块底板 */
+.sigma-control-group {
+  display: flex;
+  flex-direction: inherit;
+  overflow: hidden;
+  border: 1px solid var(--sigma-control-border);
+  border-radius: var(--sigma-control-radius);
+  background: var(--sigma-control-bg);
+  box-shadow: var(--sigma-control-shadow);
+}
+
+:where(.sigma-control-button) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--sigma-control-size);
+  height: var(--sigma-control-size);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--sigma-control-fg);
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+
+:where(.sigma-control-button:hover:not(:disabled)) {
+  background: var(--sigma-color-hover);
+}
+
+:where(.sigma-control-button:active:not(:disabled)) {
+  background: var(--sigma-color-active);
+}
+
+:where(.sigma-control-button:disabled) {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+:where(.sigma-control-button:focus-visible) {
+  outline: 2px solid var(--sigma-color-accent);
+  outline-offset: -2px;
+}
+
+/* 检索控件 */
+.sigma-search {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+}
+
+:where(.sigma-search-input) {
+  height: var(--sigma-control-size);
+  padding: 0 8px;
+  border: 1px solid var(--sigma-control-border);
+  border-radius: var(--sigma-control-radius);
+  background: var(--sigma-control-bg);
+  color: var(--sigma-control-fg);
+  font: inherit;
+  box-shadow: var(--sigma-control-shadow);
+}
+
+:where(.sigma-search-input:focus-visible) {
+  outline: 2px solid var(--sigma-color-accent);
+  outline-offset: -1px;
+}
+
+.sigma-search-results {
+  position: absolute;
+  top: calc(var(--sigma-control-size) + var(--sigma-space));
+  left: 0;
+  right: 0;
+  z-index: 1;
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--sigma-control-border);
+  border-radius: var(--sigma-control-radius);
+  background: var(--sigma-control-bg);
+  box-shadow: var(--sigma-shadow-md);
+}
+
+/* 结果列表在底部停靠时向上展开，避免超出容器 */
+:where(.sigma-controls[data-position^="bottom"]) .sigma-search-results {
+  top: auto;
+  bottom: calc(var(--sigma-control-size) + var(--sigma-space));
+}
+
+:where(.sigma-search-option) {
+  display: block;
+  width: 100%;
+  padding: 6px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--sigma-control-fg);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+:where(.sigma-search-option:hover, .sigma-search-option[aria-selected="true"]) {
+  background: var(--sigma-color-hover);
+}
+
+:where(.sigma-search-match) {
+  color: var(--sigma-color-accent);
+  font-weight: 600;
+}
+
+:where(.sigma-search-empty) {
+  padding: 6px 8px;
+  color: var(--sigma-color-muted);
+}
+
+/* 图例 */
+.sigma-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  border: 1px solid var(--sigma-control-border);
+  border-radius: var(--sigma-control-radius);
+  background: var(--sigma-control-bg);
+  box-shadow: var(--sigma-control-shadow);
+  color: var(--sigma-control-fg);
+}
+
+:where(.sigma-legend-item) {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: calc(var(--sigma-control-radius) - 2px);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+:where(.sigma-legend-item:hover) {
+  background: var(--sigma-color-hover);
+}
+
+:where(.sigma-legend-item[aria-pressed="false"]) {
+  opacity: 0.4;
+}
+
+:where(.sigma-legend-swatch) {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+
+:where(.sigma-legend-count) {
+  margin-left: auto;
+  color: var(--sigma-color-muted);
+}
+
+/* 小地图 */
+.sigma-minimap {
+  width: var(--sigma-minimap-size);
+  height: var(--sigma-minimap-size);
+  border: 1px solid var(--sigma-control-border);
+  border-radius: var(--sigma-control-radius);
+  background: var(--sigma-control-bg);
+  box-shadow: var(--sigma-control-shadow);
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+:where(.sigma-minimap canvas) {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
