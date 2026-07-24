@@ -105,6 +105,8 @@ new Sigma(graph, container, settings)
 
 `useSigma()` 返回的是原生 `Sigma` 与 `Graph` 实例本身，不是 Proxy、不是包装对象。任何 sigma / graphology 的原生方法直接可调：
 
+注意一个容易漏掉的点：Vue 会把 props 包成响应式代理，`props.graph` 拿到的可能是 `external` 的 Proxy 而非原对象。组件必须 `toRaw()` 剥回去再交给 sigma，否则下发的就不是「原生实例」，`instanceof` 与 graphology 的内部状态都可能出问题。已有单测断言构造时传入的就是原对象本身。
+
 ```vue
 <script setup lang="ts">
 const { sigma, graph, whenReady } = useSigma()
@@ -123,7 +125,9 @@ graph.value.setNodeAttribute('n1', 'color', '#f43f5e')
 
 ### 3. 事件双通道
 
-组件 emits 覆盖 sigma 事件全集；`useSigmaEvents()` 接受任意事件名，未被 emits 覆盖的也能绑定。两条通道之下，`sigma.on()` 始终可用。
+组件 emits 覆盖 sigma 事件全集（33 个）；`useSigmaEvents()` 接受任意事件名，未被 emits 覆盖的也能绑定。两条通道之下，`sigma.on()` 始终可用。
+
+emits 的类型必须**逐条写出**，不能用 `{ [K in SigmaEventType]: Parameters<SigmaEvents[K]> }` 这样的映射类型派生：`@vue/compiler-sfc` 要在编译期静态提取事件名，它解析不了跨包的映射类型——`vue-tsc` 能过但打包会失败。运行期的事件名列表另在 `runtime/types` 里以 `Record<SigmaEventType, true>` 维护，上游新增事件时它会先报错。
 
 ### 4. 数据双通道，可完全接管
 
@@ -224,9 +228,16 @@ sigma 没有 Mapbox 那样的 Marker / Popup 概念，覆盖层要自己算位�
 
 ### 5. SSR 与容器尺寸
 
-sigma 需要真实 DOM 与 WebGL 上下文，服务端渲染必然失败。
+**只推迟实例化不够，`import` 本身就会崩。** sigma 在模块顶层用 `WebGL2RenderingContext.BOOL` 一类常量建查找表，服务端没有这两个全局，`import 'sigma'` 与 `import 'sigma/settings'` 会直接 `ReferenceError`（已实测）。graphology 无此问题，可正常静态导入。
 
-方案：`SigmaGraph` 只在 `onMounted` 内实例化，SSR 阶段渲染空容器，调用方无需手动包 `<ClientOnly>`；同时对容器尺寸为 0 的情况用 `allowInvalidContainer` 兜底，并在容器可见后 `refresh()`。
+方案：`SigmaGraph` 里 sigma 一律**动态导入**，在 `onMounted` 内 `await import('sigma')` 之后再实例化，SSR 阶段只渲染空容器，调用方无需手动包 `<ClientOnly>`。类型侧用 `import type` 引入，编译期即擦除。
+
+由此带来两个附加约束：
+
+- `onMounted` 是异步的，实例化完成前卸载要能中断，避免残留实例
+- 单测里 happy-dom 同样没有 WebGL 全局，需在 `test/setup/` 补一组桩，测试才能加载真实的 `sigma/settings` 去断言内置渲染程序
+
+容器尺寸为 0 的情况用 `allowInvalidContainer` 兜底（作为库的默认值，用户可覆盖），并由 `useResizeObserver` 在尺寸变化时补 `sigma.resize()`。
 
 ### 6. 布局 worker 的生命周期
 
@@ -277,7 +288,7 @@ Nuxt 官方明确：已发布模块的 `src/runtime/` 内不能依赖自动导�
 | --- | --- |
 | `useSigma()` | `{ sigma, graph, isReady, whenReady() }`，树内注入，返回原生实例 |
 | `useSigmaById(id)` | 按 id 从全局注册表取，树外或跨路由访问 |
-| `useSigmaGraph()` | 响应式桥接，`{ graph, version, order, size, watch() }`。见难点 1 |
+| `useSigmaGraph()` | 响应式桥接，`{ graph, version, order, size, onGraphUpdate() }`。回调不叫 `watch` 是为了避免与 Vue 自动导入的 `watch` 撞名。见难点 1 |
 | `useSigmaEvents(handlers)` | 声明式绑定 sigma 事件，接受任意事件名，卸载自动解绑 |
 | `useSigmaSettings(source)` | 响应式 `setSettings` |
 | `useSigmaReducer(node?, edge?, order?)` | reducer 链注册。见难点 2 |
@@ -286,7 +297,7 @@ Nuxt 官方明确：已发布模块的 `src/runtime/` 内不能依赖自动导�
 
 | Composable | 返回 / 职责 |
 | --- | --- |
-| `useSigmaCamera()` | `{ zoomIn, zoomOut, reset, goto, gotoNode, fitTo(nodes) }`，基于 `camera.animate` 与 `@sigma/utils` 的 `fitViewportToNodes` |
+| `useSigmaCamera()` | `{ zoomIn, zoomOut, reset, goto, gotoNode, fitTo, getState, toViewport }`，基于原生 `camera` 的 `animatedZoom` / `animatedUnzoom` / `animatedReset` / `animate`。`fitTo` 依赖可选 peer `@sigma/utils`，用到时才动态导入，未安装则给出可操作的报错 |
 | `useSigmaSelection()` | hover / selected / focused 状态机，内建高亮与淡出 reducer。核心交互原语 |
 | `useSigmaNeighborhood()` | N 度邻域（`graphology-traversal` BFS），并提供 `expand(key)` 拉取远端邻域后增量合并。「点击展开」的落点 |
 | `useSigmaSearch(options)` | 按 label 与属性模糊检索节点与边 |
@@ -455,9 +466,12 @@ playground 不在 `files: ["dist"]` 内，不进用户依赖树，「控件零�
 ### 测试
 
 - 单测（vitest + happy-dom）覆盖工具函数与 composables：`applyGraphDiff` 的坐标保留、`chainReducers` 的合成顺序、`useSigmaGraph` 的 version 递增、`useSigmaNeighborhood` 的 BFS 深度
-- 出口兼容专项断言：`settings` 未知键透传、用户自带 reducer 位于链首
-- 组件测试用 `@vue/test-utils`，WebGL 相关 mock 掉 Sigma 构造
+- 出口兼容专项断言：`settings` 未知键透传、传入的 graph 是原对象而非代理、用户自带 reducer 位于链首
+- 组件测试用 `@vue/test-utils`，mock 掉 Sigma 构造；`test/setup/` 里补 WebGL 全局桩，否则 `sigma/settings` 无法加载
+- 组件的 `onMounted` 是异步的（动态导入 sigma），断言前必须轮询到实例真正创建，只 `flushPromises()` 会读到别的用例迟到解析出的调用
 - 需要真实 Nuxt 环境的场景用 `@nuxt/test-utils` 加 `test/fixtures/*`
+
+根 `tsconfig.json` 必须 `extends: "./.nuxt/tsconfig.json"`。若改成指向 `.nuxt/tsconfig.*.json` 的 project references 写法，`vue-tsc --noEmit` 会**完全跳过 `src/`**，typecheck 变成空转却仍然退出码 0。
 
 ## 十三、里程碑
 

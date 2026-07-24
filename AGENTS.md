@@ -35,11 +35,19 @@ M4 起 `playground/` 拆为 `playgrounds/basic` 与 `playgrounds/ui`，见「演
 
 **不准开 `shamefully-hoist=true`。** 它把所有依赖提升到根 `node_modules`，会让漏写的 import 也能解析成功，正好掩盖上面这类 bug。某些依赖（如 `@movk/nuxt` 要求的 `tailwindcss`）的安装文档会建议开它，一律改用「在需要的 workspace 里显式安装」绕开。
 
+### sigma 只能动态导入
+
+sigma 在模块顶层就读 `WebGL2RenderingContext`，服务端与 happy-dom 都没有这个全局，**静态 `import 'sigma'` 或 `import 'sigma/settings'` 会让 SSR 直接 ReferenceError**。
+
+runtime 代码里 sigma 一律 `await import('sigma')`，放在 `onMounted` 之后；类型侧用 `import type`，编译期擦除不影响。graphology 无此问题，可正常静态导入。
+
+连带的两条：异步 `onMounted` 要能在实例化完成前被卸载中断；测试需要 `test/setup/webgl-globals.ts` 补桩才能加载真实的 `sigma/settings`。
+
 ### 出口兼容不可破坏
 
 封装是加法，不是围墙。
 
-- 不代理实例：`useSigma()` 返回原生 `Sigma` 与 `Graph`，不包 Proxy、不包装
+- 不代理实例：`useSigma()` 返回原生 `Sigma` 与 `Graph`，不包 Proxy、不包装。注意 Vue 会把 props 包成响应式代理，接收外部实例时必须 `toRaw()` 剥回原对象再往下传
 - 不做 settings 白名单：`settings` 整体透传，不逐字段枚举、不过滤未知键
 - 不 re-export 上游：不转发 sigma / graphology 的任何值或类型，用户从原包直接 import
 - `sigma` 与 `graphology` 保持 peer 依赖，不进 dependencies
@@ -96,6 +104,11 @@ pnpm lint
 ```
 
 改动 `src/` 后若 playground 表现异常，先重跑 `pnpm dev:prepare`。
+
+两个已经踩过的坑：
+
+- 根 `tsconfig.json` 必须 `extends: "./.nuxt/tsconfig.json"`。改成 project references 写法会让 `vue-tsc --noEmit` 完全跳过 `src/`，typecheck 空转却仍退出码 0
+- 组件 emits 的类型要逐条写出。用 `{ [K in SigmaEventType]: ... }` 这类映射类型派生，`vue-tsc` 能过但 `pnpm build` 会失败——`@vue/compiler-sfc` 要在编译期静态提取事件名，解析不了跨包映射类型
 
 ## 演示应用
 
