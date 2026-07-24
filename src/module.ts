@@ -1,4 +1,4 @@
-import { addImportsDir, createResolver, defineNuxtModule } from '@nuxt/kit'
+import { addComponentsDir, addImportsDir, addPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
 import { defu } from 'defu'
 import type { Settings } from 'sigma/settings'
 import { name, version } from '../package.json'
@@ -50,6 +50,13 @@ export default defineNuxtModule<ModuleOptions>({
       settings: options.settings
     })
 
+    addComponentsDir({
+      path: resolve('./runtime/components'),
+      prefix: options.prefix,
+      pathPrefix: false
+    })
+    addImportsDir(resolve('./runtime/composables'))
     addImportsDir(resolve('./runtime/utils'))
+    addPlugin(resolve('./runtime/plugins/defaults'))
   }
 })
