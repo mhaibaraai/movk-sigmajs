@@ -58,7 +58,7 @@ runtime 代码里 sigma 一律 `await import('sigma')`，放在 `onMounted` 之�
 
 - 不代理实例：`useSigma()` 返回原生 `Sigma` 与 `Graph`，不包 Proxy、不包装。注意 Vue 会把 props 包成响应式代理，接收外部实例时必须 `toRaw()` 剥回原对象再往下传
 - 不做 settings 白名单：`settings` 整体透传，不逐字段枚举、不过滤未知键
-- 不 re-export 上游：不转发 sigma / graphology 的任何值或类型，用户从原包直接 import
+- 不 re-export 上游：不转发 sigma / graphology 的任何值或类型，用户从原包直接 import。**本库自己的**类型不在此列——它们全部从 `@movk/sigma` 根出口，汇总在 `src/runtime/types/public.ts`，新增公开类型时同步加一行 re-export，`test/type-exports.test-d.ts` 会在 typecheck 时兜底
 - `sigma` 与 `graphology` 保持 peer 依赖，不进 dependencies
 - 用户自带的 `settings.nodeReducer` / `edgeReducer` 作为 reducer 链的基座执行，不得被吞掉
 
