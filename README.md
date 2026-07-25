@@ -79,7 +79,8 @@ const { selected } = useSigmaSelection()
 ```bash
 pnpm install
 pnpm dev:prepare     # 首次或依赖变更后必须先跑
-pnpm dev             # 启动 playground
+pnpm dev             # 启动 playgrounds/basic：全部 API 的示例、规模三档、纯原生逃生舱
+pnpm dev:ui          # 启动 playgrounds/ui：接口驱动的完整场景、插槽接管控件外观
 pnpm test
 pnpm typecheck
 pnpm lint

@@ -15,12 +15,14 @@ src/
     ├── utils/
     ├── types/
     └── index.css         # 可选样式表
-playground/               # Nuxt 演示应用，含「纯原生逃生舱」示例
+playgrounds/
+├── basic/                # 零 UI 依赖，全量示例与纯原生逃生舱
+└── ui/                   # @movk/nuxt，接口驱动的完整场景与插槽接管
 test/                     # vitest + happy-dom + @vue/test-utils
 references/               # 架构方案与背景资料
 ```
 
-M4 起 `playground/` 拆为 `playgrounds/basic` 与 `playgrounds/ui`，见「演示应用」一节。
+两个 playground 的分工见「演示应用」一节，示例的组织约定见「示例与文档铺垫」一节。
 
 ## 红线
 
@@ -56,7 +58,7 @@ runtime 代码里 sigma 一律 `await import('sigma')`，放在 `onMounted` 之�
 
 - 不代理实例：`useSigma()` 返回原生 `Sigma` 与 `Graph`，不包 Proxy、不包装。注意 Vue 会把 props 包成响应式代理，接收外部实例时必须 `toRaw()` 剥回原对象再往下传
 - 不做 settings 白名单：`settings` 整体透传，不逐字段枚举、不过滤未知键
-- 不 re-export 上游：不转发 sigma / graphology 的任何值或类型，用户从原包直接 import
+- 不 re-export 上游：不转发 sigma / graphology 的任何值或类型，用户从原包直接 import。**本库自己的**类型不在此列——它们全部从 `@movk/sigma` 根出口，汇总在 `src/runtime/types/public.ts`，新增公开类型时同步加一行 re-export，`test/type-exports.test-d.ts` 会在 typecheck 时兜底
 - `sigma` 与 `graphology` 保持 peer 依赖，不进 dependencies
 - 用户自带的 `settings.nodeReducer` / `edgeReducer` 作为 reducer 链的基座执行，不得被吞掉
 
@@ -105,8 +107,9 @@ Nuxt 模块最佳实践要求所有导出加模块名前缀防冲突：
 
 ```bash
 pnpm install
-pnpm dev:prepare     # 首次或依赖变更后必须先跑
-pnpm dev             # 启动 playground
+pnpm dev:prepare     # 首次或依赖变更后必须先跑，两个 playground 一起 prepare
+pnpm dev             # 启动 playgrounds/basic
+pnpm dev:ui          # 启动 playgrounds/ui
 pnpm test            # vitest
 pnpm typecheck
 pnpm lint
@@ -114,13 +117,15 @@ pnpm lint
 
 改动 `src/` 后若 playground 表现异常，先重跑 `pnpm dev:prepare`。
 
-四个已经踩过的坑：
+已经踩过的坑：
 
 - 覆盖层定位有两套坐标：节点用 `framedGraphToViewport()`（`getNodeDisplayData()` 返回的是归一化后的 framed 坐标），原始图坐标才用 `graphToViewport()`，混用会整体错位
 - 覆盖层用 `v-show` 保留 DOM，隐藏时插槽内容必须另用 `v-if` 跳过，否则使用方拿到空作用域且隐藏内容仍可点击
 - `SigmaGraph` 的默认插槽排在占满高度的画布之后，走的是正常文档流。插槽内的任何面板都必须自行 `position: absolute`，否则会被挤到容器之外并被 `overflow` 裁掉
 - `index.css` 里同一属性不要一半写在裸类名规则、一半写在 `:where()` 里：前者优先级 0,1,0，后者是 0，`:where()` 的覆盖永远赢不了。需要被后续规则覆盖的属性，基础规则也要包 `:where()`
 - 改完 `src/runtime/index.css` 必须重跑 `pnpm dev:prepare`，playground 加载的是 `dist/` 里的副本，不重新 stub 就还是旧样式
+- **一页里能同时存活的 Sigma 实例有硬上限**：每个实例占 3 个 WebGL 上下文（`sigma-edges` / `sigma-nodes` / `sigma-hoverNodes` 三张画布走 WebGL，另外四张是 2D），浏览器上限多为 16 个。超出后最早的上下文被强制丢弃、画布直接变空白，只在控制台留一行 `Too many active WebGL contexts` 的警告。示例列表页一律经 `ExampleCard` 视口内懒挂载，同屏不超过四个实例
+- 控件插槽的作用域要连行为一起给。只暴露数据（如图例只给 `groups`）会让「接管外观」等于「丢掉功能」，与设计前提相悖
 
 - 根 `tsconfig.json` 必须 `extends: "./.nuxt/tsconfig.json"`。改成 project references 写法会让 `vue-tsc --noEmit` 完全跳过 `src/`，typecheck 空转却仍退出码 0
 - 组件 emits 的类型要逐条写出。用 `{ [K in SigmaEventType]: ... }` 这类映射类型派生，`vue-tsc` 能过但 `pnpm build` 会失败——`@vue/compiler-sfc` 要在编译期静态提取事件名，解析不了跨包映射类型
@@ -129,14 +134,10 @@ pnpm lint
 
 文档站不排期，演示职责全部由 playground 承担。它同时是「模块能否装进一个干净 Nuxt 项目」的验证信号，因此对 UI 依赖有明确分区。
 
-**M4 之前：不引入任何 UI 库。** M1 到 M3 展示的是渲染与交互原语，一个按钮加一段 `<pre>` 就够，引入 UI 库只有负担没有信息量。
-
-**M4 起拆成两个：**
-
 | 目录 | UI 依赖 | 承载内容 |
 | --- | --- | --- |
-| `playgrounds/basic` | 零，永远不引入 | 核心渲染、内置控件的原样外观、**纯原生逃生舱示例** |
-| `playgrounds/ui` | `@movk/nuxt` | 插槽接管控件外观、完整知识图谱场景 |
+| `playgrounds/basic` | 零，永远不引入 | 全部 34 个公开 API 的示例、内置控件的原样外观、规模三档、**纯原生逃生舱** |
+| `playgrounds/ui` | `@movk/nuxt` | 插槽接管控件外观、服务端接口驱动的完整知识图谱场景 |
 
 必须分区的三条理由：
 
@@ -145,6 +146,29 @@ pnpm lint
 - 混入大型 UI 模块后，样式冲突、自动导入冲突、构建失败都难以归因，验证信号被污染
 
 选 `@movk/nuxt` 而不是直接用 `@nuxt/ui`：前者本身就建在后者之上，且演示两个 movk 库如何配合更贴近实际项目。引入时它要求的 `tailwindcss` 装进 `playgrounds/ui` 这个 workspace，**不准用 `shamefully-hoist=true` 绕过**，理由见红线第一条。
+
+两个 playground 都显式声明自己用到的可选 peer（`@sigma/*`、`graphology-layout*`、`graphology-metrics` 等）。不靠仓库根的 devDependencies 蹭解析——那样得到的「装得进干净项目」信号是假的。
+
+`playgrounds/ui` 还需要一个会话密钥：`@movk/nuxt` 依赖 `nuxt-auth-utils`，它在每个请求上取会话，密钥为空会让整页 500。playground 不做鉴权，`nuxt.config.ts` 里给了开发占位值，真实项目用 `NUXT_SESSION_PASSWORD` 覆盖。
+
+## 示例与文档铺垫
+
+文档站本轮不排期，但示例已经按文档站的约定写好，将来建站整目录搬走即可，不必重写。
+
+**目录与命名**：示例放在 `playgrounds/*/app/components/content/examples/`，PascalCase 加 `Example` 后缀。这正是 Movk Nuxt Docs 的 `component-example` 模块读取源码的路径，MDC 侧写 `:component-example{name="GraphBasicExample"}`。`nuxt.config.ts` 里必须给这个目录配 `pathPrefix: false`，否则组件名会被拼成 `ContentExamplesGraphBasicExample`，与 MDC 里的名字对不上。
+
+**自包含约束**（决定了能否零改写搬迁）：
+
+- 自带 `SigmaGraph`、自带数据、自带高度，不依赖页面布局或任何 playground 专用组件
+- 依赖白名单：`@movk/sigma` 的自动导入、`graphology`、`sigma`、Vue API。此外只允许 `~/utils/corpus`（示例数据生成器）与 `~/assets/css/examples.css`（共用的极简样式），这两个文件随 examples 目录一起搬迁
+- 组件示例的数据内联，因为数据形状本身就是演示内容；composable 与规模示例用 `demoGraph()` / `createScaleGraph()`，那些示例讲的是行为，数据只是背景板
+- 示例内的注释会出现在文档的源码展示里，只写验证点，一两行
+
+**成对的示例**：`useSigma()` 是 inject，必须在 `SigmaGraph` 子树内调用，所以 composable 示例一律是 `XxxExample.vue`（渲染图的外壳）加 `XxxPanel.vue`（消费上下文的面板）两个文件。这也正是真实应用的结构。
+
+**建站时要做的**：新建 `docs/` workspace → `extends: ['@movk/nuxt-docs']` → 把 basic 的 examples 目录搬过去 → `content/docs/` 下每个 API 一页，正文写 `:component-example{name="XxxExample"}` 配 `:component-props{slug="SigmaGraph"}`。
+
+一条连带结论：docs 的 props / emits / slots 表由 `nuxt-component-meta` 从**源码 JSDoc** 自动生成，`componentMeta.dirs` 指到 `@movk/sigma` 的组件目录即可。也就是说 `src/runtime/` 里的 JSDoc 就是未来的文档正文——本文件「代码风格」一节关于 `@defaultValue` / `@see` 的要求，因此不只是风格偏好。
 
 ## 测试要求
 

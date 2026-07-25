@@ -1,5 +1,5 @@
 packages:
-  - playground
+  - playgrounds/*
   - test/fixtures/*
 
 ignoreWorkspaceRootCheck: true
@@ -9,5 +9,7 @@ minimumReleaseAge: 0
 allowBuilds:
   '@parcel/watcher': false
   esbuild: false
+  # @nuxt/image 的可选依赖，playgrounds/ui 不用 <NuxtImg>，无需编译原生二进制
+  sharp: false
   unrs-resolver: false
   vue-demi: false

@@ -87,12 +87,18 @@ describe('SigmaGraph 出口兼容', () => {
     expect(settings.renderLabels).toBe(false)
   })
 
-  it('用户自带的 nodeReducer 原样传给 sigma，不被吞掉', async () => {
-    const nodeReducer = vi.fn((_node: string, data: Record<string, unknown>) => data)
+  it('用户自带的 nodeReducer 位于链首被调用，返回的补丁合并进显示数据', async () => {
+    const nodeReducer = vi.fn(() => ({ size: 20 }))
 
     await mountGraph({ settings: { nodeReducer } })
 
-    expect(state.calls[0]!.settings.nodeReducer).toBe(nodeReducer)
+    // 传给 sigma 的是链，不是原函数：链要替只返回补丁的归约补全 x / y，
+    // 否则 sigma 拿不到完整显示数据会直接抛错
+    const chained = state.calls[0]!.settings.nodeReducer as (key: string, data: Record<string, unknown>) => Record<string, unknown>
+    const result = chained('n1', { x: 1, y: 2, label: 'N1' })
+
+    expect(nodeReducer).toHaveBeenCalledWith('n1', expect.objectContaining({ label: 'N1' }))
+    expect(result).toMatchObject({ x: 1, y: 2, label: 'N1', size: 20 })
   })
 
   it('内置默认 allowInvalidContainer 可被用户覆盖', async () => {

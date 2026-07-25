@@ -21,8 +21,12 @@ export function chainReducers<D>(reducers: Array<SigmaReducer<D> | null | undefi
     return null
   }
 
+  // 只有一条时也要合并，不能直接把它交给 sigma：
+  // sigma 拿归约的返回值当完整显示数据用，缺 x / y 会直接抛错。链的契约是「返回补丁」，
+  // 单条与多条必须一致，否则同一个归约函数在链上多一条同伴就换一种语义
   if (active.length === 1) {
-    return active[0]!
+    const only = active[0]!
+    return (key, data) => ({ ...data, ...only(key, data) } as Partial<D>)
   }
 
   // 合成后的函数每帧对每个节点与边各跑一次，是热路径。

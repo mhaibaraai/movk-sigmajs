@@ -1,0 +1,100 @@
+/* 示例共用的极简样式，随 examples 目录一起搬迁到 docs。
+   示例本身只写 class，不重复 46 份几乎相同的 scoped CSS。
+   SigmaGraph 的默认插槽走正常文档流，面板必须自行绝对定位，.demo-panel 替示例做了这件事 */
+
+.demo-panel {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: calc(100% - 16px);
+  padding: 8px 10px;
+  border: 1px solid var(--sigma-color-border);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--sigma-color-bg) 92%, transparent);
+  color: var(--sigma-color-fg);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.demo-panel[data-at="top-left"] {
+  inset: 8px auto auto 8px;
+}
+
+.demo-panel[data-at="top-right"] {
+  inset: 8px 8px auto auto;
+}
+
+.demo-panel[data-at="bottom-left"] {
+  inset: auto auto 8px 8px;
+}
+
+.demo-panel[data-at="bottom-right"] {
+  inset: auto 8px 8px auto;
+}
+
+.demo-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.demo-label {
+  min-width: 48px;
+  color: var(--sigma-color-muted);
+}
+
+.demo-panel button,
+.demo-panel select,
+.demo-panel input {
+  padding: 3px 8px;
+  border: 1px solid var(--sigma-color-border);
+  border-radius: 4px;
+  background: var(--sigma-color-bg);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+}
+
+.demo-panel button:not(:disabled) {
+  cursor: pointer;
+}
+
+.demo-panel button:hover:not(:disabled) {
+  background: var(--sigma-color-hover);
+}
+
+.demo-panel button:disabled {
+  opacity: 0.5;
+}
+
+.demo-panel button[aria-pressed="true"] {
+  border-color: var(--sigma-color-accent);
+  color: var(--sigma-color-accent);
+}
+
+.demo-tag {
+  color: var(--sigma-color-muted);
+  font-size: 12px;
+}
+
+.demo-log {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--sigma-color-muted);
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+.demo-hud {
+  pointer-events: none;
+}
+
+.demo-hud button,
+.demo-hud input,
+.demo-hud select {
+  pointer-events: auto;
+}

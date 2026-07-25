@@ -3,7 +3,7 @@ import { defu } from 'defu'
 import type { Settings } from 'sigma/settings'
 import { name, version } from '../package.json'
 
-export type * from './runtime/types'
+export type * from './runtime/types/public'
 
 export interface ModuleOptions {
   /**

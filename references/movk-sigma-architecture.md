@@ -17,7 +17,7 @@
 - **不做 Vite 插件**：它的全部价值是 `unplugin-vue-components` 的 resolver，属于 YAGNI
 - 控件 UI **零第三方依赖**：只提供行为与无障碍结构，自带可选极简 CSS，外观经插槽与 CSS 变量全接管
 - 领域能力（邻域展开、检索、详情面板）抽象成通用原语进库
-- 文档站、MCP Server、llms.txt、Agent Skill 不排期，由 playground 承担演示职责，其 UI 依赖策略见第十二节
+- 文档站、MCP Server、llms.txt、Agent Skill 不排期，由 playground 承担演示职责，其 UI 依赖策略见第十二节。示例已按文档站的目录与自包含约定写好，将来建站整目录搬走即可
 - 类型一律用官方类型包，通用方法一律优先 `@movk/core`
 - **封装不得成为天花板**：原生 sigma / graphology 能力必须始终可直达，见第三节
 
@@ -176,7 +176,7 @@ emits 的类型必须**逐条写出**，不能用 `{ [K in SigmaEventType]: Para
 
 ### 兼容性如何验证
 
-- `playground/` 里放一个「纯原生逃生舱」示例：完全不使用库的任何 composable 与控件，只用 `SigmaGraph` 拿到实例后全走原生 API，证明封装可被绕过
+- `playgrounds/basic` 里放一个「纯原生逃生舱」示例：完全不使用库的任何 composable 与控件，只用 `SigmaGraph` 拿到实例后全走原生 API，证明封装可被绕过
 - 单测断言 `settings` 透传未被过滤：传入一个库未知的键，从 `sigma.getSettings()` 读回来仍在
 - 单测断言用户自带的 `settings.nodeReducer` 在链中被调用且位于最前
 
@@ -269,7 +269,7 @@ Nuxt 官方明确：已发布模块的 `src/runtime/` 内不能依赖自动导�
 
 | 组件 | 职责 | 关键 props / emits / slots |
 | --- | --- | --- |
-| `SigmaGraph` | 根组件。客户端创建 Sigma 实例与 graphology 图，下发 `SigmaContext`，注册到全局注册表 | props: `data`（`SerializedGraph`）、`graph`（`v-model`，外部 `Graph` 实例）、`settings`（`Partial<Settings>`）、`programs`、`id`、`autoFit`、`diff`；emits: sigma 事件全集与 `ready`；slot: default，作用域暴露 `{ sigma, graph }` |
+| `SigmaGraph` | 根组件。客户端创建 Sigma 实例与 graphology 图，下发 `SigmaContext`，注册到全局注册表 | props: `data`（`SerializedGraph`）、`graph`（`v-model`，外部 `Graph` 实例）、`settings`（`Partial<Settings>`）、`programs`、`id`、`diffOptions`；emits: sigma 事件全集与 `ready`；slot: default，作用域暴露 `{ sigma, graph }` |
 | `SigmaOverlay` | 通用锚定层，锚到 `node`（key）或 `position`（`Coordinates`），随相机同步 | props: `node`、`position`、`offset` |
 | `SigmaTooltip` | 悬浮 / 点击触发，插槽以 `{ type, id, attributes }` 暴露命中项。键名用 `id` 而非 `key`，后者是 Vue 的保留属性 | props: `trigger`、`target`、`offset` |
 | `SigmaPopover` | 锚定到指定节点的常驻浮层，插槽自定义内容。「点击节点展示详情」的落点 | props: `node`、`open`（`v-model`）、`placement` |
@@ -293,7 +293,7 @@ Nuxt 官方明确：已发布模块的 `src/runtime/` 内不能依赖自动导�
 | `SigmaZoomControl` | 放大 / 缩小 / 复位，图标经具名插槽接管 |
 | `SigmaFullscreenControl` | 全屏切换。对 `closest('.sigma-root')` 取全屏目标，覆盖层与其他控件一起进入，且不依赖根组件的 DOM 结构 |
 | `SigmaSearchControl` | 节点检索输入与结果列表，选中后相机聚焦。输入即时回显、检索按防抖触发，命中片段用 `@movk/core` 的 `splitHighlight` 高亮 |
-| `SigmaLegend` | 按分类字段聚合图例，点击切换显隐（落到 reducer 的 `hidden`）。`field` 默认取 `type`，但 sigma 里 `type` 是渲染程序名，领域分类应显式传业务字段 |
+| `SigmaLegend` | 按分类字段聚合图例，点击切换显隐（落到 reducer 的 `hidden`）。`field` 默认取 `type`，但 sigma 里 `type` 是渲染程序名，领域分类应显式传业务字段。默认插槽的作用域给 `groups` / `toggle` / `reset`——只给数据的话，接管外观就等于丢掉显隐切换 |
 | `SigmaMiniMap` | 缩略图与视口框。全程使用 framed 坐标——`getNodeDisplayData` 与相机的 `x` / `y` 同在这个坐标系，画点、画视口框、点击换算三者不必来回转换 |
 
 导出不做成组件——`useSigmaExport()` 加一个调用方自己的按钮即可，包一层没有增量价值。
@@ -412,7 +412,7 @@ Nuxt 官方明确：已发布模块的 `src/runtime/` 内不能依赖自动导�
 | 增量更新 | `applyGraphDiff` 保留坐标；`useSigmaNeighborhood().expand()` 按需合并 |
 | 1000+ 规模 | 概览加展开、worker 布局、标签密度控制、服务端预布局 |
 
-领域模型不进库，只在 `playground/` 里作为示例出现。
+领域模型不进库，只在 `playgrounds/ui` 里作为示例出现：那里的 `server/` 实现了上表四条接口，用 1500 个节点的制度图谱把这一整条链路跑通了一遍。
 
 ## 十二、工程形态
 
@@ -428,7 +428,9 @@ movk-sigmajs/
 │       ├── utils/
 │       ├── types/
 │       └── index.css         # 可选样式表
-├── playground/               # Nuxt 演示应用，M4 起拆为 playgrounds/basic 与 playgrounds/ui
+├── playgrounds/
+│   ├── basic/                # 零 UI 依赖，全量示例与纯原生逃生舱
+│   └── ui/                   # @movk/nuxt，接口驱动的完整场景与插槽接管
 ├── test/                     # vitest + happy-dom + @vue/test-utils
 ├── references/               # 本架构方案与背景资料
 ├── .mcp.json
@@ -457,14 +459,10 @@ movk-sigmajs/
 
 playground 不在 `files: ["dist"]` 内，不进用户依赖树，「控件零依赖」约束的是 `src/runtime/` 而非 playground。所以这是取舍问题，不是红线问题。
 
-**M4 之前不引入任何 UI 库。** M1 到 M3 展示的是渲染与交互原语，一个按钮加一段 `<pre>` 就够，引入 UI 库只有负担没有信息量。
-
-**M4 起拆成两个：**
-
 | 目录 | UI 依赖 | 承载内容 |
 | --- | --- | --- |
-| `playgrounds/basic` | 零，永远不引入 | 核心渲染、内置控件的原样外观、纯原生逃生舱示例 |
-| `playgrounds/ui` | `@movk/nuxt` | 插槽接管控件外观、完整知识图谱场景 |
+| `playgrounds/basic` | 零，永远不引入 | 全部 34 个公开 API 的示例、内置控件的原样外观、规模三档、纯原生逃生舱 |
+| `playgrounds/ui` | `@movk/nuxt` | 插槽接管控件外观、服务端接口驱动的完整知识图谱场景 |
 
 必须分区的三条理由：
 
@@ -474,7 +472,25 @@ playground 不在 `files: ["dist"]` 内，不进用户依赖树，「控件零�
 
 选 `@movk/nuxt` 而非直接用 `@nuxt/ui`：前者本身就建在后者之上，直接用 `@nuxt/ui` 少了一层；且演示两个 movk 库如何配合更贴近实际项目。
 
-一个硬约束：`@movk/nuxt` 的安装文档建议 pnpm 下设 `shamefully-hoist=true`。**本仓库不接受**——它把所有依赖提升到根 `node_modules`，会让 `src/runtime/` 里漏写的 import 也能解析成功，正好掩盖难点 7 要防的那类 bug。改为把 `tailwindcss` 显式装进 `playgrounds/ui` 这个 workspace。
+一个硬约束：`@movk/nuxt` 的安装文档建议 pnpm 下设 `shamefully-hoist=true`。**本仓库不接受**——它把所有依赖提升到根 `node_modules`，会让 `src/runtime/` 里漏写的 import 也能解析成功，正好掩盖难点 7 要防的那类 bug。改为把 `tailwindcss` 显式装进 `playgrounds/ui` 这个 workspace，官方文档给的正是这两个选项，取后者即可。
+
+同理，两个 playground 都显式声明自己用到的可选 peer，而不是蹭仓库根 devDependencies 的解析——那样得到的「装得进干净项目」信号是假的。接入 `@movk/nuxt` 还暴露出一条必须记下的：它依赖的 `nuxt-auth-utils` 在每个请求上取会话，`NUXT_SESSION_PASSWORD` 为空会让整页 500，playground 里给了开发占位值。
+
+### 示例的组织方式
+
+文档站不排期，但示例按文档站的约定写，避免将来重写一遍。约定与搬迁路径记在 AGENTS.md 的「示例与文档铺垫」一节，要点三条：
+
+- 示例放 `app/components/content/examples/`，PascalCase 加 `Example` 后缀，与 Movk Nuxt Docs 的 `component-example` 模块对齐
+- 自包含：自带图、自带数据、自带高度，依赖白名单之外只允许随目录一起搬迁的数据生成器与共用样式表
+- `useSigma()` 是 inject，composable 示例一律拆成「渲染图的外壳 + 消费上下文的面板」两个文件，这也是真实应用的结构
+
+连带结论：文档的 props / emits / slots 表由 `nuxt-component-meta` 从源码 JSDoc 生成，所以 `src/runtime/` 的 JSDoc 就是未来的文档正文。
+
+### 一页里能有多少个实例
+
+每个 Sigma 实例占 **3 个 WebGL 上下文**（`sigma-edges` / `sigma-nodes` / `sigma-hoverNodes` 走 WebGL，另外四张画布是 2D），浏览器上限多为 16 个。示例列表页很容易撞上：`playgrounds/basic` 的控件页一次列七个示例，同屏六个实例就是 18 个上下文，超出后最早的上下文被强制丢弃、画布变空白，只在控制台留一行 `Too many active WebGL contexts`。
+
+因此示例一律经视口内懒挂载，同屏不超过四个实例。这同时把「异步 `onMounted` 期间卸载要能中断」这条难点压在了真实路径上。
 
 ### 构建与发布
 
@@ -504,10 +520,11 @@ playground 不在 `files: ["dist"]` 内，不进用户依赖树，「控件零�
 
 | 阶段 | 内容 |
 | --- | --- |
-| M0 脚手架 | `pnpm create nuxt -t module` 初始化；补齐 `.mcp.json` / `AGENTS.md` / `README.md`；`playground/` 与 `test/` 骨架跑通 |
-| M1 地基 | `useSigmaGraph` 响应式桥接、`SigmaGraph` 根组件（含 SSR、容器尺寸、出口兼容三条通道）、`useSigma` / `useSigmaById` / `useSigmaEvents` / `useSigmaSettings` / `useSigmaCamera`、`applyGraphDiff`；playground 的「纯原生逃生舱」示例 |
+| M0 脚手架 | `pnpm create nuxt -t module` 初始化；补齐 `.mcp.json` / `AGENTS.md` / `README.md`；playground 与 `test/` 骨架跑通 |
+| M1 地基 | `useSigmaGraph` 响应式桥接、`SigmaGraph` 根组件（含 SSR、容器尺寸、出口兼容三条通道）、`useSigma` / `useSigmaById` / `useSigmaEvents` / `useSigmaSettings` / `useSigmaCamera`、`applyGraphDiff`；「纯原生逃生舱」示例 |
 | M2 交互原语 | `useSigmaReducer` 与 `chainReducers`、`useSigmaSelection`、`useSigmaNeighborhood`、`SigmaOverlay` / `Tooltip` / `Popover` / `ContextMenu` |
 | M3 布局与分析 | `useSigmaLayout`（worker 生命周期）、`useSigmaMetrics`、`useSigmaSearch`、`useSigmaFilter`、`programs` prop 与官方渲染程序接入 |
-| M4 控件与样式 | `SigmaControls` 全家、`runtime/index.css` 与 CSS 变量体系、`useSigmaExport`；playground 拆为 `playgrounds/basic` 与 `playgrounds/ui`，后者接入 `@movk/nuxt` 演示插槽接管外观 |
+| M4 控件与样式 | `SigmaControls` 全家、`runtime/index.css` 与 CSS 变量体系、`useSigmaExport` |
+| M5 演示 | playground 拆为 `playgrounds/basic` 与 `playgrounds/ui`；basic 建全量示例体系并按文档站约定组织；ui 接入 `@movk/nuxt`，用真实服务端接口跑通「概览 + 按需扩展」，并演示插槽接管外观 |
 
-文档站、MCP Server、llms.txt、Agent Skill 列为后续候选，本轮不排期。
+文档站、MCP Server、llms.txt、Agent Skill 列为后续候选，本轮不排期——但 M5 已把示例按文档站的目录与自包含约定写好，建站时不必重写。
