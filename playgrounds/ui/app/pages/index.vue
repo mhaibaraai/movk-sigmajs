@@ -27,7 +27,7 @@ const { data, status } = await useFetch('/api/graph/overview', {
         hideEdgesOnMove: true,
         labelRenderedSizeThreshold: 9,
         labelDensity: 0.3,
-        defaultEdgeColor: 'rgba(120,120,120,0.28)',
+        defaultEdgeColor: '#e2e8f0',
       }"
     >
       <SigmaControls position="top-right">
@@ -54,7 +54,7 @@ const { data, status } = await useFetch('/api/graph/overview', {
         <div class="flex items-center gap-2 text-xs">
           <span class="text-muted">概览规模</span>
           <UButton
-            v-for="value in [150, 300, 600]"
+            v-for="value in [150, 300, 600, 5000]"
             :key="value"
             :variant="limit === value ? 'soft' : 'ghost'"
             color="neutral"
