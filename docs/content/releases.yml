@@ -1,5 +1,8 @@
 title: 版本发布
 description: 查看 @movk/sigma 的版本更新、功能增强与问题修复。
+seo:
+  title: Releases
+  description: Release notes for @movk/sigma — new features, improvements and bug fixes.
 navigation: false
 releases: https://ungh.cc/repos/mhaibaraai/movk-sigmajs/releases
 hero:

@@ -1,7 +1,7 @@
 ---
 seo:
   title: '@movk/sigma'
-  description: 面向 Vue 3 / Nuxt 4 的 sigma v3 声明式封装，专注大规模知识图谱可视化。
+  description: A declarative sigma v3 wrapper for Vue 3 and Nuxt 4 — components and composables for large-scale knowledge graph visualization.
 ---
 
 ::u-page-hero{class="dark:bg-gradient-to-b from-neutral-900 to-neutral-950"}
