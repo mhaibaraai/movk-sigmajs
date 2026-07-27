@@ -14,7 +14,7 @@
     "graphology": "^0.26.0",
     "nuxt": "^4.5.0",
     "sigma": "^3.0.3",
-    "tailwindcss": "^4.3.2",
+    "tailwindcss": "^4.3.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {
