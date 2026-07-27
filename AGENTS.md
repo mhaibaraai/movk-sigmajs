@@ -182,17 +182,25 @@ pnpm lint
 
 **成对的示例**：`useSigma()` 是 inject，必须在 `SigmaGraph` 子树内调用，所以 composable 示例一律是 `XxxExample.vue`（渲染图的外壳）加 `XxxPanel.vue`（消费上下文的面板）两个文件。这也正是真实应用的结构。
 
-### 写文档页的三条硬约束
+### 写文档页的硬约束
 
 - **每个 `:component-example` 都要带 `class="example-stage"`**。`.sigma-root` 是 `height: 100%`，文档站的示例容器不给高度就塌成 0。用普通 class 而非 `h-[420px]` 这类原子类，是因为 Tailwind 不扫 `content/` 下的 Markdown，生成不出规则
 - **每个 `:component-example` 都要带 `client-only="true"`**，理由同红线第二条
 - **一页最多 4 个渲染 sigma 的示例**。`ComponentExample` 没有懒挂载，每个实例吃 3 个 WebGL 上下文，浏览器上限多为 16。超了最早的上下文被丢弃、画布变空白，只在控制台留一行 `Too many active WebGL contexts`。示例更多的 API 要拆页
+- **`seo.title` 与 `seo.description` 必须写英文**。OG 图渲染中文会乱码。frontmatter 的 `title` / `description` 照常用中文，那两个进侧边栏与页面正文，不进 OG 图
+- **非必要不用表格**。API 一律 `::field-group` 加 `::field{name type}`，默认值写进 field 正文（`默认 \`true\` —— …`），嵌套选项用 `::collapsible` 包一层；MDC 嵌套按冒号递增（`::` → `:::` → `::::`）。签名行单独一句，带 `{lang="ts-type"}`。页面里唯一该出现的表格是 `:component-props` / `:component-emits` / `:component-slots` 自动生成的那三张
 
 ### JSDoc 与 API 表的现状
 
 props 表由 `nuxt-component-meta` 从**源码 JSDoc** 自动生成，描述、类型、默认值都能读到——`src/runtime/` 里的 JSDoc 就是文档正文，「代码风格」一节关于 `@defaultValue` / `@see` 的要求因此不只是风格偏好。
 
-emits 与 slots 的**描述目前落不了地**，两个已知缺口都在上游：`vue-component-meta` 对这两类返回空 `description`（`@movk/nuxt-docs` 自己的线上站点同样如此，与 `metaFields` 配置无关），而 `ComponentEmits.vue` 压根没有描述列。JSDoc 照写不误——IDE hover 能用，上游修好即自动显示——但别指望它现在出现在页面上。composables 与工具函数不在 `nuxt-component-meta` 的覆盖范围内，API 表手写。
+emits 与 slots 的**描述目前落不了地**，两个已知缺口都在上游：`vue-component-meta` 对这两类返回空 `description`（`@movk/nuxt-docs` 自己的线上站点同样如此，与 `metaFields` 配置无关），而 `ComponentEmits.vue` 压根没有描述列。JSDoc 照写不误——IDE hover 能用，上游修好即自动显示——但别指望它现在出现在页面上。composables 与工具函数不在 `nuxt-component-meta` 的覆盖范围内，用 `::field-group` 手写。
+
+### h3 版本必须锁死
+
+`pnpm-workspace.yaml` 的 `overrides` 里钉了 `h3: 1.15.11`，**不要摘掉**。依赖树里 h3 v1 与 v2-rc 会同时出现，两套 `H3Event` 互不兼容，症状是两处看起来毫不相干的 typecheck 报错：`playgrounds/ui` 的 `useFetch` 把服务端返回类型塌成 `{}`，docs 则在 `@movk/nuxt-docs` 自身的 server 路由上报 38 条 `H3Event` 不匹配。统一到 v1 后两处一起消失。
+
+nitro 的 `h3-next`（`npm:h3@2` 别名）不受这条 override 影响，那是它有意并存的第二份，不用管。
 
 ## 测试要求
 
