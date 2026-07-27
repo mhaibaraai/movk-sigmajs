@@ -54,40 +54,75 @@ const props = defineProps<{
  * 上游新增事件时，`runtime/types` 里的 `Record<SigmaEventType, true>` 会先报错提示同步这里。
  */
 const emit = defineEmits<{
+  /** 单击节点 */
   'clickNode': [payload: SigmaNodeEventPayload]
+  /** 双击节点，默认会触发相机缩放，可在 payload 上 `preventSigmaDefault()` 阻止 */
   'doubleClickNode': [payload: SigmaNodeEventPayload]
+  /** 右键点击节点 */
   'rightClickNode': [payload: SigmaNodeEventPayload]
+  /** 在节点上滚动滚轮 */
   'wheelNode': [payload: SigmaNodeEventPayload]
+  /** 在节点上按下指针 */
   'downNode': [payload: SigmaNodeEventPayload]
+  /** 在节点上松开指针 */
   'upNode': [payload: SigmaNodeEventPayload]
+  /** 指针进入节点 */
   'enterNode': [payload: SigmaNodeEventPayload]
+  /** 指针离开节点 */
   'leaveNode': [payload: SigmaNodeEventPayload]
+  /** 单击边，需先开启 `enableEdgeEvents` */
   'clickEdge': [payload: SigmaEdgeEventPayload]
+  /** 双击边 */
   'doubleClickEdge': [payload: SigmaEdgeEventPayload]
+  /** 右键点击边 */
   'rightClickEdge': [payload: SigmaEdgeEventPayload]
+  /** 在边上滚动滚轮 */
   'wheelEdge': [payload: SigmaEdgeEventPayload]
+  /** 在边上按下指针 */
   'downEdge': [payload: SigmaEdgeEventPayload]
+  /** 在边上松开指针 */
   'upEdge': [payload: SigmaEdgeEventPayload]
+  /** 指针进入边 */
   'enterEdge': [payload: SigmaEdgeEventPayload]
+  /** 指针离开边 */
   'leaveEdge': [payload: SigmaEdgeEventPayload]
+  /** 单击空白画布 */
   'clickStage': [payload: SigmaStageEventPayload]
+  /** 双击空白画布，默认会触发相机缩放 */
   'doubleClickStage': [payload: SigmaStageEventPayload]
+  /** 右键点击空白画布 */
   'rightClickStage': [payload: SigmaStageEventPayload]
+  /** 在空白画布上滚动滚轮，默认会触发相机缩放 */
   'wheelStage': [payload: SigmaStageEventPayload]
+  /** 在空白画布上按下指针 */
   'downStage': [payload: SigmaStageEventPayload]
+  /** 在空白画布上松开指针 */
   'upStage': [payload: SigmaStageEventPayload]
+  /** 指针进入画布区域 */
   'enterStage': [payload: SigmaStageEventPayload]
+  /** 指针离开画布区域 */
   'leaveStage': [payload: SigmaStageEventPayload]
+  /** 指针在画布上移动，坐标随动，用于自绘跟随层 */
   'moveBody': [payload: SigmaStageEventPayload]
+  /** 每帧清空画布前 */
   'beforeClear': []
+  /** 每帧清空画布后 */
   'afterClear': []
+  /** 图数据进入渲染管线处理前 */
   'beforeProcess': []
+  /** 图数据处理完成、即将绘制前 */
   'afterProcess': []
+  /** 每帧绘制前 */
   'beforeRender': []
+  /** 每帧绘制后 */
   'afterRender': []
+  /** 容器尺寸变化、画布已重新适配 */
   'resize': []
+  /** 实例被销毁 */
   'kill': []
+  /** 实例创建完成，payload 是原生 `Sigma` 对象 */
   'ready': [sigma: Sigma]
+  /** 内部创建的 graphology 实例回传，仅在未传 `graph` 时触发 */
   'update:graph': [graph: Graph]
 }>()
 
