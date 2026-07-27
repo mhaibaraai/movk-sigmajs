@@ -1,0 +1,32 @@
+{
+  "private": true,
+  "name": "movk-sigma-docs",
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate"
+  },
+  "dependencies": {
+    "@movk/nuxt-docs": "^2.0.6",
+    "@movk/sigma": "workspace:*",
+    "@nuxt/content": "^3.15.1",
+    "@sigma/edge-curve": "^3.1.0",
+    "@sigma/export-image": "^3.0.0",
+    "@sigma/node-border": "^3.0.0",
+    "@sigma/utils": "^3.0.0",
+    "better-sqlite3": "^13.0.1",
+    "graphology": "^0.26.0",
+    "graphology-communities-louvain": "^2.0.2",
+    "graphology-layout": "^0.6.1",
+    "graphology-layout-forceatlas2": "^0.10.1",
+    "graphology-layout-noverlap": "^0.4.2",
+    "graphology-metrics": "^2.4.0",
+    "nuxt": "^4.5.0",
+    "sigma": "^3.0.3",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "graphology-types": "^0.24.8"
+  }
+}

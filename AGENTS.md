@@ -15,14 +15,19 @@ src/
     ├── utils/
     ├── types/
     └── index.css         # 可选样式表
+docs/                     # @movk/nuxt-docs 文档站，示例的唯一数据源
+├── app/components/content/examples/
+├── app/utils/corpus.ts
+├── app/assets/css/examples.css
+└── content/docs/         # 一 API 一页
 playgrounds/
-├── basic/                # 零 UI 依赖，全量示例与纯原生逃生舱
+├── basic/                # 零 UI 依赖，反向引用 docs 的示例，纯原生逃生舱
 └── ui/                   # @movk/nuxt，接口驱动的完整场景与插槽接管
 test/                     # vitest + happy-dom + @vue/test-utils
 references/               # 架构方案与背景资料
 ```
 
-两个 playground 的分工见「演示应用」一节，示例的组织约定见「示例与文档铺垫」一节。
+两个 playground 的分工见「演示应用」一节，示例与文档页的组织约定见「文档站」一节。
 
 ## 红线
 
@@ -107,15 +112,16 @@ Nuxt 模块最佳实践要求所有导出加模块名前缀防冲突：
 
 ```bash
 pnpm install
-pnpm dev:prepare     # 首次或依赖变更后必须先跑，两个 playground 一起 prepare
+pnpm dev:prepare     # 首次或依赖变更后必须先跑，两个 playground 与 docs 一起 prepare
 pnpm dev             # 启动 playgrounds/basic
 pnpm dev:ui          # 启动 playgrounds/ui
+pnpm dev:docs        # 启动 docs
 pnpm test            # vitest
 pnpm typecheck
 pnpm lint
 ```
 
-改动 `src/` 后若 playground 表现异常，先重跑 `pnpm dev:prepare`。
+改动 `src/` 后若 playground 或 docs 表现异常，先重跑 `pnpm dev:prepare`。`nuxt-component-meta` 只在启动时解析一次，改了组件 JSDoc 要重启 `dev:docs` 才能看到新的 API 表。
 
 已经踩过的坑：
 
@@ -132,12 +138,13 @@ pnpm lint
 
 ## 演示应用
 
-文档站不排期，演示职责全部由 playground 承担。它同时是「模块能否装进一个干净 Nuxt 项目」的验证信号，因此对 UI 依赖有明确分区。
+文档站接手了对外展示，playground 仍然留着——它是「模块能否装进一个干净 Nuxt 项目」的验证信号，而 docs 带着 `@nuxt/ui` 与 Tailwind，给不出这个信号。因此对 UI 依赖有明确分区。
 
 | 目录 | UI 依赖 | 承载内容 |
 | --- | --- | --- |
-| `playgrounds/basic` | 零，永远不引入 | 全部 34 个公开 API 的示例、内置控件的原样外观、规模三档、**纯原生逃生舱** |
+| `playgrounds/basic` | 零，永远不引入 | 全部 34 个公开 API 的示例（反向引用 docs 的目录）、内置控件的原样外观、规模三档、**纯原生逃生舱** |
 | `playgrounds/ui` | `@movk/nuxt` | 插槽接管控件外观、服务端接口驱动的完整知识图谱场景 |
+| `docs` | `@nuxt/ui`（经 `@movk/nuxt-docs`） | 面向用户的 API 参考，示例源码的唯一数据源 |
 
 必须分区的三条理由：
 
@@ -147,28 +154,53 @@ pnpm lint
 
 选 `@movk/nuxt` 而不是直接用 `@nuxt/ui`：前者本身就建在后者之上，且演示两个 movk 库如何配合更贴近实际项目。引入时它要求的 `tailwindcss` 装进 `playgrounds/ui` 这个 workspace，**不准用 `shamefully-hoist=true` 绕过**，理由见红线第一条。
 
-两个 playground 都显式声明自己用到的可选 peer（`@sigma/*`、`graphology-layout*`、`graphology-metrics` 等）。不靠仓库根的 devDependencies 蹭解析——那样得到的「装得进干净项目」信号是假的。
+三个应用都显式声明自己用到的可选 peer（`@sigma/*`、`graphology-layout*`、`graphology-metrics` 等）。不靠仓库根的 devDependencies 蹭解析——那样得到的「装得进干净项目」信号是假的。docs 因为要跑同一批示例，peer 清单与 basic 一致。
 
 `playgrounds/ui` 还需要一个会话密钥：`@movk/nuxt` 依赖 `nuxt-auth-utils`，它在每个请求上取会话，密钥为空会让整页 500。playground 不做鉴权，`nuxt.config.ts` 里给了开发占位值，真实项目用 `NUXT_SESSION_PASSWORD` 覆盖。
 
-## 示例与文档铺垫
+## 文档站
 
-文档站本轮不排期，但示例已经按文档站的约定写好，将来建站整目录搬走即可，不必重写。
+`docs/` 是 `@movk/nuxt-docs` 的消费方，`pnpm dev:docs` 起站。目前只有骨架：入门两页加 `SigmaGraph` / `useSigmaCamera` / `applyGraphDiff` 三个样板页，其余 31 个 API 页待补。部署未排期。
 
-**目录与命名**：示例放在 `playgrounds/*/app/components/content/examples/`，PascalCase 加 `Example` 后缀。这正是 Movk Nuxt Docs 的 `component-example` 模块读取源码的路径，MDC 侧写 `:component-example{name="GraphBasicExample"}`。`nuxt.config.ts` 里必须给这个目录配 `pathPrefix: false`，否则组件名会被拼成 `ContentExamplesGraphBasicExample`，与 MDC 里的名字对不上。
+### 示例的唯一数据源在 docs
 
-**自包含约束**（决定了能否零改写搬迁）：
+46 个示例、`corpus.ts`、`examples.css` 全部住在 `docs/app/`，`playgrounds/basic` 经 `components` / `imports.dirs` / `css` 三处的绝对路径**反向引用**同一份文件。不要在 basic 下重建这些目录，两份会立刻漂移。
 
-- 自带 `SigmaGraph`、自带数据、自带高度，不依赖页面布局或任何 playground 专用组件
-- 依赖白名单：`@movk/sigma` 的自动导入、`graphology`、`sigma`、Vue API。此外只允许 `~/utils/corpus`（示例数据生成器）与 `~/assets/css/examples.css`（共用的极简样式），这两个文件随 examples 目录一起搬迁
+物理位置必须在 docs 侧，因为 `ComponentExample.vue` 用 `import.meta.glob('~/components/content/examples/**/*.vue')` 找预览组件，`~` 硬绑 docs 自身 srcDir。示例放在别处时**预览会静默消失**——模板是 `v-else-if="resolvedComponent"`，没有兜底分支也不报错，只剩源码块。改完示例位置务必肉眼确认预览还在。
+
+（源码抓取是另一条链路，按 `shortPath.includes('components/content/examples/')` 过滤，跨 workspace 的相对路径仍含这个片段，不受影响。）
+
+**目录与命名**：PascalCase 加 `Example` 后缀，MDC 侧写 `:component-example{name="GraphBasicExample"}`。两边的 `nuxt.config.ts` 都必须给这个目录配 `pathPrefix: false`，否则组件名会被拼成 `ContentExamplesGraphBasicExample`，与服务端接口的 `pascalCase(name)` 查找对不上。
+
+**自包含约束**：
+
+- 自带 `SigmaGraph`、自带数据，不依赖页面布局或任何 playground 专用组件
+- 依赖白名单：`@movk/sigma` 的自动导入、`graphology`、`sigma`、Vue API，加上自动导入的 `demoGraph()` / `createScaleGraph()` 与 `examples.css` 的公共 class
+- **不准用 `@nuxt/ui` 的自动导入**。示例现在住在装了 `@nuxt/ui` 的 docs 里，误用 `UButton` 这类组件在文档站看不出问题，只有 basic 构建会炸。`pnpm dev:build` 是这条的守门人
 - 组件示例的数据内联，因为数据形状本身就是演示内容；composable 与规模示例用 `demoGraph()` / `createScaleGraph()`，那些示例讲的是行为，数据只是背景板
 - 示例内的注释会出现在文档的源码展示里，只写验证点，一两行
 
 **成对的示例**：`useSigma()` 是 inject，必须在 `SigmaGraph` 子树内调用，所以 composable 示例一律是 `XxxExample.vue`（渲染图的外壳）加 `XxxPanel.vue`（消费上下文的面板）两个文件。这也正是真实应用的结构。
 
-**建站时要做的**：新建 `docs/` workspace → `extends: ['@movk/nuxt-docs']` → 把 basic 的 examples 目录搬过去 → `content/docs/` 下每个 API 一页，正文写 `:component-example{name="XxxExample"}` 配 `:component-props{slug="SigmaGraph"}`。
+### 写文档页的硬约束
 
-一条连带结论：docs 的 props / emits / slots 表由 `nuxt-component-meta` 从**源码 JSDoc** 自动生成，`componentMeta.dirs` 指到 `@movk/sigma` 的组件目录即可。也就是说 `src/runtime/` 里的 JSDoc 就是未来的文档正文——本文件「代码风格」一节关于 `@defaultValue` / `@see` 的要求，因此不只是风格偏好。
+- **每个 `:component-example` 都要带 `class="example-stage"`**。`.sigma-root` 是 `height: 100%`，文档站的示例容器不给高度就塌成 0。用普通 class 而非 `h-[420px]` 这类原子类，是因为 Tailwind 不扫 `content/` 下的 Markdown，生成不出规则
+- **每个 `:component-example` 都要带 `client-only="true"`**，理由同红线第二条
+- **一页最多 4 个渲染 sigma 的示例**。`ComponentExample` 没有懒挂载，每个实例吃 3 个 WebGL 上下文，浏览器上限多为 16。超了最早的上下文被丢弃、画布变空白，只在控制台留一行 `Too many active WebGL contexts`。示例更多的 API 要拆页
+- **`seo.title` 与 `seo.description` 必须写英文**。OG 图渲染中文会乱码。frontmatter 的 `title` / `description` 照常用中文，那两个进侧边栏与页面正文，不进 OG 图
+- **非必要不用表格**。API 一律 `::field-group` 加 `::field{name type}`，默认值写进 field 正文（`默认 \`true\` —— …`），嵌套选项用 `::collapsible` 包一层；MDC 嵌套按冒号递增（`::` → `:::` → `::::`）。签名行单独一句，带 `{lang="ts-type"}`。页面里唯一该出现的表格是 `:component-props` / `:component-emits` / `:component-slots` 自动生成的那三张
+
+### JSDoc 与 API 表的现状
+
+props 表由 `nuxt-component-meta` 从**源码 JSDoc** 自动生成，描述、类型、默认值都能读到——`src/runtime/` 里的 JSDoc 就是文档正文，「代码风格」一节关于 `@defaultValue` / `@see` 的要求因此不只是风格偏好。
+
+emits 与 slots 的**描述目前落不了地**，两个已知缺口都在上游：`vue-component-meta` 对这两类返回空 `description`（`@movk/nuxt-docs` 自己的线上站点同样如此，与 `metaFields` 配置无关），而 `ComponentEmits.vue` 压根没有描述列。JSDoc 照写不误——IDE hover 能用，上游修好即自动显示——但别指望它现在出现在页面上。composables 与工具函数不在 `nuxt-component-meta` 的覆盖范围内，用 `::field-group` 手写。
+
+### h3 版本必须锁死
+
+`pnpm-workspace.yaml` 的 `overrides` 里钉了 `h3: 1.15.11`，**不要摘掉**。依赖树里 h3 v1 与 v2-rc 会同时出现，两套 `H3Event` 互不兼容，症状是两处看起来毫不相干的 typecheck 报错：`playgrounds/ui` 的 `useFetch` 把服务端返回类型塌成 `{}`，docs 则在 `@movk/nuxt-docs` 自身的 server 路由上报 38 条 `H3Event` 不匹配。统一到 v1 后两处一起消失。
+
+nitro 的 `h3-next`（`npm:h3@2` 别名）不受这条 override 影响，那是它有意并存的第二份，不用管。
 
 ## 测试要求
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, shallowRef } from 'vue'
+import { computed, onBeforeUnmount, onMounted, shallowRef } from 'vue'
 
 const props = withDefaults(defineProps<{
   /** 示例标题 */
@@ -22,6 +22,40 @@ const props = withDefaults(defineProps<{
 const root = shallowRef<HTMLElement | null>(null)
 const active = shallowRef(false)
 let observer: IntersectionObserver | undefined
+
+// 源码取自 docs 的示例目录（唯一数据源），eager 是为了让折叠展开时无需等待网络。
+// 这里不做语法高亮：basic 的定位是零 UI 依赖的干净项目验证信号，高亮版看文档站
+const sources = import.meta.glob<string>('#examples/*.vue', {
+  query: '?raw',
+  import: 'default',
+  eager: true
+})
+
+const source = computed(() => {
+  if (!props.name) {
+    return ''
+  }
+  const entry = Object.entries(sources).find(([path]) => path.endsWith(`/${props.name}.vue`))
+  return entry?.[1] ?? ''
+})
+
+const copied = shallowRef(false)
+let copiedTimer: ReturnType<typeof setTimeout> | undefined
+
+async function copy() {
+  try {
+    await navigator.clipboard.writeText(source.value)
+    copied.value = true
+    clearTimeout(copiedTimer)
+    copiedTimer = setTimeout(() => {
+      copied.value = false
+    }, 1600)
+  }
+  catch {
+    // 非安全上下文或用户拒绝授权时静默降级，源码本身仍可手动选中复制
+    copied.value = false
+  }
+}
 
 /**
  * 进入视口才挂载示例，离开视口后卸载。
@@ -50,6 +84,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   observer?.disconnect()
+  clearTimeout(copiedTimer)
 })
 </script>
 
@@ -82,6 +117,22 @@ onBeforeUnmount(() => {
         滚动到此处后加载
       </p>
     </div>
+
+    <details
+      v-if="source"
+      class="source"
+    >
+      <summary>
+        查看源码
+        <button
+          type="button"
+          @click.prevent="copy"
+        >
+          {{ copied ? '已复制' : '复制' }}
+        </button>
+      </summary>
+      <pre><code>{{ source }}</code></pre>
+    </details>
   </section>
 </template>
 
@@ -129,5 +180,42 @@ code {
   margin: 0;
   color: var(--pg-muted);
   font-size: 13px;
+}
+
+.source {
+  margin-top: 8px;
+  border: 1px solid var(--pg-border);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  color: var(--pg-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+summary button {
+  margin-left: auto;
+  padding: 2px 8px;
+  border: 1px solid var(--pg-border);
+  border-radius: 4px;
+  background: none;
+  color: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.source pre {
+  margin: 0;
+  padding: 12px;
+  border-top: 1px solid var(--pg-border);
+  overflow-x: auto;
+  line-height: 1.6;
+  tab-size: 2;
 }
 </style>
