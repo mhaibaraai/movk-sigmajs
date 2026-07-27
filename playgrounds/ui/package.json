@@ -12,7 +12,7 @@
     "@movk/sigma": "workspace:*",
     "@nuxt/ui": "^4.10.0",
     "graphology": "^0.26.0",
-    "nuxt": "^4.5.0",
+    "nuxt": "^4.5.1",
     "sigma": "^3.0.3",
     "tailwindcss": "^4.3.3",
     "zod": "^4.4.3"

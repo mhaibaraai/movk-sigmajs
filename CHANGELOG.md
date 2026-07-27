@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.0.2](https://github.com/mhaibaraai/movk-sigmajs/compare/v0.0.1...v0.0.2) (2026-07-27)
+
+### Build System
+
+* 声明 publishConfig 公开发布 ([1d08fde](https://github.com/mhaibaraai/movk-sigmajs/commit/1d08fde1c454e575e1ffad1b5752087c0799209e))
+
 ## 0.0.1 (2026-07-27)
 
 ### Features
