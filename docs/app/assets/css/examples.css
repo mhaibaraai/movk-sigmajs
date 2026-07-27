@@ -1,6 +1,13 @@
-/* 示例共用的极简样式，随 examples 目录一起搬迁到 docs。
+/* 示例共用的极简样式，examples 目录的一部分。
    示例本身只写 class，不重复 46 份几乎相同的 scoped CSS。
    SigmaGraph 的默认插槽走正常文档流，面板必须自行绝对定位，.demo-panel 替示例做了这件事 */
+
+/* 示例容器高度。SigmaGraph 的 .sigma-root 是 height: 100%，祖先不给确定高度就会塌成 0。
+   文档站经 :component-example{class="example-stage"} 挂上，playgrounds/basic 由 ExampleCard 的 .stage 自行给。
+   刻意用普通 class 而非 Tailwind 原子类：Tailwind 不扫 content 目录的 Markdown，h-[420px] 这类写法生成不出规则 */
+.example-stage {
+  height: 420px;
+}
 
 .demo-panel {
   position: absolute;
