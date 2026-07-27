@@ -74,7 +74,7 @@
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
     "test:watch": "vitest watch",
-    "typecheck": "vue-tsc --noEmit && nuxt typecheck playgrounds/basic && nuxt typecheck playgrounds/ui",
+    "typecheck": "vue-tsc --noEmit && nuxt typecheck playgrounds/basic && nuxt typecheck playgrounds/ui && nuxt typecheck docs",
     "release": "release-it && npm publish",
     "clean": "movk-clean"
   },

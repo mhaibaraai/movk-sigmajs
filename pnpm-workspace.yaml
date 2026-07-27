@@ -7,12 +7,13 @@ ignoreWorkspaceRootCheck: true
 linkWorkspacePackages: true
 minimumReleaseAge: 0
 
+overrides:
+  h3: 1.15.11
+
 allowBuilds:
   '@parcel/watcher': false
-  # @nuxt/content 的存储后端，docs 必须编译这个原生模块才能建内容库
   better-sqlite3: true
   esbuild: false
-  # @nuxt/image 的可选依赖，playgrounds/ui 不用 <NuxtImg>，无需编译原生二进制
   sharp: false
   unrs-resolver: false
   vue-demi: false
