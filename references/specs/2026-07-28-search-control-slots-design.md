@@ -143,7 +143,9 @@
 
 这正是 `playgrounds/ui` 的既定职责（插槽接管控件外观）。
 
-原示例演示的是 `#option` / `#empty`，那份演示价值不能丢：`ThemedSearchExample.vue` 改为演示 `#input` + `#results` 的完全接管，另新建 `ThemedSearchOptionExample.vue` 保留原有的 `#option` / `#empty` 演示，两个示例分列不同页面。不合并进同一页，因为每个 `SigmaGraph` 吃 3 个 WebGL 上下文，同页实例数受限。
+原示例演示的是 `#option` / `#empty`，那份演示价值不能丢：`ThemedSearchExample.vue` 改为演示 `#input` + `#results` 的完全接管，另新建 `ThemedSearchOptionExample.vue` 保留原有的 `#option` / `#empty` 演示，两者一并列在 `pages/themed.vue`。
+
+该页实例数由此从 3 增至 4，正好落在 AGENTS.md「同屏不超过四个实例」的上限（4 × 3 = 12 个 WebGL 上下文，浏览器上限多为 16）。**此后该页不得再加渲染 sigma 的示例**，要加须先引入视口内懒挂载。
 
 ## 测试
 
