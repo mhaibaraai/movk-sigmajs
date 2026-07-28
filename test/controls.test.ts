@@ -236,6 +236,72 @@ describe('SigmaSearchControl', () => {
     const { wrapper } = await mountControl(() => h(SigmaSearchControl, { debounce: 0 }))
     expect(wrapper.find('.sigma-search-results').exists()).toBe(false)
   })
+
+  it('#input 插槽接管后仍能驱动检索与键盘导航', async () => {
+    const { wrapper } = await mountControl(() =>
+      h(SigmaSearchControl, { debounce: 0 }, {
+        input: (scope: {
+          modelValue: string
+          activeIndex: number
+          onUpdate: (value: string) => void
+          onKeydown: (event: KeyboardEvent) => void
+        }) => h('input', {
+          'class': 'custom-input',
+          'value': scope.modelValue,
+          'data-active': scope.activeIndex,
+          'onInput': (event: Event) => scope.onUpdate((event.target as HTMLInputElement).value),
+          'onKeydown': scope.onKeydown
+        })
+      })
+    )
+
+    expect(wrapper.find('.sigma-search-input').exists()).toBe(false)
+
+    await wrapper.find('.custom-input').setValue('制度')
+    await vi.waitFor(async () => {
+      await nextTick()
+      if (wrapper.findAll('.sigma-search-option').length !== 2) {
+        throw new Error('结果尚未就绪')
+      }
+    })
+
+    await wrapper.find('.custom-input').trigger('keydown', { key: 'ArrowDown' })
+    await nextTick()
+
+    expect(wrapper.find('.custom-input').attributes('data-active')).toBe('0')
+    expect(wrapper.findAll('.sigma-search-option')[0]!.attributes('aria-selected')).toBe('true')
+  })
+
+  it('#input 作用域的 onKeydown 支持 Esc 清空', async () => {
+    const { wrapper } = await mountControl(() =>
+      h(SigmaSearchControl, { debounce: 0 }, {
+        input: (scope: {
+          modelValue: string
+          onUpdate: (value: string) => void
+          onKeydown: (event: KeyboardEvent) => void
+        }) => h('input', {
+          class: 'custom-input',
+          value: scope.modelValue,
+          onInput: (event: Event) => scope.onUpdate((event.target as HTMLInputElement).value),
+          onKeydown: scope.onKeydown
+        })
+      })
+    )
+
+    await wrapper.find('.custom-input').setValue('制度')
+    await vi.waitFor(async () => {
+      await nextTick()
+      if (!wrapper.find('.sigma-search-option').exists()) {
+        throw new Error('结果尚未就绪')
+      }
+    })
+
+    await wrapper.find('.custom-input').trigger('keydown', { key: 'Escape' })
+    await nextTick()
+
+    expect(wrapper.find('.sigma-search-results').exists()).toBe(false)
+    expect((wrapper.find('.custom-input').element as HTMLInputElement).value).toBe('')
+  })
 })
 
 describe('SigmaLegend', () => {
