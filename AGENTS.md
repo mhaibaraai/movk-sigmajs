@@ -133,6 +133,7 @@ pnpm lint
 - **一页里能同时存活的 Sigma 实例有硬上限**：每个实例占 3 个 WebGL 上下文（`sigma-edges` / `sigma-nodes` / `sigma-hoverNodes` 三张画布走 WebGL，另外四张是 2D），浏览器上限多为 16 个。超出后最早的上下文被强制丢弃、画布直接变空白，只在控制台留一行 `Too many active WebGL contexts` 的警告。示例列表页一律经 `ExampleCard` 视口内懒挂载，同屏不超过四个实例
 - 控件插槽的作用域要连行为一起给。只暴露数据（如图例只给 `groups`）会让「接管外观」等于「丢掉功能」，与设计前提相悖
 
+- 模块装进消费方的 `node_modules` 后，Vite 的依赖扫描不进 node_modules 里的源码，runtime 对 graphology / sigma 系列的 import 拿不到预构建，浏览器直接收到 CJS 报缺少命名导出。声明由 `src/optimize-deps.ts` 内置，runtime 新增对某个包的 import 时要同步补一条候选。传递依赖（`events`、`graphology-utils/*`）必须写成 Vite 的 `parent > child` 形式，未安装的可选 peer 必须探测后跳过——直接塞进 `optimizeDeps.include` 会换来一串启动告警
 - 根 `tsconfig.json` 必须 `extends: "./.nuxt/tsconfig.json"`。改成 project references 写法会让 `vue-tsc --noEmit` 完全跳过 `src/`，typecheck 空转却仍退出码 0
 - 组件 emits 的类型要逐条写出。用 `{ [K in SigmaEventType]: ... }` 这类映射类型派生，`vue-tsc` 能过但 `pnpm build` 会失败——`@vue/compiler-sfc` 要在编译期静态提取事件名，解析不了跨包映射类型
 
