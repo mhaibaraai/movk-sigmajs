@@ -302,6 +302,69 @@ describe('SigmaSearchControl', () => {
     expect(wrapper.find('.sigma-search-results').exists()).toBe(false)
     expect((wrapper.find('.custom-input').element as HTMLInputElement).value).toBe('')
   })
+
+  it('#results 插槽接管整个下拉容器', async () => {
+    const { wrapper, instance } = await mountControl(() =>
+      h(SigmaSearchControl, { debounce: 0 }, {
+        results: (scope: {
+          results: Array<{ id: string, label: string }>
+          highlight: (result: { id: string, label: string }) => Array<{ text: string, match: boolean }>
+          choose: (result: { id: string, label: string }) => Promise<void>
+        }) => h('div', { class: 'custom-results' }, scope.results.map(result =>
+          h('button', {
+            class: 'custom-option',
+            onClick: () => scope.choose(result)
+          }, scope.highlight(result).map(segment =>
+            h('span', { class: segment.match ? 'custom-match' : undefined }, segment.text)
+          ))
+        ))
+      })
+    )
+
+    await wrapper.find('input').setValue('条例')
+    await vi.waitFor(async () => {
+      await nextTick()
+      if (!wrapper.find('.custom-option').exists()) {
+        throw new Error('结果尚未就绪')
+      }
+    })
+
+    expect(wrapper.find('.sigma-search-results').exists()).toBe(false)
+    expect(wrapper.find('.custom-match').text()).toBe('条例')
+
+    await wrapper.find('.custom-option').trigger('click')
+    await vi.waitFor(() => {
+      if (instance.camera.animated.length === 0) {
+        throw new Error('相机尚未移动')
+      }
+    })
+
+    expect(wrapper.findComponent(SigmaSearchControl).emitted('select')).toHaveLength(1)
+  })
+
+  it('同时传 #results 与 #option 时告警且 #option 不渲染', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+
+    const { wrapper } = await mountControl(() =>
+      h(SigmaSearchControl, { debounce: 0 }, {
+        results: () => h('div', { class: 'custom-results' }, '自定义下拉'),
+        option: () => h('span', { class: 'custom-option-slot' }, '不该出现')
+      })
+    )
+
+    await wrapper.find('input').setValue('制度')
+    await vi.waitFor(async () => {
+      await nextTick()
+      if (!wrapper.find('.custom-results').exists()) {
+        throw new Error('自定义下拉尚未渲染')
+      }
+    })
+
+    expect(wrapper.find('.custom-option-slot').exists()).toBe(false)
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('#results'))
+
+    warn.mockRestore()
+  })
 })
 
 describe('SigmaLegend', () => {

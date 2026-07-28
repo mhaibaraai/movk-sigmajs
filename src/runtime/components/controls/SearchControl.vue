@@ -2,7 +2,7 @@
 import { splitHighlight } from '@movk/core'
 import type { HighlightSegment } from '@movk/core'
 import { watchDebounced } from '@vueuse/core'
-import { computed, shallowRef } from 'vue'
+import { computed, shallowRef, useSlots } from 'vue'
 import { useSigmaSearch } from '../../composables/use-sigma-search'
 import type { SigmaSearchResult } from '../../composables/use-sigma-search'
 
@@ -77,11 +77,34 @@ defineSlots<{
     /** 清空输入与高亮 */
     clear: () => void
   }) => unknown
+  /**
+   * 接管整个结果下拉容器。接管后 `#option` 与 `#empty` 不再渲染，
+   * `.sigma-search-results` 的绝对定位、滚动与向上展开规则一并失效，需自行处理。
+   */
+  results: (props: {
+    /** 当前检索结果 */
+    results: SigmaSearchResult[]
+    /** 当前键盘高亮项下标，未选中为 -1 */
+    activeIndex: number
+    /** 防抖后真正参与匹配的词 */
+    query: string
+    /** 按当前 query 切出命中片段 */
+    highlight: (result: SigmaSearchResult) => HighlightSegment[]
+    /** 聚焦到该结果、抛出 select 事件并清空输入 */
+    choose: (result: SigmaSearchResult) => Promise<void>
+  }) => unknown
   /** 接管单条结果的内容，`segments` 是已切好的命中片段 */
   option: (props: { result: SigmaSearchResult, segments: HighlightSegment[] }) => unknown
   /** 接管无结果时的提示内容 */
   empty: () => unknown
 }>()
+
+const slots = useSlots()
+
+// #option 与 #empty 的出口位于 #results 的默认内容内部，接管后二者静默失效
+if (import.meta.dev && slots.results && (slots.option || slots.empty)) {
+  console.warn('[@movk/sigma] SigmaSearchControl 已接管 #results，#option 与 #empty 不再渲染')
+}
 
 const { query, results, focus } = useSigmaSearch({
   fields: props.fields,
@@ -187,45 +210,54 @@ function onKeydown(event: KeyboardEvent) {
       >
     </slot>
 
-    <ul
+    <slot
       v-if="open"
-      class="sigma-search-results"
-      role="listbox"
+      name="results"
+      :results="results"
+      :active-index="activeIndex"
+      :query="query"
+      :highlight="segments"
+      :choose="choose"
     >
-      <li
-        v-for="(result, index) in results"
-        :key="result.id"
-        role="presentation"
+      <ul
+        class="sigma-search-results"
+        role="listbox"
       >
-        <button
-          type="button"
-          class="sigma-search-option"
-          role="option"
-          :aria-selected="index === activeIndex"
-          @click="choose(result)"
+        <li
+          v-for="(result, index) in results"
+          :key="result.id"
+          role="presentation"
         >
-          <slot
-            :result="result"
-            :segments="segments(result)"
-            name="option"
+          <button
+            type="button"
+            class="sigma-search-option"
+            role="option"
+            :aria-selected="index === activeIndex"
+            @click="choose(result)"
           >
-            <span
-              v-for="(segment, i) in segments(result)"
-              :key="i"
-              :class="segment.match ? 'sigma-search-match' : undefined"
-            >{{ segment.text }}</span>
-          </slot>
-        </button>
-      </li>
+            <slot
+              :result="result"
+              :segments="segments(result)"
+              name="option"
+            >
+              <span
+                v-for="(segment, i) in segments(result)"
+                :key="i"
+                :class="segment.match ? 'sigma-search-match' : undefined"
+              >{{ segment.text }}</span>
+            </slot>
+          </button>
+        </li>
 
-      <li
-        v-if="results.length === 0"
-        class="sigma-search-empty"
-      >
-        <slot name="empty">
-          {{ emptyText }}
-        </slot>
-      </li>
-    </ul>
+        <li
+          v-if="results.length === 0"
+          class="sigma-search-empty"
+        >
+          <slot name="empty">
+            {{ emptyText }}
+          </slot>
+        </li>
+      </ul>
+    </slot>
   </div>
 </template>
