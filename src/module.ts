@@ -1,7 +1,8 @@
-import { addComponentsDir, addImportsDir, addPlugin, createResolver, defineNuxtModule } from '@nuxt/kit'
+import { addComponentsDir, addImportsDir, addPlugin, createResolver, defineNuxtModule, extendViteConfig } from '@nuxt/kit'
 import { defu } from 'defu'
 import type { Settings } from 'sigma/settings'
 import { name, version } from '../package.json'
+import { createOptimizeDepResolver, resolveOptimizeDepsInclude } from './optimize-deps'
 
 export type * from './runtime/types/public'
 
@@ -22,6 +23,12 @@ export interface ModuleOptions {
    * @defaultValue true
    */
   css?: boolean
+  /**
+   * 把 sigma、graphology 与已安装的可选 peer 加进 Vite 预构建。
+   * 关掉后需要自行在 nuxt.config 的 `vite.optimizeDeps.include` 里声明
+   * @defaultValue true
+   */
+  optimizeDeps?: boolean
 }
 
 export default defineNuxtModule<ModuleOptions>({
@@ -34,7 +41,8 @@ export default defineNuxtModule<ModuleOptions>({
   defaults: {
     prefix: 'Sigma',
     settings: {},
-    css: true
+    css: true,
+    optimizeDeps: true
   },
   setup(options, nuxt) {
     const { resolve } = createResolver(import.meta.url)
@@ -44,6 +52,23 @@ export default defineNuxtModule<ModuleOptions>({
 
     if (options.css) {
       nuxt.options.css.push(resolve('./runtime/index.css'))
+    }
+
+    // 模块装进消费方的 node_modules 后，Vite 扫不到 runtime 里对 graphology / sigma 系列的
+    // import，浏览器会拿到未预构建的 CJS。这里替消费方补上声明，只探测得到的包才进清单，
+    // 免得未装的可选 peer 换来一串 Vite 告警
+    if (options.optimizeDeps) {
+      const detected = resolveOptimizeDepsInclude(createOptimizeDepResolver(nuxt.options.rootDir))
+
+      // 不传 client / server：那两个选项在 Nuxt 4.5 已废弃并会打印告警，
+      // 且 Nuxt 5 的 Vite Environment API 本就让两端共享一份配置
+      extendViteConfig((config) => {
+        const existing = config.optimizeDeps?.include ?? []
+        config.optimizeDeps = {
+          ...config.optimizeDeps,
+          include: [...existing, ...detected.filter(id => !existing.includes(id))]
+        }
+      })
     }
 
     // 全局 settings 经 runtimeConfig 下发，由 plugins/defaults 搬进 runtime 的模块级变量。
