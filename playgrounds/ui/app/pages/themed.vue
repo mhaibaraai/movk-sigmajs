@@ -11,9 +11,14 @@ const examples = [
     description: '默认插槽以 groups / toggle / reset 暴露聚合结果与行为，换渲染不丢功能。'
   },
   {
-    title: '检索',
+    title: '检索：完全接管',
     name: 'ThemedSearchExample',
-    description: 'option 插槽拿到的 segments 是切好的命中片段，高亮逻辑不必重写。'
+    description: 'input 与 results 两个插槽把输入框换成 UInput、下拉换成 Nuxt UI 面板。onKeydown 一次绑完上下键、回车与 Esc，键盘导航不丢。'
+  },
+  {
+    title: '检索：只换条目',
+    name: 'ThemedSearchOptionExample',
+    description: 'option 插槽拿到的 segments 是切好的命中片段，容器的定位、滚动与键盘高亮全部白拿。'
   }
 ]
 </script>
