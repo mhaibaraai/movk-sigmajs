@@ -30,8 +30,9 @@ export default defineNuxtConfig({
   routeRules: {
     '/docs': { redirect: '/docs/getting-started', prerender: false },
     '/docs/components': { redirect: '/docs/components/graph', prerender: false },
-    '/docs/composables': { redirect: '/docs/composables/use-sigma-camera', prerender: false },
-    '/docs/utils': { redirect: '/docs/utils/apply-graph-diff', prerender: false }
+    '/docs/composables': { redirect: '/docs/composables/use-sigma', prerender: false },
+    '/docs/utils': { redirect: '/docs/utils/apply-graph-diff', prerender: false },
+    '/docs/guides': { redirect: '/docs/guides/scale', prerender: false }
   },
 
   compatibilityDate: 'latest',
