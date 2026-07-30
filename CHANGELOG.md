@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.0.3](https://github.com/mhaibaraai/movk-sigmajs/compare/v0.0.2...v0.0.3) (2026-07-30)
+
+### Features
+
+* **module:** 内置 Vite 预构建声明 ([a26c4af](https://github.com/mhaibaraai/movk-sigmajs/commit/a26c4af08f78513ec3d7e219000f3a6160e17d51))
+* **search:** 检索控件新增 [#input](https://github.com/mhaibaraai/movk-sigmajs/issues/input) 插槽 ([c6ef765](https://github.com/mhaibaraai/movk-sigmajs/commit/c6ef7650c8b74cd6d70986127005bc3b5b3ccd97))
+* **search:** 检索控件新增 [#results](https://github.com/mhaibaraai/movk-sigmajs/issues/results) 插槽 ([082e293](https://github.com/mhaibaraai/movk-sigmajs/commit/082e293cb22a6c8fee3bc14986fffd8ce3677b43)), references [#option](https://github.com/mhaibaraai/movk-sigmajs/issues/option) [#option](https://github.com/mhaibaraai/movk-sigmajs/issues/option) [#empty](https://github.com/mhaibaraai/movk-sigmajs/issues/empty)
+
+### Documentation
+
+* **agents:** 补充预构建声明的踩坑记录 ([4aea304](https://github.com/mhaibaraai/movk-sigmajs/commit/4aea304f0ba7387b6d32e314a60d137d4faec13e))
+* **playground:** 检索控件演示 UInput 完全接管 ([8aa279e](https://github.com/mhaibaraai/movk-sigmajs/commit/8aa279ec083c490b8c2475fad17faa4f3b76031d))
+* **search:** 补充检索控件插槽接管实施计划 ([add64c6](https://github.com/mhaibaraai/movk-sigmajs/commit/add64c6b366ee98381855e11083d935806706ca9)), references [#input](https://github.com/mhaibaraai/movk-sigmajs/issues/input) [#results](https://github.com/mhaibaraai/movk-sigmajs/issues/results)
+* **search:** 补充检索控件插槽接管设计文档 ([42ed78b](https://github.com/mhaibaraai/movk-sigmajs/commit/42ed78b6a615c13e5f197dcdbbbadc8d7f36d77f)), references [#input](https://github.com/mhaibaraai/movk-sigmajs/issues/input) [#results](https://github.com/mhaibaraai/movk-sigmajs/issues/results) [#option](https://github.com/mhaibaraai/movk-sigmajs/issues/option) [#empty](https://github.com/mhaibaraai/movk-sigmajs/issues/empty)
+
+### Tests
+
+* **module:** 覆盖预构建候选的探测与跳过 ([31edf58](https://github.com/mhaibaraai/movk-sigmajs/commit/31edf583d0c48dd7fda013673df28d2aabc2b6a1))
+
+### CI
+
+* 升级 setup-node 并接入 pkg-pr-new 预览发布 ([5b165ee](https://github.com/mhaibaraai/movk-sigmajs/commit/5b165eee16768d354dbae1dadb10a854aa905f9f))
+
 ## [0.0.2](https://github.com/mhaibaraai/movk-sigmajs/compare/v0.0.1...v0.0.2) (2026-07-27)
 
 ### Build System
