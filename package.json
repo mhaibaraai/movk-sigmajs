@@ -1,7 +1,7 @@
 {
   "name": "@movk/sigma",
   "type": "module",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "packageManager": "pnpm@11.18.0",
   "description": "基于 sigma v3 的知识图谱可视化 Nuxt 模块：SigmaGraph 等声明式组件与 composables，覆盖渲染、交互、布局、分析与 DOM 覆盖层，面向 1000+ 节点的大规模图谱。",
   "author": "YiXuan <mhaibaraai@gmail.com>",

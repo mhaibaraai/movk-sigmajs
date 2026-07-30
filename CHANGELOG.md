@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.0.4](https://github.com/mhaibaraai/movk-sigmajs/compare/v0.0.3...v0.0.4) (2026-07-30)
+
+### ⚠ BREAKING CHANGES
+
+* **utils:** degreeToSize 的中间段取值变大，依赖线性插值具体数值的调用方需要重新核对尺寸区间。
+
+### Features
+
+* **utils:** degreeToSize 改用 sqrt 曲线映射度数 ([46600ae](https://github.com/mhaibaraai/movk-sigmajs/commit/46600aec42fa6748b7db5b34c142dbfbc92f9a57))
+
+### Documentation
+
+* **utils:** 同步 degreeToSize 的 sqrt 口径 ([87ef7c0](https://github.com/mhaibaraai/movk-sigmajs/commit/87ef7c0eacae16398e1a252dae65955e811c98da))
+* 可选 peer 的分析类去掉 graphology-traversal ([0a85535](https://github.com/mhaibaraai/movk-sigmajs/commit/0a855357fe3a2d088c0f6c5a6bbe3b8a55be1ba0))
+* 新增指南栏目并接上入口 ([ab5aa3f](https://github.com/mhaibaraai/movk-sigmajs/commit/ab5aa3f9f15cd3307df1b54dd81038c0e7e4cd4e))
+* 补齐组件、composables 与工具函数的 API 文档 ([c1eb8a5](https://github.com/mhaibaraai/movk-sigmajs/commit/c1eb8a547186abca24d9d36e8ffa041e4c5cd0bf))
+
+### Chores
+
+* **deps:** 升级 pnpm 与依赖版本 ([1b18044](https://github.com/mhaibaraai/movk-sigmajs/commit/1b18044c53b07f969233b798182fa1da68e29e23))
+
 ## [0.0.3](https://github.com/mhaibaraai/movk-sigmajs/compare/v0.0.2...v0.0.3) (2026-07-30)
 
 ### Features
