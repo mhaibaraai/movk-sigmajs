@@ -354,7 +354,7 @@ Nuxt 官方明确：已发布模块的 `src/runtime/` 内不能依赖自动导�
 
 - `applyGraphDiff(graph, next, options)` —— 增量 diff，`preservePositions` 保留已有 `x` / `y`，`prune` 控制是否剪除新数据外的节点与边。见难点 3
 - `sampleGraph(graph, size)` —— 大图概览抽样，按度数取 Top-N 及两端都入选的边。基于 `graph.export()` 过滤，图级 `attributes` 与 `options` 原样保留
-- `degreeToSize(graph, range)` —— 度数映射尺寸，内核是 core 的 `mapRange(..., { clamp: true })`
+- `degreeToSize(graph, range)` —— 度数映射尺寸，归一后取 sqrt 再经 core 的 `mapRange(..., { clamp: true })` 落到区间。不用线性：度数分布偏斜会把绝大多数节点钉在下界，且尺寸按面积感知，半径 ∝ sqrt(度数) 才让面积正比于度数
 - `communityToColor(communities, palette)` —— 社区映射配色。入参是社区划分结果而非图，因此不依赖 `graphology-communities-louvain` 这个可选 peer
 - `chainReducers(fns)` —— reducer 链合成。见难点 2
 - `curveParallelEdges(graph, options)` —— 平行边与自环分配曲率。见下

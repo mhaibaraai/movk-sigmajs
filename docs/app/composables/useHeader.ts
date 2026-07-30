@@ -23,13 +23,18 @@ export function useHeader() {
   }, {
     label: 'Composables',
     icon: 'i-lucide-function-square',
-    to: '/docs/composables/use-sigma-camera',
+    to: '/docs/composables/use-sigma',
     active: route.path.startsWith('/docs/composables')
   }, {
     label: '工具函数',
     icon: 'i-lucide-wrench',
     to: '/docs/utils/apply-graph-diff',
     active: route.path.startsWith('/docs/utils')
+  }, {
+    label: '指南',
+    icon: 'i-lucide-compass',
+    to: '/docs/guides/scale',
+    active: route.path.startsWith('/docs/guides')
   }, {
     label: '发布版本',
     icon: 'i-lucide-newspaper',

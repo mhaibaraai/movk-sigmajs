@@ -3,7 +3,7 @@ import Graph from 'graphology'
 import { shallowRef } from 'vue'
 
 /**
- * 把节点度数线性映射到尺寸区间，返回「节点 key → size」的映射表。
+ * 把节点度数按 sqrt 曲线映射到尺寸区间，返回「节点 key → size」的映射表。
  *
  * 只返回映射表而不直接写图：是否落到 size 属性、还是交给 reducer 只影响显示，
  * 由调用方决定。这里演示直接写回属性的做法。

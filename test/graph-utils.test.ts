@@ -76,11 +76,17 @@ describe('degreeToSize', () => {
     expect(sizes.c).toBe(4)
   })
 
-  it('中间度数线性插值', () => {
-    // 度数 1..3 映射到 4..20，度 2 落在正中
+  it('中间度数按 sqrt 曲线插值', () => {
+    // 度数 1..3 映射到 4..20，度 2 归一后 t = 0.5，sqrt 后约 0.707
     const sizes = degreeToSize(starGraph(), [4, 20])
-    expect(sizes.a).toBe(12)
-    expect(sizes.b).toBe(12)
+    expect(sizes.a).toBeCloseTo(15.31, 2)
+    expect(sizes.b).toBeCloseTo(15.31, 2)
+  })
+
+  it('中间度数高于线性映射的结果，叶子节点不至于被钉在下界', () => {
+    const sizes = degreeToSize(starGraph(), [4, 20])
+    // 线性映射下度 2 落在正中的 12
+    expect(sizes.a!).toBeGreaterThan(12)
   })
 
   it('全图度数相同时统一取区间下界', () => {

@@ -17,7 +17,11 @@ export const DEFAULT_COMMUNITY_PALETTE: readonly string[] = [
 ]
 
 /**
- * 把节点度数线性映射到尺寸区间，返回 `节点 key → size` 的映射表。
+ * 把节点度数按 sqrt 曲线映射到尺寸区间，返回 `节点 key → size` 的映射表。
+ *
+ * 不用线性有两个原因：度数分布普遍偏斜（大量叶子节点加少数枢纽），线性映射会把绝大多数
+ * 节点钉在区间下界、枢纽独占上界；而尺寸是按面积被感知的，半径 ∝ sqrt(度数) 才让面积
+ * 正比于度数。端点取值不受影响，只有中间段整体抬高。
  *
  * 只返回映射表而不直接写图：是否落到 `size` 属性、还是交给 reducer 只影响显示，
  * 由调用方决定。全图度数相同时所有节点取区间下界。
@@ -28,11 +32,13 @@ export function degreeToSize(graph: Graph, range: [number, number] = [4, 20]): R
   const degrees = graph.nodes().map(node => graph.degree(node))
   const min = degrees.length === 0 ? 0 : Math.min(...degrees)
   const max = degrees.length === 0 ? 0 : Math.max(...degrees)
+  const span = max - min
 
   const sizes: Record<string, number> = {}
 
   graph.forEachNode((node) => {
-    sizes[node] = mapRange(graph.degree(node), [min, max], range, { clamp: true })
+    const eased = span === 0 ? 0 : Math.sqrt((graph.degree(node) - min) / span)
+    sizes[node] = mapRange(eased, [0, 1], range, { clamp: true })
   })
 
   return sizes
