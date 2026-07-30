@@ -1,5 +1,6 @@
+import { existsSync } from 'node:fs'
 import { createRequire } from 'node:module'
-import { dirname, isAbsolute, join } from 'node:path'
+import { basename, dirname, isAbsolute, join } from 'node:path'
 
 /**
  * Vite 预构建候选条目。
@@ -66,6 +67,32 @@ export const OPTIMIZE_DEPS_CANDIDATES: OptimizeDepCandidate[] = [
 /** 与 Vite 的 `isOptimizable` 对齐：解析结果不是这些扩展名，Vite 会警告 Cannot optimize dependency */
 const OPTIMIZABLE_ENTRY_RE = /\.[cm]?[jt]s$/
 
+/**
+ * 包本体是否挂在基准目录的 node_modules 链上。
+ *
+ * `require.resolve` 会认 NODE_PATH，而 pnpm 跑脚本时正好把 .pnpm 的 hoist 目录塞进去，
+ * 里面躺着一堆没链到项目根的包（装过又移除的依赖尤其常见）。Vite 的解析器不认 NODE_PATH，
+ * 只看解析成不成功会把这些包放进 include，换来逐条 `Failed to resolve dependency`。
+ * 沿链自己走一遍，才和 Vite 的查找范围对齐
+ */
+function isLinkedFrom(baseDir: string, id: string): boolean {
+  const name = id.split('/').slice(0, id.startsWith('@') ? 2 : 1).join('/')
+
+  for (let dir = baseDir; ;) {
+    // 链上不含 node_modules/node_modules，与 Node 的查找顺序一致
+    if (basename(dir) !== 'node_modules' && existsSync(join(dir, 'node_modules', name))) {
+      return true
+    }
+
+    const parent = dirname(dir)
+    if (parent === dir) {
+      return false
+    }
+
+    dir = parent
+  }
+}
+
 function tryResolve(resolve: NodeRequire['resolve'], id: string): string | null {
   try {
     const resolved = resolve(id)
@@ -85,7 +112,8 @@ function tryResolve(resolve: NodeRequire['resolve'], id: string): string | null 
  * 会静默退回项目根再解析一次，于是稳定产出一条告警。所以嵌套条目两段都探
  *
  * 只认项目根这一个基准，是为了与 Vite 自己的解析起点保持一致：从别处（如某个层自带的
- * node_modules）能解析到、Vite 却解析不到的包，探测通过反而换来一条告警
+ * node_modules、或 NODE_PATH）能解析到、Vite 却解析不到的包，探测通过反而换来一条告警。
+ * 后者由 {@link isLinkedFrom} 挡掉
  *
  * @param rootDir 消费方项目根目录
  */
@@ -95,6 +123,10 @@ export function createOptimizeDepResolver(rootDir: string): OptimizeDepResolver 
 
   return {
     canResolve(id, fromDir) {
+      if (!isLinkedFrom(fromDir ?? rootDir, id)) {
+        return false
+      }
+
       const resolve = fromDir ? createRequire(join(fromDir, 'package.json')).resolve : resolveFromRoot
       const entry = tryResolve(resolve, id)
       if (entry) {
@@ -107,6 +139,10 @@ export function createOptimizeDepResolver(rootDir: string): OptimizeDepResolver 
     },
 
     packageBase(id) {
+      if (!isLinkedFrom(rootDir, id)) {
+        return null
+      }
+
       const manifest = tryResolve(resolveFromRoot, `${id}/package.json`)
       if (manifest) {
         return dirname(manifest)
