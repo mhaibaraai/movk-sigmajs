@@ -44,6 +44,10 @@
     "./utils/*": {
       "types": "./dist/runtime/utils/*.d.ts",
       "import": "./dist/runtime/utils/*.js"
+    },
+    "./programs/*": {
+      "types": "./dist/runtime/programs/*.d.ts",
+      "import": "./dist/runtime/programs/*.js"
     }
   },
   "typesVersions": {
@@ -56,6 +60,9 @@
       ],
       "utils/*": [
         "./dist/runtime/utils/*.d.ts"
+      ],
+      "programs/*": [
+        "./dist/runtime/programs/*.d.ts"
       ]
     }
   },
