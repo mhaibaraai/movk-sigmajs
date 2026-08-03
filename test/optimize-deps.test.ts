@@ -1,5 +1,8 @@
+import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
+import Module, { createRequire } from 'node:module'
 import { tmpdir } from 'node:os'
-import { describe, expect, it } from 'vitest'
+import { join } from 'node:path'
+import { afterEach, describe, expect, it } from 'vitest'
 import type { OptimizeDepCandidate, OptimizeDepResolver } from '../src/optimize-deps'
 import { createOptimizeDepResolver, OPTIMIZE_DEPS_CANDIDATES, resolveOptimizeDepsInclude } from '../src/optimize-deps'
 
@@ -102,5 +105,51 @@ describe('createOptimizeDepResolver', () => {
 
   it('什么都没装的项目根产出空清单，Vite 拿不到任何解析不了的条目', () => {
     expect(resolveOptimizeDepsInclude(createOptimizeDepResolver(tmpdir()))).toEqual([])
+  })
+})
+
+/** NODE_PATH 只在进程启动时读进 Module.globalPaths，运行时改了得手动重算 */
+const nodeModule = Module as unknown as { _initPaths: () => void }
+
+describe('createOptimizeDepResolver 与 NODE_PATH', () => {
+  const originalNodePath = process.env.NODE_PATH
+  const workspaces: string[] = []
+
+  afterEach(() => {
+    if (originalNodePath === undefined) {
+      delete process.env.NODE_PATH
+    }
+    else {
+      process.env.NODE_PATH = originalNodePath
+    }
+    nodeModule._initPaths()
+
+    for (const workspace of workspaces.splice(0)) {
+      rmSync(workspace, { recursive: true, force: true })
+    }
+  })
+
+  it('只在 NODE_PATH 上可见的包判定为不可解析', () => {
+    // pnpm 跑脚本时会把 .pnpm 的 hoist 目录塞进 NODE_PATH，里面躺着一堆没链到项目根的包
+    const workspace = realpathSync(mkdtempSync(join(tmpdir(), 'movk-sigma-node-path-')))
+    workspaces.push(workspace)
+
+    const hoistRoot = join(workspace, 'hoisted', 'node_modules')
+    const hoisted = join(hoistRoot, 'fake-hoisted')
+    mkdirSync(hoisted, { recursive: true })
+    writeFileSync(join(hoisted, 'package.json'), JSON.stringify({ name: 'fake-hoisted', version: '1.0.0', main: 'index.js' }))
+    writeFileSync(join(hoisted, 'index.js'), 'module.exports = {}\n')
+
+    const projectDir = join(workspace, 'project')
+    mkdirSync(projectDir)
+
+    process.env.NODE_PATH = hoistRoot
+    nodeModule._initPaths()
+
+    // 前提：require.resolve 确实认 NODE_PATH，否则这条用例证明不了任何事
+    expect(createRequire(join(projectDir, 'package.json')).resolve('fake-hoisted')).toBe(join(hoisted, 'index.js'))
+
+    // Vite 的解析器不认 NODE_PATH，探测跟着它走才不会产出解析不了的 include 条目
+    expect(createOptimizeDepResolver(projectDir).canResolve('fake-hoisted')).toBe(false)
   })
 })
