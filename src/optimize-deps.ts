@@ -96,7 +96,7 @@ function isLinkedFrom(baseDir: string, id: string): boolean {
   }
 }
 
-function tryResolve(resolve: NodeRequire['resolve'], id: string): string | null {
+function tryResolve(resolve: NodeJS.Require['resolve'], id: string): string | null {
   try {
     const resolved = resolve(id)
     // Node 内置模块名会原样返回，不是路径就不算解析到了真实的包

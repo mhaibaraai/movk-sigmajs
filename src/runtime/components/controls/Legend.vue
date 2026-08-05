@@ -116,7 +116,6 @@ defineExpose({ reset })
     class="sigma-legend"
     v-bind="$attrs"
   >
-    <!-- 作用域连同 toggle / reset 一起给出：只给 groups 的话，接管外观就等于丢掉显隐切换 -->
     <slot
       :groups="groups"
       :toggle="toggle"

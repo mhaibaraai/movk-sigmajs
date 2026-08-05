@@ -6,12 +6,7 @@ import type { EdgeProgramType, NodeProgramType } from 'sigma/rendering'
 import type { EdgeDisplayData, NodeDisplayData, SigmaEventType } from 'sigma/types'
 import type { InjectionKey, Ref, ShallowRef } from 'vue'
 
-/**
- * 归约函数的通用形状。
- *
- * sigma 未把 `nodeReducer` / `edgeReducer` 的类型单独导出，只在 `Settings` 上以内联字段声明，
- * 因此这里从 `Settings` 派生而不是重写一份。
- */
+/** 归约函数的通用形状 */
 export type SigmaReducer<D> = (key: string, data: Attributes) => Partial<D>
 
 /** 节点归约函数，等价于 `Settings['nodeReducer']` 的非空形态 */
@@ -20,10 +15,7 @@ export type SigmaNodeReducer = NonNullable<Settings['nodeReducer']>
 /** 边归约函数，等价于 `Settings['edgeReducer']` 的非空形态 */
 export type SigmaEdgeReducer = NonNullable<Settings['edgeReducer']>
 
-/**
- * reducer 链中的一条登记。sigma 各只接受一个 reducer，库内按 order 升序合成为单个函数。
- * 用户经 `settings` 直接传入的 reducer 始终作为链的基座先执行。
- */
+/** reducer 链中的一条登记 */
 export interface SigmaReducerEntry {
   node?: SigmaReducer<NodeDisplayData>
   edge?: SigmaReducer<EdgeDisplayData>
@@ -49,8 +41,7 @@ export type SigmaProgramSource<T> = T | SigmaLazyProgram<T>
  * 自定义渲染程序。接受任何符合官方程序类型的实现，
  * 不限于 `@sigma/*` 官方包，也不维护白名单。
  *
- * `@sigma/*` 程序包在模块顶层读取 WebGL 全局，在 Nuxt 里必须经
- * `defineSigmaProgram()` 延迟加载，否则 SSR 会崩。
+ * `@sigma/*` 程序包必须经 `defineSigmaProgram()` 延迟加载。
  */
 export interface SigmaPrograms {
   node?: Record<string, SigmaProgramSource<NodeProgramType>>

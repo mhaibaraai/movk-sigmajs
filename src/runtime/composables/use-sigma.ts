@@ -9,11 +9,10 @@ import type { SigmaContext } from '../types'
  * 实例注册表。
  *
  * `reactive` 让 `useSigmaById` 能在目标实例挂载后自动拿到它，而不是停留在首次查表的结果。
- * 底层是 `shallowReactive(Map)`，只追踪键的增删、不深度包装值——存进去的 `SigmaContext`
- * 取出来仍是原对象，`sigma` 与 `graph` 不会被代理，出口兼容的第一条红线得以保住。
+ * 底层是 `shallowReactive(Map)`，只追踪键的增删、不深度包装值，存进去的 `SigmaContext`
+ * 取出来仍是原对象。
  *
- * 重复 id 的告警不用注册表自带的 `onDuplicate`：它同步触发，会把「交接」误判成「冲突」，
- * 理由见 `registerSigma`。
+ * 重复 id 的告警不用自带的 `onDuplicate`：它同步触发，会把「交接」误判成「冲突」。
  */
 const registry = createRegistry<SigmaContext>({ reactive: true })
 
@@ -49,10 +48,7 @@ export function registerSigma(id: string, context: SigmaContext): () => void {
 }
 
 /**
- * 注入当前 `SigmaGraph` 的上下文。
- *
- * 返回的 `sigma` 与 `graph` 是原生实例本身，不是 Proxy 也不是包装对象，
- * 任何 sigma / graphology 的原生方法都可直接调用。
+ * 注入当前 `SigmaGraph` 的上下文，`sigma` 与 `graph` 是原生实例本身。
  *
  * @throws 在 `SigmaGraph` 子树之外调用时抛错
  */

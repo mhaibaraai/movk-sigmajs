@@ -25,12 +25,7 @@ export interface UseSigmaExportReturn {
   download: (filename?: string, options?: SigmaExportOptions) => Promise<void>
 }
 
-/**
- * 把当前画面导出为 PNG。
- *
- * 依赖可选 peer `@sigma/export-image`，用到时才动态加载：它与 sigma 本体一样
- * 在模块顶层读 WebGL 全局，静态 import 会让 SSR 直接崩。
- */
+/** 把当前画面导出为 PNG，依赖可选 peer `@sigma/export-image`，用到时才动态加载 */
 export function useSigmaExport(): UseSigmaExportReturn {
   const { whenReady } = useSigma()
   const isExporting = shallowRef(false)

@@ -325,8 +325,7 @@ export function buildNodeShapeShaders(
  * `size` 的语义是**外接圆半径**，与圆形节点的半径同义。同一个 `size` 下多边形看起来比圆略小，
  * 是顶点之间被切掉的部分，属预期；`@sigma/node-square` 取的是内切半径，两者混用时需自行折算。
  *
- * 本模块在顶层静态引用 `sigma/rendering` 与 `sigma/utils`，它们在模块顶层就读 WebGL 全局，
- * **必须经 `defineSigmaProgram()` 延迟加载**，直接静态 import 会让 SSR 崩在 `WebGL2RenderingContext`。
+ * 本模块顶层静态引用 `sigma/rendering` 与 `sigma/utils`，**必须经 `defineSigmaProgram()` 延迟加载**。
  *
  * @example
  * ```ts

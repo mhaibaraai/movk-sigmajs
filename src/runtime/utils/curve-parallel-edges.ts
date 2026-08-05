@@ -47,10 +47,7 @@ function getCurvature(index: number, maxIndex: number, base: number): number {
  * `parallelIndex` / `parallelMinIndex` / `parallelMaxIndex`，再把索引换算成
  * `curvature` 并设置边的 `type`——只做第一步边是不会弯的，索引本身不参与渲染。
  *
- * 依赖可选 peer `@sigma/edge-curve`，用到时才动态加载：它与 sigma 本体一样
- * 在模块顶层读 WebGL 全局，静态 import 会让 SSR 直接崩。
- *
- * graphology 实例本就是可变数据结构，此处直接写属性是有意为之。
+ * 依赖可选 peer `@sigma/edge-curve`，用到时才动态加载。
  */
 export async function curveParallelEdges(
   graph: Graph,

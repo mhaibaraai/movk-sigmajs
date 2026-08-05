@@ -31,14 +31,11 @@ const props = defineProps<{
    */
   graph?: Graph
   /**
-   * sigma 渲染配置，整体透传，不逐字段枚举也不过滤未知键
+   * sigma 渲染配置，整体透传
    * @see https://www.sigmajs.org/docs/typedoc/sigma/src/settings/interfaces/Settings
    */
   settings?: Partial<Settings>
-  /**
-   * 自定义渲染程序，与 sigma 内置程序合并。
-   * 接受任何符合官方程序类型的实现，不限于 `@sigma/*` 官方包
-   */
+  /** 自定义渲染程序，与 sigma 内置程序合并 */
   programs?: SigmaPrograms
   /** 实例 id，登记后可经 `useSigmaById(id)` 在组件树之外访问 */
   id?: string
@@ -49,9 +46,8 @@ const props = defineProps<{
 /**
  * sigma 事件全集，payload 类型与上游一致。
  *
- * 这里必须逐条写出而非用映射类型派生：`@vue/compiler-sfc` 需要在编译期静态提取事件名，
- * 它解析不了跨包的映射类型（`vue-tsc` 能过但打包会失败）。
- * 上游新增事件时，`runtime/types` 里的 `Record<SigmaEventType, true>` 会先报错提示同步这里。
+ * 必须逐条写出而非用映射类型派生：`@vue/compiler-sfc` 要在编译期静态提取事件名，
+ * 解析不了跨包的映射类型（`vue-tsc` 能过但打包会失败）。
  */
 const emit = defineEmits<{
   /** 单击节点 */
@@ -133,14 +129,12 @@ const isReady = shallowRef(false)
 /**
  * 内部图按 `data.options` 建，否则 `multi: true` 的数据会被降级：
  * 无 key 的平行边在非多重图上会命中同一条边，三条 a→b 合并成一条。
- *
- * props 会被 Vue 包成响应式代理，必须 `toRaw` 剥回原对象再交给 sigma 与 graphology，
- * 否则下发出去的就不是「原生实例」了，instanceof 与内部状态都可能出问题
  */
 function createInternalGraph(): Graph {
   return new Graph(props.data?.options)
 }
 
+// toRaw 剥掉 Vue 给 props 套的响应式代理，下发出去的才是原生实例
 const graph = shallowRef<Graph>(props.graph ? toRaw(props.graph) : createInternalGraph())
 const isExternalGraph = computed(() => props.graph !== undefined)
 
@@ -149,10 +143,7 @@ let readyPromise = new Promise<Sigma>((resolve) => {
   resolveReady = resolve
 })
 
-/**
- * sigma 的内置渲染程序表。
- * 只能在客户端拿到——见下方 onMounted 里对动态导入的说明
- */
+/** sigma 的内置渲染程序表，只能在客户端拿到 */
 let programDefaults: {
   node: Record<string, NodeProgramType>
   edge: Record<string, EdgeProgramType>
@@ -188,11 +179,7 @@ const baseSettings = computed<Partial<Settings>>(() => defu(
   { allowInvalidContainer: true }
 ) as Partial<Settings>)
 
-/**
- * reducer 链。sigma 的 nodeReducer / edgeReducer 各只接受一个函数，后设置的会覆盖先设置的，
- * 于是高亮、淡出、过滤、图例显隐这些独立关注点无法共存。
- * 这里维护一条按 order 升序的链，合成为单个函数交给 sigma。
- */
+/** reducer 链，按 order 升序合成为单个函数交给 sigma */
 const reducerEntries: SigmaReducerEntry[] = []
 
 function registerReducer(entry: SigmaReducerEntry): () => void {
@@ -224,7 +211,7 @@ function resolveSettings(): Partial<Settings> {
 
   return {
     ...base,
-    // 用户自带的 reducer 永远排在链首作为基座，库注册的在其后叠加，不得被吞掉
+    // 用户自带的 reducer 排在链首作为基座，库注册的在其后叠加
     nodeReducer: chainReducers<NodeDisplayData>([
       base.nodeReducer as SigmaReducer<NodeDisplayData> | null | undefined,
       ...sorted.map(entry => entry.node)
@@ -296,8 +283,7 @@ onMounted(async () => {
     console.warn('[@movk/sigma] data 与 graph 互斥，已传入外部 graph，data 将被忽略')
   }
 
-  // sigma 在模块顶层就读取 WebGL2RenderingContext 建常量表，静态导入会让 SSR 直接 ReferenceError。
-  // 必须推迟到客户端挂载后再加载，graphology 无此问题可以正常静态导入
+  // sigma 在模块顶层就读 WebGL2RenderingContext，静态导入会让 SSR 直接 ReferenceError
   const [{ default: Sigma }, { DEFAULT_NODE_PROGRAM_CLASSES, DEFAULT_EDGE_PROGRAM_CLASSES }, node, edge] = await Promise.all([
     import('sigma'),
     import('sigma/settings'),
@@ -333,11 +319,7 @@ onMounted(async () => {
   emit('ready', instance)
 })
 
-/**
- * 只在客户端登记。注册表是模块级单例，而服务端不会触发 `onBeforeUnmount`，
- * SSR 期注册的条目只增不减，既跨请求残留又会把后续渲染误判成 id 冲突。
- * 何况服务端的 `sigma` 恒为 `null`（实例在 `onMounted` 才创建），登记本身没有意义。
- */
+// 只在客户端登记：注册表是模块级单例，而服务端不触发 onBeforeUnmount，条目只增不减
 if (props.id && import.meta.client) {
   const unregister = registerSigma(props.id, context)
   onBeforeUnmount(unregister)

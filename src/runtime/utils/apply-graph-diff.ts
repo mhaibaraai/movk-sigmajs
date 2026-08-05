@@ -21,8 +21,6 @@ export interface ApplyGraphDiffOptions {
  *
  * 节点属性按新数据整体替换，唯一例外是 `preservePositions` 下的 x / y：
  * 新数据显式给出时以新值为准，未给出则沿用图上现有坐标。
- *
- * graphology 实例本身就是可变数据结构，此处直接 mutation 是有意为之。
  */
 export function applyGraphDiff(
   graph: Graph,

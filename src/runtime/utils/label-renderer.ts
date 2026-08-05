@@ -87,10 +87,7 @@ export interface CreateLabelRendererOptions {
    */
   gap?: number
   /**
-   * 文字描边光晕，传 `false` 关闭。
-   *
-   * 用描边而非底衬，是因为节点标签画布固定压在边标签之上（`render()` 里 `renderLabels()`
-   * 先于 `renderEdgeLabels()`，顺序改不了），成片的底衬会盖住画在下层的关系名。
+   * 文字描边光晕，传 `false` 关闭。用描边而非底衬，是因为成片的底衬会盖住画在下层的关系名
    * @defaultValue `{ color: 'rgba(255, 255, 255, 0.95)', width: 3 }`
    */
   halo?: SigmaLabelHaloOptions | false
