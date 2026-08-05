@@ -15,8 +15,11 @@ src/
     └── index.css         # 可选样式表
 docs/                     # @movk/nuxt-docs 文档站，示例的唯一数据源
 ├── app/components/content/examples/
-├── app/utils/corpus.ts
+├── app/utils/corpus.ts   # 示例数据的唯一入口
+├── app/data/             # 打进 bundle 的数据集子集
 ├── app/assets/css/examples.css
+├── public/data/          # 官方完整数据集，按需 fetch
+├── scripts/              # 子集派生脚本
 └── content/docs/         # 一 API 一页
 playgrounds/
 ├── basic/                # 零 UI 依赖，反向引用 docs 的示例，纯原生逃生舱
@@ -120,13 +123,13 @@ pnpm install
 pnpm dev:prepare     # 首次或依赖变更后必须先跑，两个 playground 与 docs 一起 prepare
 pnpm dev             # 启动 playgrounds/basic
 pnpm dev:ui          # 启动 playgrounds/ui
-pnpm dev:docs        # 启动 docs
+pnpm docs            # 启动 docs
 pnpm test            # vitest
 pnpm typecheck
 pnpm lint
 ```
 
-改动 `src/` 后若 playground 或 docs 表现异常，先重跑 `pnpm dev:prepare`。`nuxt-component-meta` 只在启动时解析一次，改了组件 JSDoc 要重启 `dev:docs` 才能看到新的 API 表。
+改动 `src/` 后若 playground 或 docs 表现异常，先重跑 `pnpm dev:prepare`。`nuxt-component-meta` 只在启动时解析一次，改了组件 JSDoc 要重启 `pnpm docs` 才能看到新的 API 表。
 
 已经踩过的坑：
 
@@ -137,6 +140,8 @@ pnpm lint
 - 改完 `src/runtime/index.css` 必须重跑 `pnpm dev:prepare`，playground 加载的是 `dist/` 里的副本，不重新 stub 就还是旧样式
 - **一页里能同时存活的 Sigma 实例有硬上限**：每个实例占 3 个 WebGL 上下文（`sigma-edges` / `sigma-nodes` / `sigma-hoverNodes` 三张画布走 WebGL，另外四张是 2D），浏览器上限多为 16 个。超出后最早的上下文被强制丢弃、画布直接变空白，只在控制台留一行 `Too many active WebGL contexts` 的警告。示例列表页一律经 `ExampleCard` 视口内懒挂载，同屏不超过四个实例
 - 控件插槽的作用域要连行为一起给。只暴露数据（如图例只给 `groups`）会让「接管外观」等于「丢掉功能」，与设计前提相悖
+- 文档站的 `.example-stage` 是 **flex 行容器**。示例根节点若是自己的 `div`（而不是直接给 `SigmaGraph`），只声明 `height: 100%` 会缩成内容宽，图被压成一条。这类容器必须一并写 `width: 100%`
+- **布局会毁掉 360 单位的坐标约定**：`circular` / `random` 默认 `scale` 为 1，跨度只剩 1~2 个单位；`forceatlas2` 用 `inferSettings()` 会收敛到几十个单位。跑布局的示例一律传 `itemSizesReference: 'screen'` 让 size 退回像素语义——布局后归一化坐标按不住 worker 版 ForceAtlas2，它每一帧都在回写坐标
 - **v4 的节点 `size` 是图坐标单位，不是屏幕像素**：`itemSizesReference` 默认从 v3 的 `'screen'` 改成了 `'positions'`，渲染半径 = `size × 每坐标单位的像素数`，也就是说决定视觉大小的是 size 与坐标跨度的**比值**。v3 时代「坐标随便写、size 当像素填」的数据搬到 v4 会渲染出比画布还大的色块。示例一律把坐标跨度取在 360 单位左右（对应 `.example-stage` 的 420px 减去 `stagePadding`），使每单位约等于 1px、size 数值读起来就是像素半径；新写示例要守这个约定。库不覆盖这个默认值，语义与逃生方式写在 `docs/content/docs/6.guides/4.node-size.md`
 
 - 模块装进消费方的 `node_modules` 后，Vite 的依赖扫描不进 node_modules 里的源码，runtime 对 graphology / sigma 系列的 import 拿不到预构建，浏览器直接收到 CJS 报缺少命名导出。声明由 `src/optimize-deps.ts` 内置，runtime 新增对某个包的 import 时要同步补一条候选。传递依赖（`events`、`graphology-utils/*`）必须写成 Vite 的 `parent > child` 形式，未安装的可选 peer 必须探测后跳过——直接塞进 `optimizeDeps.include` 会换来一串启动告警
@@ -167,11 +172,11 @@ pnpm lint
 
 ## 文档站
 
-`docs/` 是 `@movk/nuxt-docs` 的消费方，`pnpm dev:docs` 起站。入门、组件、composables、工具函数、指南五个分组，一 API 一页已补齐。部署未排期。
+`docs/` 是 `@movk/nuxt-docs` 的消费方，`pnpm docs` 起站。入门、组件、composables、工具函数、指南五个分组，一 API 一页已补齐。部署未排期。
 
 ### 示例的唯一数据源在 docs
 
-47 个示例、`corpus.ts`、`examples.css` 全部住在 `docs/app/`，`playgrounds/basic` 经 `components` / `imports.dirs` / `css` 三处的绝对路径**反向引用**同一份文件。不要在 basic 下重建这些目录，两份会立刻漂移。
+50 个示例、`corpus.ts`、`examples.css` 与 `public/data/` 全部住在 `docs/`，`playgrounds/basic` 经 `components` / `imports.dirs` / `css` / `nitro.publicAssets` 四处的绝对路径**反向引用**同一份文件。不要在 basic 下重建这些目录，两份会立刻漂移。
 
 物理位置必须在 docs 侧，因为 `ComponentExample.vue` 用 `import.meta.glob('~/components/content/examples/**/*.vue')` 找预览组件，`~` 硬绑 docs 自身 srcDir。示例放在别处时**预览会静默消失**——模板是 `v-else-if="resolvedComponent"`，没有兜底分支也不报错，只剩源码块。改完示例位置务必肉眼确认预览还在。
 
@@ -186,6 +191,13 @@ pnpm lint
 - **不准用 `@nuxt/ui` 的自动导入**。示例现在住在装了 `@nuxt/ui` 的 docs 里，误用 `UButton` 这类组件在文档站看不出问题，只有 basic 构建会炸。`pnpm dev:build` 是这条的守门人
 - 组件示例的数据内联，因为数据形状本身就是演示内容；composable 与规模示例用 `demoGraph()` / `createScaleGraph()`，那些示例讲的是行为，数据只是背景板
 - 示例内的注释会出现在文档的源码展示里，只写验证点，一两行
+
+**示例数据取自 sigma 官方数据集**。`docs/public/data/wikipedia.json` 是从上游 v4 仓库原样 copy 的完整数据集（2085 节点 / 5409 边 / 24 社区），来源与 commit 记在同目录 README。分工照搬上游：
+
+- `demoGraph()` 是同步函数，示例里 `const data = demoGraph()` 一行就要拿到数据，所以它读的是 `docs/app/data/wikipedia-subset.json`——一份 160 节点的子集，随包打进 bundle。子集由 `docs/scripts/build-wikipedia-subset.mjs` 从完整数据集派生，改了取样规则要重跑
+- 完整数据集只由 `loadWikipediaGraph()` 按需 `fetch('/data/wikipedia.json')`，886 KB 不该在挂载时加载
+- `demoGraph()` 把节点 key 重编为 `n0..nN`（`n0` 恒为枢纽）。示例与文档正文都按这套稳定 id 引用节点，**不要改成真实 key**，否则六处按 `'n0'` / `'n3'` 取节点的示例会一起失效
+- `createScaleGraph()` 仍是合成数据，且应当保持：规模示例要 2k / 5k / 20k 节点，官方公开数据目录里最大的图也只有 2085 个，上游那批万级数据集是构建时从 SNAP 下载、不入库的
 
 **成对的示例**：`useSigma()` 是 inject，必须在 `SigmaGraph` 子树内调用，所以 composable 示例一律是 `XxxExample.vue`（渲染图的外壳）加 `XxxPanel.vue`（消费上下文的面板）两个文件。这也正是真实应用的结构。
 
