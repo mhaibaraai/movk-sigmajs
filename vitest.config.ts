@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vitest/config'
 
@@ -24,6 +25,12 @@ function defineNuxtImportMeta() {
 
 export default defineConfig({
   plugins: [defineNuxtImportMeta(), vue()],
+  resolve: {
+    alias: {
+      // Nuxt 在构建期注入的别名，vitest 里解析不到，见 test/setup/nuxt-app-stub.ts
+      '#app': fileURLToPath(new URL('./test/setup/nuxt-app-stub.ts', import.meta.url))
+    }
+  },
   test: {
     environment: 'happy-dom',
     include: ['test/**/*.test.ts'],

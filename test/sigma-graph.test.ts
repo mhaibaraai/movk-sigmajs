@@ -6,8 +6,16 @@ import SigmaGraph from '../src/runtime/components/Graph.vue'
 import { useSigmaById } from '../src/runtime/composables/use-sigma'
 
 /** 捕获 Sigma 构造参数。happy-dom 无 WebGL 上下文，必须 mock 掉构造本身 */
+type SigmaOptions = {
+  settings: Record<string, unknown>
+  styles?: unknown
+  primitives?: unknown
+  nodeReducer?: (...args: unknown[]) => Record<string, unknown>
+  edgeReducer?: (...args: unknown[]) => Record<string, unknown>
+}
+
 const state = vi.hoisted(() => ({
-  calls: [] as Array<{ graph: unknown, container: unknown, settings: Record<string, unknown> }>,
+  calls: [] as Array<{ graph: unknown, container: unknown, options: SigmaOptions }>,
   events: [] as string[],
   killed: 0
 }))
@@ -15,9 +23,9 @@ const state = vi.hoisted(() => ({
 vi.mock('sigma', () => {
   class MockSigma {
     settings: Record<string, unknown>
-    constructor(graph: unknown, container: unknown, settings: Record<string, unknown>) {
-      this.settings = settings
-      state.calls.push({ graph, container, settings })
+    constructor(graph: unknown, container: unknown, options: SigmaOptions) {
+      this.settings = options.settings
+      state.calls.push({ graph, container, options })
     }
 
     on(event: string) {
@@ -26,6 +34,7 @@ vi.mock('sigma', () => {
 
     off() {}
     resize() {}
+    refresh() {}
     setGraph() {}
     kill() {
       state.killed++
@@ -82,7 +91,7 @@ describe('SigmaGraph 出口兼容', () => {
       settings: { someFutureSigmaOption: 'kept', renderLabels: false }
     })
 
-    const settings = state.calls[0]!.settings
+    const settings = state.calls[0]!.options.settings
     expect(settings.someFutureSigmaOption).toBe('kept')
     expect(settings.renderLabels).toBe(false)
   })
@@ -90,50 +99,79 @@ describe('SigmaGraph 出口兼容', () => {
   it('用户自带的 nodeReducer 位于链首被调用，返回的补丁合并进显示数据', async () => {
     const nodeReducer = vi.fn(() => ({ size: 20 }))
 
-    await mountGraph({ settings: { nodeReducer } })
+    await mountGraph({ nodeReducer })
 
-    // 传给 sigma 的是链，不是原函数：链要替只返回补丁的归约补全 x / y，
+    // 传给 sigma 的是稳定的 dispatcher，不是原函数：链要替只返回补丁的归约补全 x / y，
     // 否则 sigma 拿不到完整显示数据会直接抛错
-    const chained = state.calls[0]!.settings.nodeReducer as (key: string, data: Record<string, unknown>) => Record<string, unknown>
-    const result = chained('n1', { x: 1, y: 2, label: 'N1' })
+    const dispatch = state.calls[0]!.options.nodeReducer!
+    const result = dispatch('n1', { x: 1, y: 2, label: 'N1' }, {}, {}, {}, {})
 
-    expect(nodeReducer).toHaveBeenCalledWith('n1', expect.objectContaining({ label: 'N1' }))
+    expect(nodeReducer).toHaveBeenCalledWith('n1', expect.objectContaining({ label: 'N1' }), {}, {}, {}, {})
     expect(result).toMatchObject({ x: 1, y: 2, label: 'N1', size: 20 })
   })
 
   it('内置默认 allowInvalidContainer 可被用户覆盖', async () => {
     await mountGraph()
-    expect(state.calls[0]!.settings.allowInvalidContainer).toBe(true)
+    expect(state.calls[0]!.options.settings.allowInvalidContainer).toBe(true)
 
     state.calls.length = 0
     await mountGraph({ settings: { allowInvalidContainer: false } })
-    expect(state.calls[0]!.settings.allowInvalidContainer).toBe(false)
+    expect(state.calls[0]!.options.settings.allowInvalidContainer).toBe(false)
   })
 
-  it('自定义渲染程序与 sigma 内置程序合并，不挤掉内置项', async () => {
-    const custom = class {
-      readonly kind = 'custom'
+  it('styles 整体透传，不做键白名单', async () => {
+    const styles = {
+      nodes: { color: '#f43f5e', someFutureStyleKey: 1 },
+      edges: { parallelPath: 'curved' }
     }
 
-    await mountGraph({ programs: { node: { custom } } })
+    await mountGraph({ styles })
 
-    const classes = state.calls[0]!.settings.nodeProgramClasses as Record<string, unknown>
-    expect(classes.custom).toBe(custom)
-    expect(classes.circle).toBeDefined()
+    expect(state.calls[0]!.options.styles).toMatchObject(styles)
   })
 
-  it('未传 programs 时不干预 sigma 自己的程序默认值', async () => {
+  it('primitives 整体透传', async () => {
+    const primitives = {
+      nodes: { shapes: [{ name: 'hex', glsl: 'float d = 0.0;' }] },
+      depthLayers: ['edges', 'nodes']
+    }
+
+    await mountGraph({ primitives })
+
+    expect(state.calls[0]!.options.primitives).toMatchObject(primitives)
+  })
+
+  it('未传 styles 与 primitives 时不干预 sigma 自己的默认值', async () => {
     await mountGraph()
-    expect(state.calls[0]!.settings.nodeProgramClasses).toBeUndefined()
+
+    expect(state.calls[0]!.options.styles).toBeUndefined()
+    expect(state.calls[0]!.options.primitives).toBeUndefined()
   })
 
-  it('绑定 sigma 的全部 33 个事件', async () => {
+  it('styles 是构造时读取的，变更后重建实例', async () => {
+    const wrapper = await mountGraph({ styles: { nodes: { color: '#111' } } })
+    expect(state.calls).toHaveLength(1)
+
+    await wrapper.setProps({ styles: { nodes: { color: '#222' } } } as never)
+    await vi.waitFor(() => {
+      if (state.calls.length < 2) {
+        throw new Error('尚未重建')
+      }
+    })
+
+    expect(state.killed).toBe(1)
+    expect(state.calls[1]!.options.styles).toMatchObject({ nodes: { color: '#222' } })
+  })
+
+  it('绑定 sigma 的全部 52 个事件', async () => {
     await mountGraph()
 
     expect(state.events).toContain('clickNode')
     expect(state.events).toContain('enterEdge')
     expect(state.events).toContain('afterRender')
-    expect(state.events).toHaveLength(33)
+    expect(state.events).toContain('clickNodeLabel')
+    expect(state.events).toContain('nodeDragStart')
+    expect(state.events).toHaveLength(52)
   })
 
   it('settings 变化后经 setSettings 同步，仍不做键过滤', async () => {

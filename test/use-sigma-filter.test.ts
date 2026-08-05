@@ -7,14 +7,16 @@ import { useSigmaFilter } from '../src/runtime/composables/use-sigma-filter'
 import type { UseSigmaFilterOptions, UseSigmaFilterReturn } from '../src/runtime/composables/use-sigma-filter'
 
 const state = vi.hoisted(() => ({
-  instances: [] as Array<{ settings: Record<string, unknown> }>
+  instances: [] as Array<{ options: Record<string, unknown>, settings: Record<string, unknown> }>
 }))
 
 vi.mock('sigma', () => {
   class MockSigma {
+    options: Record<string, unknown>
     settings: Record<string, unknown>
-    constructor(_graph: unknown, _container: unknown, settings: Record<string, unknown>) {
-      this.settings = settings
+    constructor(_graph: unknown, _container: unknown, options: { settings: Record<string, unknown> }) {
+      this.options = options
+      this.settings = options.settings
       state.instances.push(this)
     }
 
@@ -36,7 +38,7 @@ vi.mock('sigma', () => {
   return { default: MockSigma }
 })
 
-type Reducer = (key: string, data: Record<string, unknown>) => Record<string, unknown>
+type Reducer = (...args: unknown[]) => Record<string, unknown>
 
 function seeded() {
   const graph = new Graph()
@@ -74,8 +76,14 @@ async function mountFilter(options: UseSigmaFilterOptions = {}) {
   return {
     api,
     graph,
-    nodeReducer: () => instance.settings.nodeReducer as Reducer,
-    edgeReducer: () => instance.settings.edgeReducer as Reducer
+    nodeReducer: () => {
+      const reducer = instance.options.nodeReducer as Reducer
+      return (key: string, data: Record<string, unknown> = {}) => reducer(key, data, {}, {}, {}, {})
+    },
+    edgeReducer: () => {
+      const reducer = instance.options.edgeReducer as Reducer
+      return (key: string, data: Record<string, unknown> = {}) => reducer(key, data, {}, {}, {}, {})
+    }
   }
 }
 
@@ -90,7 +98,7 @@ describe('useSigmaFilter', () => {
     const { api, nodeReducer } = await mountFilter()
 
     expect(api.hiddenCount.value).toBe(0)
-    expect(nodeReducer()('drop', { size: 1 })).not.toMatchObject({ hidden: true })
+    expect(nodeReducer()('drop', { size: 1 })).not.toMatchObject({ visibility: 'hidden' })
   })
 
   it('节点谓词返回 false 的被隐藏', async () => {
@@ -99,8 +107,8 @@ describe('useSigmaFilter', () => {
     api.nodeFilter.value = (_key, attributes) => attributes.group === 'a'
     await nextTick()
 
-    expect(nodeReducer()('keep', {})).not.toMatchObject({ hidden: true })
-    expect(nodeReducer()('drop', {})).toMatchObject({ hidden: true })
+    expect(nodeReducer()('keep', {})).not.toMatchObject({ visibility: 'hidden' })
+    expect(nodeReducer()('drop', {})).toMatchObject({ visibility: 'hidden' })
     expect(api.hiddenCount.value).toBe(1)
   })
 
@@ -110,8 +118,8 @@ describe('useSigmaFilter', () => {
     api.only(['keep'])
     await nextTick()
 
-    expect(nodeReducer()('keep', {})).not.toMatchObject({ hidden: true })
-    expect(nodeReducer()('other', {})).toMatchObject({ hidden: true })
+    expect(nodeReducer()('keep', {})).not.toMatchObject({ visibility: 'hidden' })
+    expect(nodeReducer()('other', {})).toMatchObject({ visibility: 'hidden' })
     expect(api.hiddenCount.value).toBe(2)
   })
 
@@ -121,8 +129,8 @@ describe('useSigmaFilter', () => {
     api.only(['keep', 'other'])
     await nextTick()
 
-    expect(edgeReducer()(graph.edge('keep', 'other')!, {})).not.toMatchObject({ hidden: true })
-    expect(edgeReducer()(graph.edge('keep', 'drop')!, {})).toMatchObject({ hidden: true })
+    expect(edgeReducer()(graph.edge('keep', 'other')!, {})).not.toMatchObject({ visibility: 'hidden' })
+    expect(edgeReducer()(graph.edge('keep', 'drop')!, {})).toMatchObject({ visibility: 'hidden' })
   })
 
   it('hideDanglingEdges 关闭后边不随端点隐藏', async () => {
@@ -131,7 +139,7 @@ describe('useSigmaFilter', () => {
     api.only(['keep'])
     await nextTick()
 
-    expect(edgeReducer()(graph.edge('keep', 'drop')!, {})).not.toMatchObject({ hidden: true })
+    expect(edgeReducer()(graph.edge('keep', 'drop')!, {})).not.toMatchObject({ visibility: 'hidden' })
   })
 
   it('边谓词独立生效', async () => {
@@ -140,8 +148,8 @@ describe('useSigmaFilter', () => {
     api.edgeFilter.value = (_key, attributes) => attributes.kind === 'x'
     await nextTick()
 
-    expect(edgeReducer()(graph.edge('keep', 'other')!, {})).not.toMatchObject({ hidden: true })
-    expect(edgeReducer()(graph.edge('keep', 'drop')!, {})).toMatchObject({ hidden: true })
+    expect(edgeReducer()(graph.edge('keep', 'other')!, {})).not.toMatchObject({ visibility: 'hidden' })
+    expect(edgeReducer()(graph.edge('keep', 'drop')!, {})).toMatchObject({ visibility: 'hidden' })
   })
 
   it('reset 清空全部过滤', async () => {
@@ -153,7 +161,7 @@ describe('useSigmaFilter', () => {
     await nextTick()
 
     expect(api.hiddenCount.value).toBe(0)
-    expect(nodeReducer()('drop', {})).not.toMatchObject({ hidden: true })
+    expect(nodeReducer()('drop', {})).not.toMatchObject({ visibility: 'hidden' })
   })
 
   it('过滤只作用于视图，不改动图数据', async () => {

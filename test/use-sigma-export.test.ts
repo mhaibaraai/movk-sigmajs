@@ -93,11 +93,13 @@ describe('useSigmaExport', () => {
     expect(state.downloads[0]).toMatchObject({ fileName: 'png-图谱' })
   })
 
-  it('未指定尺寸与图层时传 null，对应上游的「全部」', async () => {
+  it('未指定的选项一律不写入，交给上游的默认值', async () => {
     const api = await mountExport()
     await api.download()
 
-    expect(state.downloads[0]).toMatchObject({ layers: null, width: null, height: null })
+    expect(state.downloads[0]).not.toHaveProperty('width')
+    expect(state.downloads[0]).not.toHaveProperty('height')
+    expect(state.downloads[0]).not.toHaveProperty('cameraState')
   })
 
   it('省略背景色时不写入该字段，保留上游的透明默认值', async () => {
@@ -109,13 +111,18 @@ describe('useSigmaExport', () => {
 
   it('显式传入的选项透传给上游', async () => {
     const api = await mountExport()
-    await api.download('x', { width: 800, height: 600, backgroundColor: '#fff', layers: ['nodes'] })
+    await api.download('x', {
+      width: 800,
+      height: 600,
+      backgroundColor: '#fff',
+      sigmaOverrides: { styles: { nodes: { color: '#000' } } }
+    })
 
     expect(state.downloads[0]).toMatchObject({
       width: 800,
       height: 600,
       backgroundColor: '#fff',
-      layers: ['nodes']
+      sigmaOverrides: { styles: { nodes: { color: '#000' } } }
     })
   })
 

@@ -10,6 +10,7 @@ import SigmaLegend from '../src/runtime/components/controls/Legend.vue'
 
 const state = vi.hoisted(() => ({
   instances: [] as Array<{
+    options: Record<string, unknown>
     settings: Record<string, unknown>
     handlers: Record<string, (payload: unknown) => void>
     camera: { zoomIn: number, zoomOut: number, reset: number, animated: unknown[] }
@@ -18,14 +19,16 @@ const state = vi.hoisted(() => ({
 
 vi.mock('sigma', () => {
   class MockSigma {
+    options: Record<string, unknown> = {}
     settings: Record<string, unknown> = {}
     handlers: Record<string, (payload: unknown) => void> = {}
     camera = { zoomIn: 0, zoomOut: 0, reset: 0, animated: [] as unknown[] }
     graph: Graph
 
-    constructor(graph: Graph, _container: unknown, settings: Record<string, unknown>) {
+    constructor(graph: Graph, _container: unknown, options: { settings: Record<string, unknown> }) {
       this.graph = graph
-      this.settings = settings
+      this.options = options
+      this.settings = options.settings
       state.instances.push(this)
     }
 
@@ -52,7 +55,7 @@ vi.mock('sigma', () => {
     }
 
     getNodeDisplayData(key: string) {
-      return this.graph.hasNode(key) ? { x: 0, y: 0, hidden: false } : undefined
+      return this.graph.hasNode(key) ? { x: 0, y: 0, visibility: 'visible' } : undefined
     }
 
     on(event: string, handler: (payload: unknown) => void) {
@@ -390,14 +393,14 @@ describe('SigmaLegend', () => {
     expect(wrapper.find('.sigma-legend-item').text()).toContain('未分类')
   })
 
-  it('点击条目切换该组显隐并落到 reducer 的 hidden', async () => {
+  it('点击条目切换该组显隐并落到 reducer 的 visibility', async () => {
     const { wrapper, instance } = await mountControl(() => h(SigmaLegend, { field: 'type' }))
 
     await wrapper.findAll('.sigma-legend-item')[0]!.trigger('click')
 
-    const reducer = instance.settings.nodeReducer as (key: string, data: object) => { hidden?: boolean }
-    expect(reducer('a', {}).hidden).toBe(true)
-    expect(reducer('c', {}).hidden).toBeFalsy()
+    const reducer = instance.options.nodeReducer as (...args: unknown[]) => { visibility?: string }
+    expect(reducer('a', {}, {}, {}, {}, {}).visibility).toBe('hidden')
+    expect(reducer('c', {}, {}, {}, {}, {}).visibility).toBeUndefined()
     expect(wrapper.findAll('.sigma-legend-item')[0]!.attributes('aria-pressed')).toBe('false')
   })
 
@@ -409,9 +412,9 @@ describe('SigmaLegend', () => {
     await item.trigger('click')
 
     // 过滤归约常驻链上，清空后不再隐藏任何节点
-    const reducer = instance.settings.nodeReducer as (key: string, data: object) => { hidden?: boolean }
-    expect(reducer('a', {}).hidden).toBeFalsy()
-    expect(reducer('c', {}).hidden).toBeFalsy()
+    const reducer = instance.options.nodeReducer as (...args: unknown[]) => { visibility?: string }
+    expect(reducer('a', {}, {}, {}, {}, {}).visibility).toBeUndefined()
+    expect(reducer('c', {}, {}, {}, {}, {}).visibility).toBeUndefined()
     expect(item.attributes('aria-pressed')).toBe('true')
   })
 
