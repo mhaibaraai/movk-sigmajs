@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { shallowRef } from 'vue'
 import type { SerializedGraph } from 'graphology-types'
+import type { StylesDeclaration } from 'sigma/types'
 
 /**
  * 三档规模，确定性生成，同一档每次结果一致便于对比读数。
@@ -8,6 +9,11 @@ import type { SerializedGraph } from 'graphology-types'
  * 不自动加载：20k 节点 / 60k 边这一档建图要数百毫秒，开发时反复 HMR 会很难受。
  */
 const TIERS = [1000, 5000, 20000] as const
+
+// styles 只在构造时读取，提到顶层保持引用稳定，避免父组件重渲染时重建实例
+const styles: StylesDeclaration = {
+  edges: { color: '#e2e8f0' }
+}
 
 const tier = shallowRef<number | null>(null)
 const data = shallowRef<SerializedGraph | null>(null)
@@ -33,7 +39,8 @@ function load(count: number) {
       v-if="data"
       :key="tier ?? 0"
       :data="data"
-      :settings="{ hideEdgesOnMove: true, labelRenderedSizeThreshold: 8, defaultEdgeColor: '#e2e8f0' }"
+      :styles="styles"
+      :settings="{ hideEdgesOnMove: true, labelRenderedSizeThreshold: 8 }"
     >
       <ScaleStatsPanel
         :build-ms="buildMs"

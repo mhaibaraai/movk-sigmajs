@@ -356,14 +356,25 @@ async function createInstance() {
   emit('ready', instance)
 }
 
-// styles 与 primitives 是构造时读取的，改了只能重建
+/**
+ * styles 与 primitives 是构造时读取的，改了只能重建。
+ *
+ * 比引用而非比值：deep 比较会让模板里内联的对象字面量在父组件每次重渲染时
+ * 都判定为「变了」，于是反复重建实例。使用方应把它们提到 setup 顶层或包进
+ * computed 保持引用稳定
+ */
 watch([() => props.styles, () => props.primitives], async () => {
   if (!sigma.value) {
     return
   }
+
+  if (import.meta.dev) {
+    console.warn('[@movk/sigma] styles 或 primitives 变更，正在重建 sigma 实例。若非有意为之，请把它们提到 setup 顶层保持引用稳定')
+  }
+
   destroyInstance()
   await createInstance()
-}, { deep: true })
+})
 
 onMounted(async () => {
   if (import.meta.dev && props.data && isExternalGraph.value) {
