@@ -2,20 +2,35 @@
 import Graph from 'graphology'
 import { useResizeObserver } from '@vueuse/core'
 import { defu } from 'defu'
+import { useRuntimeConfig } from '#app'
 import { computed, onBeforeUnmount, onMounted, provide, readonly, shallowRef, toRaw, watch } from 'vue'
 import type Sigma from 'sigma'
 import type { SerializedGraph } from 'graphology-types'
 import type { Settings } from 'sigma/settings'
-import type { EdgeProgramType, NodeProgramType } from 'sigma/rendering'
-import type { EdgeDisplayData, NodeDisplayData, SigmaEdgeEventPayload, SigmaEventType, SigmaNodeEventPayload, SigmaStageEventPayload } from 'sigma/types'
+import type { PrimitivesDeclaration } from 'sigma/primitives'
+import type {
+  BaseEdgeState,
+  BaseNodeState,
+  EdgeDisplayData,
+  EdgeReducer,
+  NodeDisplayData,
+  NodeReducer,
+  SigmaEdgeEventPayload,
+  SigmaEdgeLabelEventPayload,
+  SigmaEventType,
+  SigmaNodeDragEventPayload,
+  SigmaNodeDragMovePayload,
+  SigmaNodeEventPayload,
+  SigmaNodeLabelEventPayload,
+  SigmaStageEventPayload,
+  StylesDeclaration
+} from 'sigma/types'
 import { registerSigma } from '../composables/use-sigma'
 import { SIGMA_CONTEXT_KEY, SIGMA_EVENTS } from '../types'
-import type { SigmaContext, SigmaProgramSource, SigmaPrograms, SigmaReducer, SigmaReducerEntry } from '../types'
-import { isLazySigmaProgram } from '../utils/define-sigma-program'
+import type { SigmaContext, SigmaReducer, SigmaReducerEntry } from '../types'
 import { applyGraphDiff } from '../utils/apply-graph-diff'
 import type { ApplyGraphDiffOptions } from '../utils/apply-graph-diff'
 import { chainReducers } from '../utils/chain-reducers'
-import { getSigmaDefaults } from '../utils/global-settings'
 
 defineOptions({ name: 'SigmaGraph', inheritAttrs: false })
 
@@ -31,12 +46,24 @@ const props = defineProps<{
    */
   graph?: Graph
   /**
-   * sigma 渲染配置，整体透传
-   * @see https://www.sigmajs.org/docs/typedoc/sigma/src/settings/interfaces/Settings
+   * 声明式视觉规则，整体透传。sigma 只在构造时读取，变更会重建实例
+   * @see https://v4.sigmajs.org/how-to/styles/
+   */
+  styles?: StylesDeclaration
+  /**
+   * 渲染原语：节点形状、边路径、端点、深度层。同样只在构造时读取
+   * @see https://v4.sigmajs.org/how-to/primitives/
+   */
+  primitives?: PrimitivesDeclaration
+  /**
+   * sigma 行为与性能配置，整体透传，可热更新
+   * @see https://v4.sigmajs.org/how-to/settings/
    */
   settings?: Partial<Settings>
-  /** 自定义渲染程序，与 sigma 内置程序合并 */
-  programs?: SigmaPrograms
+  /** 自带的节点归约，作为 reducer 链的基座执行 */
+  nodeReducer?: NodeReducer
+  /** 自带的边归约，作为 reducer 链的基座执行 */
+  edgeReducer?: EdgeReducer
   /** 实例 id，登记后可经 `useSigmaById(id)` 在组件树之外访问 */
   id?: string
   /** `applyGraphDiff` 的行为选项 */
@@ -82,6 +109,38 @@ const emit = defineEmits<{
   'enterEdge': [payload: SigmaEdgeEventPayload]
   /** 指针离开边 */
   'leaveEdge': [payload: SigmaEdgeEventPayload]
+  /** 单击节点标签，需先配置 `nodeLabelEvents` */
+  'clickNodeLabel': [payload: SigmaNodeLabelEventPayload]
+  /** 双击节点标签 */
+  'doubleClickNodeLabel': [payload: SigmaNodeLabelEventPayload]
+  /** 右键点击节点标签 */
+  'rightClickNodeLabel': [payload: SigmaNodeLabelEventPayload]
+  /** 在节点标签上滚动滚轮 */
+  'wheelNodeLabel': [payload: SigmaNodeLabelEventPayload]
+  /** 在节点标签上按下指针 */
+  'downNodeLabel': [payload: SigmaNodeLabelEventPayload]
+  /** 在节点标签上松开指针 */
+  'upNodeLabel': [payload: SigmaNodeLabelEventPayload]
+  /** 指针进入节点标签 */
+  'enterNodeLabel': [payload: SigmaNodeLabelEventPayload]
+  /** 指针离开节点标签 */
+  'leaveNodeLabel': [payload: SigmaNodeLabelEventPayload]
+  /** 单击边标签，需先配置 `edgeLabelEvents` */
+  'clickEdgeLabel': [payload: SigmaEdgeLabelEventPayload]
+  /** 双击边标签 */
+  'doubleClickEdgeLabel': [payload: SigmaEdgeLabelEventPayload]
+  /** 右键点击边标签 */
+  'rightClickEdgeLabel': [payload: SigmaEdgeLabelEventPayload]
+  /** 在边标签上滚动滚轮 */
+  'wheelEdgeLabel': [payload: SigmaEdgeLabelEventPayload]
+  /** 在边标签上按下指针 */
+  'downEdgeLabel': [payload: SigmaEdgeLabelEventPayload]
+  /** 在边标签上松开指针 */
+  'upEdgeLabel': [payload: SigmaEdgeLabelEventPayload]
+  /** 指针进入边标签 */
+  'enterEdgeLabel': [payload: SigmaEdgeLabelEventPayload]
+  /** 指针离开边标签 */
+  'leaveEdgeLabel': [payload: SigmaEdgeLabelEventPayload]
   /** 单击空白画布 */
   'clickStage': [payload: SigmaStageEventPayload]
   /** 双击空白画布，默认会触发相机缩放 */
@@ -100,6 +159,12 @@ const emit = defineEmits<{
   'leaveStage': [payload: SigmaStageEventPayload]
   /** 指针在画布上移动，坐标随动，用于自绘跟随层 */
   'moveBody': [payload: SigmaStageEventPayload]
+  /** 开始拖拽节点，需先开启 `enableNodeDrag` */
+  'nodeDragStart': [payload: SigmaNodeDragEventPayload]
+  /** 拖拽节点过程中 */
+  'nodeDrag': [payload: SigmaNodeDragMovePayload]
+  /** 结束拖拽节点 */
+  'nodeDragEnd': [payload: SigmaNodeDragEventPayload]
   /** 每帧清空画布前 */
   'beforeClear': []
   /** 每帧清空画布后 */
@@ -143,44 +208,47 @@ let readyPromise = new Promise<Sigma>((resolve) => {
   resolveReady = resolve
 })
 
-/** sigma 的内置渲染程序表，只能在客户端拿到 */
-let programDefaults: {
-  node: Record<string, NodeProgramType>
-  edge: Record<string, EdgeProgramType>
-} | null = null
+const moduleDefaults = (useRuntimeConfig().public.sigma as { settings?: Partial<Settings> } | undefined)?.settings ?? {}
 
-/** 解析完成的自定义程序，`defineSigmaProgram()` 声明的已在此兑现 */
-const resolvedPrograms = shallowRef<{
-  node?: Record<string, NodeProgramType>
-  edge?: Record<string, EdgeProgramType>
-}>({})
-
-async function resolveProgramSources<T>(
-  sources?: Record<string, SigmaProgramSource<T>>
-): Promise<Record<string, T> | undefined> {
-  if (!sources) {
-    return undefined
-  }
-
-  const entries = await Promise.all(
-    Object.entries(sources).map(async ([type, source]) => [
-      type,
-      isLazySigmaProgram<T>(source) ? await source.__sigmaLazyProgram() : source
-    ] as const)
-  )
-
-  return Object.fromEntries(entries)
-}
-
-const baseSettings = computed<Partial<Settings>>(() => defu(
+const resolvedSettings = computed<Partial<Settings>>(() => defu(
   props.settings ?? {},
-  getSigmaDefaults(),
+  moduleDefaults,
   // 容器尺寸为 0 时不让 sigma 直接抛错，随后由 ResizeObserver 补一次 resize
   { allowInvalidContainer: true }
 ) as Partial<Settings>)
 
-/** reducer 链，按 order 升序合成为单个函数交给 sigma */
 const reducerEntries: SigmaReducerEntry[] = []
+
+let composedNode: SigmaReducer<NodeDisplayData, BaseNodeState> | null = null
+let composedEdge: SigmaReducer<EdgeDisplayData, BaseEdgeState> | null = null
+
+/**
+ * v4 的 reducer 只能在构造时给定，因此交出去的是这对稳定闭包，
+ * 链的增删只重算 composed，不必重建实例
+ */
+function composeReducers() {
+  const sorted = [...reducerEntries].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+
+  composedNode = chainReducers<NodeDisplayData, BaseNodeState>([
+    props.nodeReducer as SigmaReducer<NodeDisplayData, BaseNodeState> | undefined,
+    ...sorted.map(entry => entry.node)
+  ])
+  composedEdge = chainReducers<EdgeDisplayData, BaseEdgeState>([
+    props.edgeReducer as SigmaReducer<EdgeDisplayData, BaseEdgeState> | undefined,
+    ...sorted.map(entry => entry.edge)
+  ])
+}
+
+const dispatchNodeReducer: NodeReducer = (key, data, attributes, state, graphState, instanceGraph) =>
+  composedNode?.(key, data, attributes, state, graphState, instanceGraph) ?? data
+
+const dispatchEdgeReducer: EdgeReducer = (key, data, attributes, state, graphState, instanceGraph) =>
+  composedEdge?.(key, data, attributes, state, graphState, instanceGraph) ?? data
+
+function refreshReducers() {
+  composeReducers()
+  sigma.value?.refresh()
+}
 
 function registerReducer(entry: SigmaReducerEntry): () => void {
   reducerEntries.push(entry)
@@ -192,40 +260,6 @@ function registerReducer(entry: SigmaReducerEntry): () => void {
       reducerEntries.splice(index, 1)
       refreshReducers()
     }
-  }
-}
-
-function refreshReducers() {
-  const instance = sigma.value
-  if (!instance) {
-    return
-  }
-  instance.setSettings(resolveSettings())
-  instance.refresh()
-}
-
-function resolveSettings(): Partial<Settings> {
-  const base = baseSettings.value
-  const { node, edge } = resolvedPrograms.value
-  const sorted = [...reducerEntries].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-
-  return {
-    ...base,
-    // 用户自带的 reducer 排在链首作为基座，库注册的在其后叠加
-    nodeReducer: chainReducers<NodeDisplayData>([
-      base.nodeReducer as SigmaReducer<NodeDisplayData> | null | undefined,
-      ...sorted.map(entry => entry.node)
-    ]) as Settings['nodeReducer'],
-    edgeReducer: chainReducers<EdgeDisplayData>([
-      base.edgeReducer as SigmaReducer<EdgeDisplayData> | null | undefined,
-      ...sorted.map(entry => entry.edge)
-    ]) as Settings['edgeReducer'],
-    ...(programDefaults && node && {
-      nodeProgramClasses: { ...programDefaults.node, ...base.nodeProgramClasses, ...node }
-    }),
-    ...(programDefaults && edge && {
-      edgeProgramClasses: { ...programDefaults.edge, ...base.edgeProgramClasses, ...edge }
-    })
   }
 }
 
@@ -258,19 +292,11 @@ watch(() => props.graph, (next) => {
   sigma.value?.setGraph(raw)
 })
 
-watch([baseSettings, resolvedPrograms], () => {
-  sigma.value?.setSettings(resolveSettings())
+watch(resolvedSettings, (next) => {
+  sigma.value?.setSettings(next)
 }, { deep: true })
 
-watch(() => props.programs, async (sources) => {
-  if (!sigma.value) {
-    return
-  }
-  resolvedPrograms.value = {
-    node: await resolveProgramSources(sources?.node),
-    edge: await resolveProgramSources(sources?.edge)
-  }
-})
+watch([() => props.nodeReducer, () => props.edgeReducer], refreshReducers)
 
 useResizeObserver(containerRef, () => {
   sigma.value?.resize()
@@ -278,29 +304,33 @@ useResizeObserver(containerRef, () => {
 
 let disposed = false
 
-onMounted(async () => {
-  if (import.meta.dev && props.data && isExternalGraph.value) {
-    console.warn('[@movk/sigma] data 与 graph 互斥，已传入外部 graph，data 将被忽略')
-  }
+function destroyInstance() {
+  sigma.value?.kill()
+  sigma.value = null
+  isReady.value = false
+  readyPromise = new Promise<Sigma>((resolve) => {
+    resolveReady = resolve
+  })
+}
 
+async function createInstance() {
   // sigma 在模块顶层就读 WebGL2RenderingContext，静态导入会让 SSR 直接 ReferenceError
-  const [{ default: Sigma }, { DEFAULT_NODE_PROGRAM_CLASSES, DEFAULT_EDGE_PROGRAM_CLASSES }, node, edge] = await Promise.all([
-    import('sigma'),
-    import('sigma/settings'),
-    // 自定义程序在建实例前解析完，避免节点带着尚未注册的 type 先渲染
-    resolveProgramSources(props.programs?.node),
-    resolveProgramSources(props.programs?.edge)
-  ])
+  const { default: Sigma } = await import('sigma')
 
   const container = containerRef.value
   if (disposed || !container) {
     return
   }
 
-  programDefaults = { node: DEFAULT_NODE_PROGRAM_CLASSES, edge: DEFAULT_EDGE_PROGRAM_CLASSES }
-  resolvedPrograms.value = { node, edge }
+  composeReducers()
 
-  const instance = new Sigma(graph.value, container, resolveSettings())
+  const instance = new Sigma(graph.value, container, {
+    primitives: toRaw(props.primitives),
+    styles: toRaw(props.styles),
+    settings: resolvedSettings.value,
+    nodeReducer: dispatchNodeReducer,
+    edgeReducer: dispatchEdgeReducer
+  })
 
   for (const event of SIGMA_EVENTS) {
     instance.on(event as SigmaEventType, (payload: unknown) => {
@@ -312,11 +342,28 @@ onMounted(async () => {
   isReady.value = true
   resolveReady?.(instance)
 
-  if (!isExternalGraph.value) {
-    emit('update:graph', graph.value)
+  emit('ready', instance)
+}
+
+// styles 与 primitives 是构造时读取的，改了只能重建
+watch([() => props.styles, () => props.primitives], async () => {
+  if (!sigma.value) {
+    return
+  }
+  destroyInstance()
+  await createInstance()
+}, { deep: true })
+
+onMounted(async () => {
+  if (import.meta.dev && props.data && isExternalGraph.value) {
+    console.warn('[@movk/sigma] data 与 graph 互斥，已传入外部 graph，data 将被忽略')
   }
 
-  emit('ready', instance)
+  await createInstance()
+
+  if (!isExternalGraph.value && sigma.value) {
+    emit('update:graph', graph.value)
+  }
 })
 
 // 只在客户端登记：注册表是模块级单例，而服务端不触发 onBeforeUnmount，条目只增不减
@@ -327,12 +374,7 @@ if (props.id && import.meta.client) {
 
 onBeforeUnmount(() => {
   disposed = true
-  sigma.value?.kill()
-  sigma.value = null
-  isReady.value = false
-  readyPromise = new Promise<Sigma>((resolve) => {
-    resolveReady = resolve
-  })
+  destroyInstance()
 })
 
 defineExpose({ sigma, graph })

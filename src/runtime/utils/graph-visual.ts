@@ -1,76 +1,5 @@
-import { mapRange } from '@movk/core'
 import type Graph from 'graphology'
-import type { SigmaLabelPlacement } from './label-anchor'
-
-/**
- * 分类配色的默认调色板，取自常见的可访问色板，相邻两色在色相上足够分开。
- * 社区数超出长度时循环取用。
- */
-export const DEFAULT_COMMUNITY_PALETTE: readonly string[] = [
-  '#f43f5e',
-  '#3b82f6',
-  '#22c55e',
-  '#a855f7',
-  '#f59e0b',
-  '#14b8a6',
-  '#ec4899',
-  '#84cc16'
-]
-
-/**
- * 把节点度数按 sqrt 曲线映射到尺寸区间，返回 `节点 key → size` 的映射表。
- *
- * 不用线性有两个原因：度数分布普遍偏斜（大量叶子节点加少数枢纽），线性映射会把绝大多数
- * 节点钉在区间下界、枢纽独占上界；而尺寸是按面积被感知的，半径 ∝ sqrt(度数) 才让面积
- * 正比于度数。端点取值不受影响，只有中间段整体抬高。
- *
- * 只返回映射表而不直接写图：是否落到 `size` 属性、还是交给 reducer 只影响显示，
- * 由调用方决定。全图度数相同时所有节点取区间下界。
- *
- * 目标尺寸区间默认为 `[4, 20]`。
- */
-export function degreeToSize(graph: Graph, range: [number, number] = [4, 20]): Record<string, number> {
-  const degrees = graph.nodes().map(node => graph.degree(node))
-  const min = degrees.length === 0 ? 0 : Math.min(...degrees)
-  const max = degrees.length === 0 ? 0 : Math.max(...degrees)
-  const span = max - min
-
-  const sizes: Record<string, number> = {}
-
-  graph.forEachNode((node) => {
-    const eased = span === 0 ? 0 : Math.sqrt((graph.degree(node) - min) / span)
-    sizes[node] = mapRange(eased, [0, 1], range, { clamp: true })
-  })
-
-  return sizes
-}
-
-/**
- * 把社区编号映射为颜色，返回 `节点 key → color` 的映射表。
- *
- * 入参是社区划分结果而非图，因此本函数不依赖 `graphology-communities-louvain`
- * 这个可选 peer，可直接接 `useSigmaMetrics().communities()` 的返回值。
- * 编号超出调色板长度时循环取用，负数编号也能正确回绕。
- *
- * 未指定调色板时用 {@link DEFAULT_COMMUNITY_PALETTE}。
- */
-export function communityToColor(
-  communities: Record<string, number>,
-  palette: readonly string[] = DEFAULT_COMMUNITY_PALETTE
-): Record<string, string> {
-  const colors: Record<string, string> = {}
-
-  if (palette.length === 0) {
-    return colors
-  }
-
-  for (const [node, community] of Object.entries(communities)) {
-    const index = ((community % palette.length) + palette.length) % palette.length
-    colors[node] = palette[index]!
-  }
-
-  return colors
-}
+import type { LabelPosition } from 'sigma/types'
 
 export interface LabelPlacementsOptions {
   /**
@@ -97,25 +26,24 @@ export interface DegreeToTierOptions {
 /**
  * 给每个节点选一个背离邻居的标签方位，返回 `节点 key → 方位` 的映射表。
  *
- * 邻居单位向量之和指向连线最密的方向，取反即最空的一侧，标签放在那里最不容易压到边。
- * 孤立节点没有邻居可参考，一律取 `'bottom'`。
+ * 邻居单位向量之和指向连线最密的方向，取反即最空的一侧。孤立节点一律取 `'below'`。
  *
- * **必须在布局写完坐标之后调用**：方位完全由邻居的相对位置决定，坐标一变结论就作废。
- * 换算时把图坐标的 y 轴翻转成视口朝向（图坐标 y 向上，屏幕 y 向下），返回值可直接
- * 喂给 {@link createLabelRenderer} 读取的 `labelPlacement` 属性。
+ * **必须在布局写完坐标之后调用**：方位完全由邻居的相对位置决定。返回值可直接喂给
+ * styles 的 `labelPosition`。
  */
 export function labelPlacements(
   graph: Graph,
   options: LabelPlacementsOptions = {}
-): Record<string, SigmaLabelPlacement> {
+): Record<string, LabelPosition> {
   const { horizontalBias = 1.6 } = options
-  const placements: Record<string, SigmaLabelPlacement> = {}
+  const placements: Record<string, LabelPosition> = {}
 
   graph.forEachNode((node, attributes) => {
     let sumX = 0
     let sumY = 0
 
     for (const neighbor of graph.neighbors(node)) {
+      // y 取反：图坐标 y 向上，视口 y 向下
       const dx = (graph.getNodeAttribute(neighbor, 'x') as number) - (attributes.x as number)
       const dy = (attributes.y as number) - (graph.getNodeAttribute(neighbor, 'y') as number)
       const distance = Math.hypot(dx, dy)
@@ -133,7 +61,7 @@ export function labelPlacements(
       placements[node] = awayX > 0 ? 'right' : 'left'
     }
     else {
-      placements[node] = awayY < 0 ? 'top' : 'bottom'
+      placements[node] = awayY < 0 ? 'above' : 'below'
     }
   })
 
@@ -143,17 +71,14 @@ export function labelPlacements(
 /**
  * 按度数排名给节点分标签档位，返回 `节点 key → 档位` 的映射表，档位越小越重要。
  *
- * 与 {@link degreeToSize} 不同，这里要的是**排名**而非取值：标签的显示优先级是相对的，
- * 一张图里该出多少标签由屏幕空间决定，与度数的绝对大小无关。
- *
- * 只返回映射不写图：档位通常同时用于字号（交给 {@link createLabelRenderer} 的 `tiers`）
- * 与强制显示（sigma 的 `forceLabel`），后者是否要开由调用方决定。
+ * 要的是**排名**而非取值：标签的显示优先级是相对的，一张图里该出多少标签由屏幕空间
+ * 决定，与度数的绝对大小无关。
  *
  * @example
  * ```ts
  * const tiers = degreeToTier(graph, { rank: (g, node) => g.getNodeAttribute(node, 'pagerank') ?? 0 })
  * for (const [node, tier] of Object.entries(tiers)) {
- *   graph.mergeNodeAttributes(node, { labelTier: tier, forceLabel: tier === 0 })
+ *   graph.setNodeAttribute(node, 'labelTier', tier)
  * }
  * ```
  */

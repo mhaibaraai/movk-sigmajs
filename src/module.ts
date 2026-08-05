@@ -1,4 +1,4 @@
-import { addComponentsDir, addImportsDir, addPlugin, createResolver, defineNuxtModule, extendViteConfig } from '@nuxt/kit'
+import { addComponentsDir, addImportsDir, createResolver, defineNuxtModule, extendViteConfig } from '@nuxt/kit'
 import { defu } from 'defu'
 import type { Settings } from 'sigma/settings'
 import { name, version } from '../package.json'
@@ -13,9 +13,9 @@ export interface ModuleOptions {
    */
   prefix?: string
   /**
-   * 全局默认的 sigma 渲染配置，与组件级 settings 深度合并后整体透传。
+   * 全局默认的 sigma 行为配置，与组件级 settings 深度合并后整体透传。
    * 不做键白名单，sigma 新增的配置项无需本模块升级即可使用
-   * @see https://www.sigmajs.org/docs/typedoc/sigma/src/settings/interfaces/Settings
+   * @see https://v4.sigmajs.org/how-to/settings/
    */
   settings?: Partial<Settings>
   /**
@@ -78,9 +78,5 @@ export default defineNuxtModule<ModuleOptions>({
 
     addImportsDir(resolve('./runtime/composables'))
     addImportsDir(resolve('./runtime/utils'))
-
-    nuxt.options.alias['@movk/sigma/programs'] = resolve('./runtime/programs')
-
-    addPlugin(resolve('./runtime/plugins/defaults'))
   }
 })

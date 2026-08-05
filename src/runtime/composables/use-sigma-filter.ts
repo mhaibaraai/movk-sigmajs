@@ -37,10 +37,12 @@ export interface UseSigmaFilterReturn {
 }
 
 /**
- * 声明式过滤，经 reducer 链落到显示数据的 `hidden` 上。
+ * 声明式过滤，经 reducer 链落到显示数据的 `visibility` 上。
  *
- * 不改动图数据本身：过滤是视图层的事，被隐藏的节点仍在 graphology 里，
- * 邻域计算与检索照常能看到它们。
+ * 不改动图数据本身：过滤是视图层的事，被隐藏的节点仍在 graphology 里，邻域计算与
+ * 检索照常能看到它们。与 `useSigmaState().setNodeState(key, { isHidden })` 的分工是——
+ * 后者表达「这个节点被主动藏起来了」，会进 sigma 的状态供 styles 消费；本 composable
+ * 表达的是一条随时可撤销的视图规则。
  */
 export function useSigmaFilter(options: UseSigmaFilterOptions = {}): UseSigmaFilterReturn {
   const { order = 50, hideDanglingEdges = true } = options
@@ -76,19 +78,19 @@ export function useSigmaFilter(options: UseSigmaFilterOptions = {}): UseSigmaFil
   const { refresh } = useSigmaReducer({
     order,
     node(key, data) {
-      return (isNodeVisible(key) ? data : { ...data, hidden: true }) as Partial<NodeDisplayData>
+      return (isNodeVisible(key) ? data : { ...data, visibility: 'hidden' }) as Partial<NodeDisplayData>
     },
     edge(key, data) {
       const predicate = edgeFilter.value
 
       if (predicate && graph.value.hasEdge(key) && !predicate(key, graph.value.getEdgeAttributes(key))) {
-        return { ...data, hidden: true } as Partial<EdgeDisplayData>
+        return { ...data, visibility: 'hidden' } as Partial<EdgeDisplayData>
       }
 
       if (hideDanglingEdges && nodeFilter.value && graph.value.hasEdge(key)) {
         const [source, target] = graph.value.extremities(key)
         if (!isNodeVisible(source) || !isNodeVisible(target)) {
-          return { ...data, hidden: true } as Partial<EdgeDisplayData>
+          return { ...data, visibility: 'hidden' } as Partial<EdgeDisplayData>
         }
       }
 

@@ -1,24 +1,41 @@
 import type Graph from 'graphology'
 import type { Attributes } from 'graphology-types'
 import type Sigma from 'sigma'
-import type { Settings } from 'sigma/settings'
-import type { EdgeProgramType, NodeProgramType } from 'sigma/rendering'
-import type { EdgeDisplayData, NodeDisplayData, SigmaEventType } from 'sigma/types'
+import type {
+  BaseEdgeState,
+  BaseGraphState,
+  BaseNodeState,
+  EdgeDisplayData,
+  EdgeReducer,
+  NodeDisplayData,
+  NodeReducer,
+  SigmaEventType
+} from 'sigma/types'
 import type { InjectionKey, Ref, ShallowRef } from 'vue'
 
-/** 归约函数的通用形状 */
-export type SigmaReducer<D> = (key: string, data: Attributes) => Partial<D>
+/**
+ * 归约函数的通用形状，参数与 v4 的 `NodeReducer` / `EdgeReducer` 对齐。
+ * 与官方的区别只在返回值语义：链内每条返回的是补丁，由链负责合并成完整显示数据
+ */
+export type SigmaReducer<D, S> = (
+  key: string,
+  data: D,
+  attributes: Attributes,
+  state: S,
+  graphState: BaseGraphState,
+  graph: Graph
+) => Partial<D>
 
-/** 节点归约函数，等价于 `Settings['nodeReducer']` 的非空形态 */
-export type SigmaNodeReducer = NonNullable<Settings['nodeReducer']>
+/** 节点归约函数，v4 直接导出，无需从 Settings 派生 */
+export type SigmaNodeReducer = NodeReducer
 
-/** 边归约函数，等价于 `Settings['edgeReducer']` 的非空形态 */
-export type SigmaEdgeReducer = NonNullable<Settings['edgeReducer']>
+/** 边归约函数 */
+export type SigmaEdgeReducer = EdgeReducer
 
 /** reducer 链中的一条登记 */
 export interface SigmaReducerEntry {
-  node?: SigmaReducer<NodeDisplayData>
-  edge?: SigmaReducer<EdgeDisplayData>
+  node?: SigmaReducer<NodeDisplayData, BaseNodeState>
+  edge?: SigmaReducer<EdgeDisplayData, BaseEdgeState>
   /**
    * 链内执行次序，升序执行，后者的返回值覆盖前者的同名字段
    * @defaultValue 0
@@ -28,25 +45,6 @@ export interface SigmaReducerEntry {
 
 /** 内置布局算法名 */
 export type SigmaLayoutName = 'forceatlas2' | 'noverlap' | 'circular' | 'circlepack' | 'random'
-
-/** `defineSigmaProgram()` 的产物，组件会在创建实例前解析它 */
-export interface SigmaLazyProgram<T> {
-  __sigmaLazyProgram: () => T | Promise<T>
-}
-
-/** 渲染程序，或一个延迟加载它的声明 */
-export type SigmaProgramSource<T> = T | SigmaLazyProgram<T>
-
-/**
- * 自定义渲染程序。接受任何符合官方程序类型的实现，
- * 不限于 `@sigma/*` 官方包，也不维护白名单。
- *
- * `@sigma/*` 程序包必须经 `defineSigmaProgram()` 延迟加载。
- */
-export interface SigmaPrograms {
-  node?: Record<string, SigmaProgramSource<NodeProgramType>>
-  edge?: Record<string, SigmaProgramSource<EdgeProgramType>>
-}
 
 /**
  * 根组件下发的上下文。`sigma` 与 `graph` 都是原生实例，不做任何代理或包装。
@@ -65,7 +63,7 @@ export interface SigmaContext {
    * 由 `useSigmaReducer()` 调用，通常不必直接使用
    */
   registerReducer: (entry: SigmaReducerEntry) => () => void
-  /** 重新合成 reducer 链并让 sigma 重绘 */
+  /** 让 sigma 重跑归约并重绘 */
   refreshReducers: () => void
 }
 
@@ -103,6 +101,22 @@ const SIGMA_EVENT_FLAGS: Record<SigmaEventType, true> = {
   upEdge: true,
   enterEdge: true,
   leaveEdge: true,
+  clickNodeLabel: true,
+  doubleClickNodeLabel: true,
+  rightClickNodeLabel: true,
+  wheelNodeLabel: true,
+  downNodeLabel: true,
+  upNodeLabel: true,
+  enterNodeLabel: true,
+  leaveNodeLabel: true,
+  clickEdgeLabel: true,
+  doubleClickEdgeLabel: true,
+  rightClickEdgeLabel: true,
+  wheelEdgeLabel: true,
+  downEdgeLabel: true,
+  upEdgeLabel: true,
+  enterEdgeLabel: true,
+  leaveEdgeLabel: true,
   beforeClear: true,
   afterClear: true,
   beforeProcess: true,
@@ -111,7 +125,10 @@ const SIGMA_EVENT_FLAGS: Record<SigmaEventType, true> = {
   afterRender: true,
   resize: true,
   kill: true,
-  moveBody: true
+  moveBody: true,
+  nodeDragStart: true,
+  nodeDrag: true,
+  nodeDragEnd: true
 }
 
 /** sigma 的全部事件名，供批量绑定 */
