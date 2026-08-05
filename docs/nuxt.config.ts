@@ -51,8 +51,8 @@ export default defineNuxtConfig({
   llms: {
     domain: 'https://sigma.mhaibaraai.cn',
     title: 'Movk Sigma',
-    description: '基于 sigma v3 的知识图谱可视化 Nuxt 模块，为 Vue 3 / Nuxt 4 提供声明式组件与 composables。',
-    notes: ['Nuxt 4', 'Vue 3', 'sigma.js v3', 'graphology', 'WebGL', '知识图谱', '网络可视化']
+    description: '基于 sigma v4 的知识图谱可视化 Nuxt 模块，为 Vue 3 / Nuxt 4 提供声明式组件与 composables。',
+    notes: ['Nuxt 4', 'Vue 3', 'sigma.js v4', 'graphology', 'WebGL', '知识图谱', '网络可视化']
   },
 
   mcp: {
