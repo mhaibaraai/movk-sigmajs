@@ -7,7 +7,6 @@ import { computed, onBeforeUnmount, onMounted, provide, readonly, shallowRef, to
 import type Sigma from 'sigma'
 import type { SerializedGraph } from 'graphology-types'
 import type { Settings } from 'sigma/settings'
-import type { PrimitivesDeclaration } from 'sigma/primitives'
 import type {
   BaseEdgeState,
   BaseNodeState,
@@ -27,10 +26,11 @@ import type {
 } from 'sigma/types'
 import { registerSigma } from '../composables/use-sigma'
 import { SIGMA_CONTEXT_KEY, SIGMA_EVENTS } from '../types'
-import type { SigmaContext, SigmaReducer, SigmaReducerEntry } from '../types'
+import type { SigmaContext, SigmaPrimitivesSource, SigmaReducer, SigmaReducerEntry } from '../types'
 import { applyGraphDiff } from '../utils/apply-graph-diff'
 import type { ApplyGraphDiffOptions } from '../utils/apply-graph-diff'
 import { chainReducers } from '../utils/chain-reducers'
+import { isLazySigmaPrimitives } from '../utils/define-sigma-primitives'
 
 defineOptions({ name: 'SigmaGraph', inheritAttrs: false })
 
@@ -51,10 +51,11 @@ const props = defineProps<{
    */
   styles?: StylesDeclaration
   /**
-   * 渲染原语：节点形状、边路径、端点、深度层。同样只在构造时读取
+   * 渲染原语：节点形状、边路径、端点、深度层。同样只在构造时读取。
+   * 取用 sigma 内置的形状与层工厂时须包在 `defineSigmaPrimitives()` 里延迟加载
    * @see https://v4.sigmajs.org/how-to/primitives/
    */
-  primitives?: PrimitivesDeclaration
+  primitives?: SigmaPrimitivesSource
   /**
    * sigma 行为与性能配置，整体透传，可热更新
    * @see https://v4.sigmajs.org/how-to/settings/
@@ -324,8 +325,18 @@ async function createInstance() {
 
   composeReducers()
 
+  // 延迟声明的原语在建实例前解析完，避免节点带着尚未注册的形状先渲染
+  const source = props.primitives
+  const primitives = source && isLazySigmaPrimitives(source)
+    ? await source.__sigmaLazyPrimitives()
+    : toRaw(source)
+
+  if (disposed) {
+    return
+  }
+
   const instance = new Sigma(graph.value, container, {
-    primitives: toRaw(props.primitives),
+    primitives,
     styles: toRaw(props.styles),
     settings: resolvedSettings.value,
     nodeReducer: dispatchNodeReducer,

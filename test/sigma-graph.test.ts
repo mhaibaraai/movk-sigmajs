@@ -141,6 +141,20 @@ describe('SigmaGraph 出口兼容', () => {
     expect(state.calls[0]!.options.primitives).toMatchObject(primitives)
   })
 
+  it('延迟声明的 primitives 在建实例前解析完', async () => {
+    // v4 的 sigma/rendering 与 sigma/primitives 顶层就读 WebGL 全局，
+    // 取用内置形状必须延迟到客户端
+    const loader = vi.fn(async () => ({
+      nodes: { shapes: [{ name: 'hex', glsl: 'float d = 0.0;' }] }
+    }))
+
+    await mountGraph({ primitives: { __sigmaLazyPrimitives: loader } })
+
+    expect(loader).toHaveBeenCalledOnce()
+    expect(state.calls[0]!.options.primitives)
+      .toMatchObject({ nodes: { shapes: [{ name: 'hex' }] } })
+  })
+
   it('未传 styles 与 primitives 时不干预 sigma 自己的默认值', async () => {
     await mountGraph()
 

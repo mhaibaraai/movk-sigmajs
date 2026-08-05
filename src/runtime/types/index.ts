@@ -1,6 +1,7 @@
 import type Graph from 'graphology'
 import type { Attributes } from 'graphology-types'
 import type Sigma from 'sigma'
+import type { PrimitivesDeclaration } from 'sigma/primitives'
 import type {
   BaseEdgeState,
   BaseGraphState,
@@ -45,6 +46,14 @@ export interface SigmaReducerEntry {
 
 /** 内置布局算法名 */
 export type SigmaLayoutName = 'forceatlas2' | 'noverlap' | 'circular' | 'circlepack' | 'random'
+
+/** `defineSigmaPrimitives()` 的产物，组件会在创建实例前解析它 */
+export interface SigmaLazyPrimitives {
+  __sigmaLazyPrimitives: () => PrimitivesDeclaration | Promise<PrimitivesDeclaration>
+}
+
+/** 渲染原语，或一个延迟加载它的声明 */
+export type SigmaPrimitivesSource = PrimitivesDeclaration | SigmaLazyPrimitives
 
 /**
  * 根组件下发的上下文。`sigma` 与 `graph` 都是原生实例，不做任何代理或包装。
