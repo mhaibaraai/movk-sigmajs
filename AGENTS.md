@@ -1,6 +1,6 @@
 # AGENTS.md
 
-`@movk/sigma` —— 基于 sigma v3 的知识图谱可视化 Nuxt 模块，为 Vue 3 / Nuxt 4 提供声明式组件与 composables。
+`@movk/sigma` —— 基于 sigma v4 的知识图谱可视化 Nuxt 模块，为 Vue 3 / Nuxt 4 提供声明式组件与 composables。
 
 完整设计依据见 [references/movk-sigma-architecture.md](references/movk-sigma-architecture.md)，动手前先读第三节（出口兼容）与第五节（七个技术难点）。不熟悉 sigma.js 本身的先看 [references/sigmajs-guide.md](references/sigmajs-guide.md)，那份讲上游库怎么工作。
 
@@ -13,7 +13,6 @@ src/
     ├── components/       # core 与 controls 两组，文件名不带前缀
     ├── composables/
     ├── utils/
-    ├── programs/         # 自建渲染程序，静态引用 sigma/rendering，不进自动导入
     ├── types/
     └── index.css         # 可选样式表
 docs/                     # @movk/nuxt-docs 文档站，示例的唯一数据源
@@ -42,21 +41,21 @@ references/               # 架构方案与背景资料
 
 **不准开 `shamefully-hoist=true`。** 它把所有依赖提升到根 `node_modules`，会让漏写的 import 也能解析成功，正好掩盖上面这类 bug。某些依赖（如 `@movk/nuxt` 要求的 `tailwindcss`）的安装文档会建议开它，一律改用「在需要的 workspace 里显式安装」绕开。
 
-### sigma 与 @sigma/* 只能动态导入
+### sigma 的每个子路径都只能动态导入
 
-sigma 在模块顶层就读 `WebGL2RenderingContext`，服务端与 happy-dom 都没有这个全局，**静态 `import 'sigma'` 或 `import 'sigma/settings'` 会让 SSR 直接 ReferenceError**。
+sigma **每个**子路径在模块顶层就读 `WebGL2RenderingContext`——`sigma`、`sigma/settings`、`sigma/rendering`、`sigma/primitives`、`sigma/types` 无一例外。服务端与 happy-dom 都没有这个全局，**静态 import 任何一条会让 SSR 直接 ReferenceError**。v4 的范围比 v3 更大，别按老印象只防主入口。
 
-runtime 代码里 sigma 一律 `await import('sigma')`，放在 `onMounted` 之后；类型侧用 `import type`，编译期擦除不影响。graphology 无此问题，可正常静态导入。
+runtime 代码里一律 `await import('sigma')`，放在 `onMounted` 之后；类型侧用 `import type`，编译期擦除不影响。graphology 无此问题，可正常静态导入。
 
-`@sigma/node-image`、`@sigma/node-border`、`@sigma/edge-curve`、`@sigma/export-image` 同样如此，**使用方也不能静态 import 它们**。所以 `programs` prop 支持 `defineSigmaProgram(() => import('@sigma/node-border').then(...))` 这种延迟声明，组件会在建实例前解析完。
+`@sigma/node-image`、`@sigma/node-border`、`@sigma/export-image` 同样如此，**使用方也不能静态 import 它们**。所以 `primitives` prop 支持 `defineSigmaPrimitives(async () => { const { sdfCircle } = await import('sigma/rendering'); ... })` 这种延迟声明，组件会在建实例前解析完。
 
 连带的三条：异步 `onMounted` 要能在实例化完成前被卸载中断；测试需要 `test/setup/webgl-globals.ts` 补桩才能加载真实的 `sigma/settings`；所有可选 peer（布局、metrics、louvain）一律 `await import()` 并在 `catch` 里给出「装哪个包」的可操作提示。
 
-### src/runtime/programs/ 不进自动导入
+### 自建形状必须是纯数据
 
-本库自建的渲染程序（`createNodeShapeProgram`）静态引用 `sigma/rendering` 与 `sigma/utils`，与上一条同理，被 SSR 打进包即 ReferenceError。因此 `programs/` **不进 `addImportsDir`**，也不许被 `utils/` 或 `composables/` 里任何文件引用；`types/public.ts` 只汇出它的类型，不汇出值。
+`utils/node-shape.ts` 的 `sdfPolygon()` / `sdfStar()` 返回 `{ name, glsl, inradiusFactor }`，**不 import sigma 的任何值**。这正是它们能进 `addImportsDir`、能被使用方直接写在模块顶层的原因。
 
-使用方只经 `@movk/sigma/programs/*` 子路径 import，并且要包在 `defineSigmaProgram()` 里。stub 开发态的 `dist/runtime/` 里是 `.ts` 而出口映射指向 `.js`，`module.ts` 因此补了一条 `@movk/sigma/programs` 别名——新增 `programs/` 下的文件不需要改这条，新增**目录**才要。
+新增形状时守住这条：一旦为了复用某个常量而 import `sigma/rendering`，整个 `utils/` 就会被 SSR 打进包并 ReferenceError。需要内置形状时让使用方在 `defineSigmaPrimitives()` 里自行取用。
 
 ### 模块级状态必须客户端隔离
 
@@ -78,7 +77,7 @@ runtime 代码里 sigma 一律 `await import('sigma')`，放在 `onMounted` 之�
 
 - **禁止安装任何 `@types/*`**：该生态全部包自带 `.d.ts`，`@types/sigma`、`@types/graphology` 等根本不存在
 - **禁止自造已有类型**：图数据契约直接用 `graphology-types` 的 `SerializedGraph`，不要写 `GraphData` 这类同义接口
-- 库内类型一律从官方类型派生：`settings` 写成 `Partial<Settings>`，`programs` 从 `NodeProgramType` / `EdgeProgramType` 派生
+- 库内类型一律从官方类型派生：`settings` 写成 `Partial<Settings>`，`styles` 与 `primitives` 直接用 `StylesDeclaration` / `PrimitivesDeclaration`
 
 类型来源速查：
 
@@ -86,15 +85,17 @@ runtime 代码里 sigma 一律 `await import('sigma')`，放在 `onMounted` 之�
 | --- | --- |
 | `graphology-types` | `SerializedGraph`、`SerializedNode`、`SerializedEdge`、`Attributes` |
 | `graphology` | `Graph` |
-| `sigma/settings` | `Settings`（reducer 类型未单独导出，见下） |
-| `sigma/types` | `NodeDisplayData`、`EdgeDisplayData`、`CameraState`、`Coordinates`、`MouseCoords` |
-| `sigma/rendering` | `NodeProgramType`、`EdgeProgramType` |
+| `sigma/settings` | `Settings`（v4 只剩行为与性能项，视觉项全在 styles） |
+| `sigma/types` | `NodeDisplayData`、`EdgeDisplayData`、`NodeReducer`、`EdgeReducer`、`StylesDeclaration`、`BaseNodeState`、`BaseEdgeState`、`BaseGraphState`、`LabelPosition`、`CameraState`、`Coordinates`、`MouseCoords` |
+| `sigma/primitives` | `PrimitivesDeclaration`、`CustomNodeShape`、`NodePrimitives`、`EdgePrimitives` |
+| `sigma/rendering` | `SDFShape`、`FragmentLayer`、`ValueSource` |
 
-sigma **没有**导出 `NodeReducer` / `EdgeReducer`，它们只是 `Settings` 上的内联字段类型。库内一律派生，不要自己重写一份签名：
+v4 **直接导出** `NodeReducer` / `EdgeReducer`，不必再从 `Settings` 派生——它们已不在 settings 上，而是构造选项。
+
+`sigma/types` 也 re-export 了 styles 相关类型，**没有 `sigma/types/styles` 这个子路径**。少数没被 re-export 的（`NodeStyleRule` 等）从 `StylesDeclaration` 索引派生：
 
 ```ts
-export type SigmaNodeReducer = NonNullable<Settings['nodeReducer']>
-export type SigmaEdgeReducer = NonNullable<Settings['edgeReducer']>
+type NodeStyles = NonNullable<StylesDeclaration['nodes']>
 ```
 
 ### 通用方法先查 @movk/core
@@ -103,7 +104,7 @@ export type SigmaEdgeReducer = NonNullable<Settings['edgeReducer']>
 
 已迁入 core 的还有 `clamp`、`mapRange`、`createRegistry`、`pipe`，本库不再自带。
 
-core 里确实没有的通用能力，先写在 `src/runtime/utils/` 并在 JSDoc 标注 `@todo 待移入 @movk/core`，便于后续搬迁。图与 sigma 领域的逻辑（`applyGraphDiff`、`chainReducers`、`curveParallelEdges` 等）不属于 core 范畴，正常放 `src/runtime/utils/`。
+core 里确实没有的通用能力，先写在 `src/runtime/utils/` 并在 JSDoc 标注 `@todo 待移入 @movk/core`，便于后续搬迁。图与 sigma 领域的逻辑（`applyGraphDiff`、`chainReducers`、`sdfPolygon` 等）不属于 core 范畴，正常放 `src/runtime/utils/`。
 
 ## 命名约定
 
@@ -168,7 +169,7 @@ pnpm lint
 
 ## 文档站
 
-`docs/` 是 `@movk/nuxt-docs` 的消费方，`pnpm dev:docs` 起站。入门、组件、composables、工具函数、渲染程序、指南六个分组，一 API 一页已补齐。部署未排期。
+`docs/` 是 `@movk/nuxt-docs` 的消费方，`pnpm dev:docs` 起站。入门、组件、composables、工具函数、指南五个分组，一 API 一页已补齐。部署未排期。
 
 ### 示例的唯一数据源在 docs
 
@@ -213,7 +214,7 @@ nitro 的 `h3-next`（`npm:h3@2` 别名）不受这条 override 影响，那是�
 ## 测试要求
 
 - 工具函数与 composables 必须有单测，重点覆盖：`applyGraphDiff` 的坐标保留、`chainReducers` 的合成顺序、`useSigmaGraph` 的 version 递增、`useSigmaNeighborhood` 的 BFS 深度
-- 出口兼容专项断言：`settings` 未知键透传后仍能从 `sigma.getSettings()` 读回、用户自带 reducer 位于链首且被调用
+- 出口兼容专项断言：`settings` 未知键透传后仍能从 `sigma.getSettings()` 读回、`styles` 与 `primitives` 原样到达构造选项、用户自带 reducer 位于链首且被调用
 - 组件测试用 `@vue/test-utils`，WebGL 相关 mock 掉 Sigma 构造
 - **同一用例内不要并发挂载多个 `SigmaGraph`**：组件在 `onMounted` 里动态 `import('sigma')`，同一 tick 内的并发导入会让 vitest 的 mock 漏掉一个，第二个实例拿到真实 sigma 后崩在 WebGL 上。顺序挂载即可（先 `await` 前一个就绪）
 - 需要真实 Nuxt 环境的场景用 `@nuxt/test-utils` 加 `test/fixtures/*`
