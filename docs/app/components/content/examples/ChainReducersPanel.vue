@@ -11,7 +11,7 @@ import type { NodeDisplayData } from 'sigma/types'
 useSigmaReducer({
   order: 100,
   node: (_key, _data, attributes): Partial<NodeDisplayData> => ({
-    color: attributes.category === '技术标准' ? '#0ea5e9' : '#94a3b8'
+    color: attributes.category === 'Network Science' ? '#0ea5e9' : '#94a3b8'
   })
 })
 </script>

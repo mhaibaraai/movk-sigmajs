@@ -19,7 +19,7 @@ useSigmaFilter()
 const { refresh } = useSigmaReducer({
   order: 400,
   node: (_key, data, attributes): Partial<NodeDisplayData> =>
-    ring.value && attributes.category === '应急预案'
+    ring.value && attributes.category === 'Network Science'
       ? { color: '#f59e0b', size: data.size * 1.6, labelVisibility: 'visible' }
       : {},
   edge: (): Partial<EdgeDisplayData> => (ring.value ? { size: 2 } : {})
@@ -35,7 +35,7 @@ function toggle() {
   <div class="demo-panel" data-at="top-left">
     <div class="demo-row">
       <button type="button" :aria-pressed="ring" @click="toggle">
-        突出「应急预案」
+        突出「Network Science」
       </button>
     </div>
     <span class="demo-tag">与内建的选中高亮、过滤同时在链上，点击节点可验证互不覆盖</span>
