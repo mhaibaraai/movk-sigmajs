@@ -226,8 +226,8 @@ importers:
   playgrounds/ui:
     dependencies:
       '@movk/nuxt':
-        specifier: ^1.7.0
-        version: 1.7.0(802b947e8fc62294d4da5b37330a7b5f)
+        specifier: ^1.7.1
+        version: 1.7.1(802b947e8fc62294d4da5b37330a7b5f)
       '@movk/sigma':
         specifier: workspace:*
         version: link:../..
@@ -1808,8 +1808,8 @@ packages:
       mermaid:
         optional: true
 
-  '@movk/nuxt@1.7.0':
-    resolution: {integrity: sha512-Uhvcwx7CZ4hbzy7FWvMv07H7hIPUPUrmVuSmJA2HUSj3iAazuXBPMVC+mxPd+tZMd628ldOsbPLibxdDfiWuuw==}
+  '@movk/nuxt@1.7.1':
+    resolution: {integrity: sha512-luLUN/1TJYKziNfAmjKyZji9BZjY/imkoXVD7f6lWeemGbR6NQQwqrHInNFMWL/bAIbJfd4eJ1TZ85toOj66vQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
     peerDependencies:
       '@nuxt/ui': '>=4.6.0'
@@ -10978,7 +10978,7 @@ snapshots:
       - webpack
       - yup
 
-  '@movk/nuxt@1.7.0(802b947e8fc62294d4da5b37330a7b5f)':
+  '@movk/nuxt@1.7.1(802b947e8fc62294d4da5b37330a7b5f)':
     dependencies:
       '@internationalized/date': 3.12.3
       '@movk/core': 1.4.1(vue@3.5.40(typescript@6.0.3))
