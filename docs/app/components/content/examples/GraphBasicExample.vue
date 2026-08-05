@@ -9,8 +9,8 @@ const data = ref<SerializedGraph>({
   options: { type: 'mixed', multi: false, allowSelfLoops: true },
   nodes: [
     { key: 'a', attributes: { label: '制度 A', x: 0, y: 0, size: 14, color: '#f43f5e' } },
-    { key: 'b', attributes: { label: '制度 B', x: 10, y: 4, size: 11, color: '#3b82f6' } },
-    { key: 'c', attributes: { label: '制度 C', x: 5, y: -8, size: 10, color: '#22c55e' } }
+    { key: 'b', attributes: { label: '制度 B', x: 320, y: 140, size: 11, color: '#3b82f6' } },
+    { key: 'c', attributes: { label: '制度 C', x: 160, y: -220, size: 10, color: '#22c55e' } }
   ],
   edges: [
     { source: 'a', target: 'b', attributes: { label: '引用' } },
@@ -29,7 +29,7 @@ function add() {
     ...data.value,
     nodes: [
       ...data.value.nodes,
-      { key, attributes: { label: `新增 ${seq.value}`, x: Math.cos(angle) * 14, y: Math.sin(angle) * 14, size: 8, color: '#a855f7' } }
+      { key, attributes: { label: `新增 ${seq.value}`, x: Math.cos(angle) * 180, y: Math.sin(angle) * 180, size: 8, color: '#a855f7' } }
     ],
     edges: [...data.value.edges, { source: 'a', target: key, attributes: { label: '引用' } }]
   }

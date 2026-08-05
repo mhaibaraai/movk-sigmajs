@@ -14,7 +14,7 @@ const data = {
   options: { type: 'mixed' as const, multi: false, allowSelfLoops: true },
   nodes: [
     { key: 'a', attributes: { label: '点我', x: 0, y: 0, size: 15, color: '#f43f5e' } },
-    { key: 'b', attributes: { label: '也点我', x: 13, y: 5, size: 13, color: '#3b82f6' } }
+    { key: 'b', attributes: { label: '也点我', x: 340, y: 300, size: 13, color: '#3b82f6' } }
   ],
   edges: [{ source: 'a', target: 'b', attributes: { label: '点这条边' } }]
 }

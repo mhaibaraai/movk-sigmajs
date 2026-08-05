@@ -12,8 +12,8 @@ import type Sigma from 'sigma'
 
 const graph = new Graph()
 graph.addNode('x', { label: '原生 X', x: 0, y: 0, size: 14, color: '#0ea5e9' })
-graph.addNode('y', { label: '原生 Y', x: 16, y: 6, size: 12, color: '#0ea5e9' })
-graph.addNode('z', { label: '原生 Z', x: 8, y: -10, size: 12, color: '#0ea5e9' })
+graph.addNode('y', { label: '原生 Y', x: 320, y: 140, size: 12, color: '#0ea5e9' })
+graph.addNode('z', { label: '原生 Z', x: 160, y: -220, size: 12, color: '#0ea5e9' })
 graph.addEdge('x', 'y')
 graph.addEdge('x', 'z')
 

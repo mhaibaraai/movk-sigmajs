@@ -28,8 +28,8 @@ async function loadNeighbors(key: string): Promise<SerializedGraph> {
       key: child,
       attributes: {
         label: child,
-        x: Math.cos(index * 2 + rounds.value) * 24,
-        y: Math.sin(index * 2 + rounds.value) * 24,
+        x: Math.cos(index * 2 + rounds.value) * 260,
+        y: Math.sin(index * 2 + rounds.value) * 260,
         size: 7,
         color: '#94a3b8'
       }

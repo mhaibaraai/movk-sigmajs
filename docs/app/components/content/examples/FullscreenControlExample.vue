@@ -6,7 +6,7 @@ const data = {
   options: { type: 'mixed' as const, multi: false, allowSelfLoops: true },
   nodes: [
     { key: 'a', attributes: { label: '节点 A', x: 0, y: 0, size: 14, color: '#f43f5e' } },
-    { key: 'b', attributes: { label: '节点 B', x: 14, y: 6, size: 12, color: '#3b82f6' } }
+    { key: 'b', attributes: { label: '节点 B', x: 340, y: 300, size: 12, color: '#3b82f6' } }
   ],
   edges: [{ source: 'a', target: 'b' }]
 }
