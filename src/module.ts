@@ -90,6 +90,12 @@ export default defineNuxtModule<ModuleOptions>({
     addImportsDir(resolve('./runtime/composables'))
     // 工具函数一并自动导入：applyGraphDiff、curveParallelEdges 这些是调用方直接会用的公开 API
     addImportsDir(resolve('./runtime/utils'))
+
+    // 渲染程序**不能**自动导入：它们静态引用 sigma/rendering，而后者在模块顶层就读 WebGL 全局，
+    // 被 SSR 打进包即 ReferenceError。只能经子路径显式 import，并且要包在 defineSigmaProgram 里。
+    // 这里补一条别名，让 `@movk/sigma/programs/*` 在源码开发态（dist 里还是 .ts）也解析得到
+    nuxt.options.alias['@movk/sigma/programs'] = resolve('./runtime/programs')
+
     addPlugin(resolve('./runtime/plugins/defaults'))
   }
 })

@@ -9,6 +9,7 @@ minimumReleaseAge: 0
 
 overrides:
   h3: 1.15.11
+  typescript: ^6.0.3
 
 allowBuilds:
   '@parcel/watcher': false

@@ -13,6 +13,7 @@ src/
     ├── components/       # core 与 controls 两组，文件名不带前缀
     ├── composables/
     ├── utils/
+    ├── programs/         # 自建渲染程序，静态引用 sigma/rendering，不进自动导入
     ├── types/
     └── index.css         # 可选样式表
 docs/                     # @movk/nuxt-docs 文档站，示例的唯一数据源
@@ -50,6 +51,12 @@ runtime 代码里 sigma 一律 `await import('sigma')`，放在 `onMounted` 之�
 `@sigma/node-image`、`@sigma/node-border`、`@sigma/edge-curve`、`@sigma/export-image` 同样如此，**使用方也不能静态 import 它们**。所以 `programs` prop 支持 `defineSigmaProgram(() => import('@sigma/node-border').then(...))` 这种延迟声明，组件会在建实例前解析完。
 
 连带的三条：异步 `onMounted` 要能在实例化完成前被卸载中断；测试需要 `test/setup/webgl-globals.ts` 补桩才能加载真实的 `sigma/settings`；所有可选 peer（布局、metrics、louvain）一律 `await import()` 并在 `catch` 里给出「装哪个包」的可操作提示。
+
+### src/runtime/programs/ 不进自动导入
+
+本库自建的渲染程序（`createNodeShapeProgram`）静态引用 `sigma/rendering` 与 `sigma/utils`，与上一条同理，被 SSR 打进包即 ReferenceError。因此 `programs/` **不进 `addImportsDir`**，也不许被 `utils/` 或 `composables/` 里任何文件引用；`types/public.ts` 只汇出它的类型，不汇出值。
+
+使用方只经 `@movk/sigma/programs/*` 子路径 import，并且要包在 `defineSigmaProgram()` 里。stub 开发态的 `dist/runtime/` 里是 `.ts` 而出口映射指向 `.js`，`module.ts` 因此补了一条 `@movk/sigma/programs` 别名——新增 `programs/` 下的文件不需要改这条，新增**目录**才要。
 
 ### 模块级状态必须客户端隔离
 
@@ -143,7 +150,7 @@ pnpm lint
 
 | 目录 | UI 依赖 | 承载内容 |
 | --- | --- | --- |
-| `playgrounds/basic` | 零，永远不引入 | 全部 34 个公开 API 的示例（反向引用 docs 的目录）、内置控件的原样外观、规模三档、**纯原生逃生舱** |
+| `playgrounds/basic` | 零，永远不引入 | 全部公开 API 的示例（反向引用 docs 的目录）、内置控件的原样外观、规模三档、**纯原生逃生舱** |
 | `playgrounds/ui` | `@movk/nuxt` | 插槽接管控件外观、服务端接口驱动的完整知识图谱场景 |
 | `docs` | `@nuxt/ui`（经 `@movk/nuxt-docs`） | 面向用户的 API 参考，示例源码的唯一数据源 |
 
@@ -161,7 +168,7 @@ pnpm lint
 
 ## 文档站
 
-`docs/` 是 `@movk/nuxt-docs` 的消费方，`pnpm dev:docs` 起站。目前只有骨架：入门两页加 `SigmaGraph` / `useSigmaCamera` / `applyGraphDiff` 三个样板页，其余 31 个 API 页待补。部署未排期。
+`docs/` 是 `@movk/nuxt-docs` 的消费方，`pnpm dev:docs` 起站。入门、组件、composables、工具函数、渲染程序、指南六个分组，一 API 一页已补齐。部署未排期。
 
 ### 示例的唯一数据源在 docs
 

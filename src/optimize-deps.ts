@@ -33,6 +33,9 @@ export const OPTIMIZE_DEPS_CANDIDATES: OptimizeDepCandidate[] = [
   { id: 'graphology' },
   { id: 'sigma' },
   { id: 'sigma/settings' },
+  // createNodeShapeProgram 静态引用这两条，整个模块由使用方经 defineSigmaProgram 延迟加载
+  { id: 'sigma/rendering' },
+  { id: 'sigma/utils' },
 
   // 布局：useSigmaLayout 按名称动态 import，worker 子路径对应 worker: true 的监督模式
   { id: 'graphology-layout' },

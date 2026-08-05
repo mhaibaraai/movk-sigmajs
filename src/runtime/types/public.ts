@@ -14,6 +14,7 @@ export type { SigmaEventHandlers } from '../composables/use-sigma-events'
 export type { SigmaExportOptions, UseSigmaExportReturn } from '../composables/use-sigma-export'
 export type { SigmaEdgePredicate, SigmaNodePredicate, UseSigmaFilterOptions, UseSigmaFilterReturn } from '../composables/use-sigma-filter'
 export type { UseSigmaGraphReturn } from '../composables/use-sigma-graph'
+export type { SigmaLabelTierBreakpoint, UseSigmaLabelTiersOptions, UseSigmaLabelTiersReturn } from '../composables/use-sigma-label-tiers'
 export type { UseSigmaLayoutOptions, UseSigmaLayoutReturn } from '../composables/use-sigma-layout'
 export type { SigmaCentralityKind, UseSigmaMetricsReturn } from '../composables/use-sigma-metrics'
 export type { UseSigmaNeighborhoodOptions, UseSigmaNeighborhoodReturn } from '../composables/use-sigma-neighborhood'
@@ -23,3 +24,31 @@ export type { UseSigmaSelectionOptions, UseSigmaSelectionReturn } from '../compo
 
 export type { ApplyGraphDiffOptions } from '../utils/apply-graph-diff'
 export type { CurveParallelEdgesOptions } from '../utils/curve-parallel-edges'
+export type { DegreeToTierOptions, LabelPlacementsOptions } from '../utils/graph-visual'
+export type {
+  PolygonExtentOptions,
+  SigmaLabelAnchor,
+  SigmaLabelGeometry,
+  SigmaLabelPlacement,
+  SigmaLabelRect
+} from '../utils/label-anchor'
+export type { SigmaLabelLayout, SigmaLabelLayoutOptions } from '../utils/label-layout'
+export type {
+  CreateLabelRendererOptions,
+  SigmaEdgeLabelOptions,
+  SigmaLabelHaloOptions,
+  SigmaLabelHoverOptions,
+  SigmaLabelRenderer,
+  SigmaLabelTierStyle
+} from '../utils/label-renderer'
+
+// 形状程序的类型可以随时取用，值必须经 `@movk/sigma/programs/node-shape` 延迟加载：
+// 该模块静态引用 sigma/rendering，从根出口转发会把 WebGL 全局拖进 SSR
+export type {
+  CreateNodeShapeProgramOptions,
+  SigmaNodeBorder,
+  SigmaNodeBorderColor,
+  SigmaNodeBorderSize,
+  SigmaNodeBorderSizeMode,
+  SigmaNodeShape
+} from '../programs/node-shape'
