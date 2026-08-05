@@ -40,6 +40,14 @@
     </ExampleCard>
 
     <ExampleCard
+      title="连接线类型"
+      name="EdgeTypeExample"
+      description="path/head 按边的 kind 属性做 dict 绑定，同一份 primitives 声明下不同边可选不同线型与端点。"
+    >
+      <EdgeTypeExample />
+    </ExampleCard>
+
+    <ExampleCard
       title="事件"
       name="GraphEventsExample"
       description="emits 覆盖 sigma 事件全集，node / edge / stage 三组直接可监听。"
