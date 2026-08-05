@@ -137,6 +137,7 @@ pnpm lint
 - 改完 `src/runtime/index.css` 必须重跑 `pnpm dev:prepare`，playground 加载的是 `dist/` 里的副本，不重新 stub 就还是旧样式
 - **一页里能同时存活的 Sigma 实例有硬上限**：每个实例占 3 个 WebGL 上下文（`sigma-edges` / `sigma-nodes` / `sigma-hoverNodes` 三张画布走 WebGL，另外四张是 2D），浏览器上限多为 16 个。超出后最早的上下文被强制丢弃、画布直接变空白，只在控制台留一行 `Too many active WebGL contexts` 的警告。示例列表页一律经 `ExampleCard` 视口内懒挂载，同屏不超过四个实例
 - 控件插槽的作用域要连行为一起给。只暴露数据（如图例只给 `groups`）会让「接管外观」等于「丢掉功能」，与设计前提相悖
+- **v4 的节点 `size` 是图坐标单位，不是屏幕像素**：`itemSizesReference` 默认从 v3 的 `'screen'` 改成了 `'positions'`，渲染半径 = `size × 每坐标单位的像素数`，也就是说决定视觉大小的是 size 与坐标跨度的**比值**。v3 时代「坐标随便写、size 当像素填」的数据搬到 v4 会渲染出比画布还大的色块。示例一律把坐标跨度取在 360 单位左右（对应 `.example-stage` 的 420px 减去 `stagePadding`），使每单位约等于 1px、size 数值读起来就是像素半径；新写示例要守这个约定。库不覆盖这个默认值，语义与逃生方式写在 `docs/content/docs/6.guides/4.node-size.md`
 
 - 模块装进消费方的 `node_modules` 后，Vite 的依赖扫描不进 node_modules 里的源码，runtime 对 graphology / sigma 系列的 import 拿不到预构建，浏览器直接收到 CJS 报缺少命名导出。声明由 `src/optimize-deps.ts` 内置，runtime 新增对某个包的 import 时要同步补一条候选。传递依赖（`events`、`graphology-utils/*`）必须写成 Vite 的 `parent > child` 形式，未安装的可选 peer 必须探测后跳过——直接塞进 `optimizeDeps.include` 会换来一串启动告警
 - 根 `tsconfig.json` 必须 `extends: "./.nuxt/tsconfig.json"`。改成 project references 写法会让 `vue-tsc --noEmit` 完全跳过 `src/`，typecheck 空转却仍退出码 0
@@ -170,7 +171,7 @@ pnpm lint
 
 ### 示例的唯一数据源在 docs
 
-46 个示例、`corpus.ts`、`examples.css` 全部住在 `docs/app/`，`playgrounds/basic` 经 `components` / `imports.dirs` / `css` 三处的绝对路径**反向引用**同一份文件。不要在 basic 下重建这些目录，两份会立刻漂移。
+47 个示例、`corpus.ts`、`examples.css` 全部住在 `docs/app/`，`playgrounds/basic` 经 `components` / `imports.dirs` / `css` 三处的绝对路径**反向引用**同一份文件。不要在 basic 下重建这些目录，两份会立刻漂移。
 
 物理位置必须在 docs 侧，因为 `ComponentExample.vue` 用 `import.meta.glob('~/components/content/examples/**/*.vue')` 找预览组件，`~` 硬绑 docs 自身 srcDir。示例放在别处时**预览会静默消失**——模板是 `v-else-if="resolvedComponent"`，没有兜底分支也不报错，只剩源码块。改完示例位置务必肉眼确认预览还在。
 
