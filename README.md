@@ -2,8 +2,6 @@
 
 面向 Vue 3 / Nuxt 4 的 [sigma v3](https://www.sigmajs.org/) 声明式封装，专注大规模知识图谱可视化。
 
-> 34 个公开 API 与两套演示已实现（[架构方案](references/movk-sigma-architecture.md#十三里程碑)的 M0–M5 全部完成）。文档站已搭起骨架（`pnpm dev:docs`），目前有入门两页与三个样板 API 页，其余页面与部署待补。
-
 ## 设计原则
 
 **封装是加法，不是围墙。** 库没覆盖的原生能力，用户必须仍然能用：
@@ -14,8 +12,6 @@
 - 渲染程序、布局、控件全都可以绕过，库不劫持画布
 - 不 re-export 上游，`sigma` 与 `graphology` 保持 peer 依赖，不夹带第二份实例
 - 用户自带的 `settings.nodeReducer` / `edgeReducer` 位于 reducer 链首，不会被库的高亮、过滤吞掉
-
-完整的十条保证与已知耦合点见[架构方案第三节](references/movk-sigma-architecture.md#三原生能力的出口兼容)。
 
 ## 安装
 
@@ -216,13 +212,6 @@ pnpm lint
 ```
 
 开发约定见 [AGENTS.md](AGENTS.md)，其中的红线（runtime 禁用自动导入、sigma 只能动态导入、模块级状态客户端隔离、出口兼容、官方类型、`@movk/core` 优先）必须遵守。
-
-## 相关
-
-- [架构方案](references/movk-sigma-architecture.md) —— 选型核查、技术难点与设计依据
-- [sigma.js 上手指南](references/sigmajs-guide.md) —— 上游库本身怎么工作
-- [sigma.js](https://www.sigmajs.org/) / [graphology](https://graphology.github.io/)
-- [@movk/mapbox](https://mapbox.mhaibaraai.cn) —— 同系列的 Mapbox GL 封装
 
 ## License
 

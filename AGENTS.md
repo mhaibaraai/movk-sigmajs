@@ -2,8 +2,6 @@
 
 `@movk/sigma` —— 基于 sigma v4 的知识图谱可视化 Nuxt 模块，为 Vue 3 / Nuxt 4 提供声明式组件与 composables。
 
-完整设计依据见 [references/movk-sigma-architecture.md](references/movk-sigma-architecture.md)，动手前先读第三节（出口兼容）与第五节（七个技术难点）。不熟悉 sigma.js 本身的先看 [references/sigmajs-guide.md](references/sigmajs-guide.md)，那份讲上游库怎么工作。
-
 ## 目录结构
 
 ```text
@@ -24,7 +22,6 @@ playgrounds/
 ├── basic/                # 零 UI 依赖，反向引用 docs 的示例，纯原生逃生舱
 └── ui/                   # @movk/nuxt，接口驱动的完整场景与插槽接管
 test/                     # vitest + happy-dom + @vue/test-utils
-references/               # 架构方案与背景资料
 ```
 
 两个 playground 的分工见「演示应用」一节，示例与文档页的组织约定见「文档站」一节。
