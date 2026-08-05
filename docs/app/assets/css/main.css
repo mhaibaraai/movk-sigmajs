@@ -1,0 +1,9 @@
+@import 'tailwindcss';
+@import '@movk/nuxt';
+@import './examples.css';
+
+@source '../../../..';
+
+@theme static {
+  --container-8xl: 96rem;
+}
