@@ -25,7 +25,7 @@
     <ExampleCard
       title="useSigmaMetrics"
       name="UseSigmaMetricsExample"
-      description="度数、三种中心性与 Louvain 社区划分，按图版本缓存。顺带演示 degreeToSize 与 communityToColor 两个视觉映射工具。"
+      description="度数、三种中心性与 Louvain 社区划分，按图版本缓存。顺带演示如何把指标映射到尺寸与配色。"
     >
       <UseSigmaMetricsExample />
     </ExampleCard>

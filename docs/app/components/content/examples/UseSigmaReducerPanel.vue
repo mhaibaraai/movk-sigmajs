@@ -15,11 +15,12 @@ const ring = shallowRef(true)
 useSigmaSelection()
 useSigmaFilter()
 
+// v4 把图属性放在第三参数，第二个是已归约的显示数据
 const { refresh } = useSigmaReducer({
   order: 400,
-  node: (_key, attributes): Partial<NodeDisplayData> =>
+  node: (_key, data, attributes): Partial<NodeDisplayData> =>
     ring.value && attributes.category === '应急预案'
-      ? { color: '#f59e0b', size: (attributes.size ?? 8) * 1.6, forceLabel: true }
+      ? { color: '#f59e0b', size: data.size * 1.6, labelVisibility: 'visible' }
       : {},
   edge: (): Partial<EdgeDisplayData> => (ring.value ? { size: 2 } : {})
 })

@@ -1,32 +1,24 @@
 <script setup lang="ts">
 import Graph from 'graphology'
 import { shallowRef } from 'vue'
+import type { StylesDeclaration } from 'sigma/types'
 
 /**
  * 档位是排名而非取值：一张图该出多少标签由屏幕空间决定，与度数的绝对大小无关。
- * 这里把档位同时用在字号（renderer 的 tiers）与强制显示（sigma 的 forceLabel）上。
+ * 档位同时驱动字号与显示优先级——0 档强制显示，其余交给标签网格竞争。
  */
 const graph = new Graph()
 graph.import(demoGraph({ nodes: 24, extraEdges: 1 }))
 
-const labels = createLabelRenderer({
-  maxChars: 6,
-  forceTier: 0,
-  tiers: {
-    0: { size: 14, weight: '600', color: '#0f172a' },
-    1: { size: 12, weight: '500', color: '#1e293b' },
-    2: { size: 11, weight: '400', color: '#64748b' }
-  }
-})
-
 const ratios = shallowRef<number[]>([0.15, 0.5])
 
-const settings = {
-  labelSize: 12,
-  labelColor: { color: '#1e293b' },
-  renderEdgeLabels: false,
-  defaultDrawNodeLabel: labels.drawNodeLabel,
-  defaultDrawNodeHover: labels.drawNodeHover
+const styles: StylesDeclaration = {
+  nodes: {
+    labelSize: { attribute: 'labelTier', dict: { 0: 14, 1: 12, 2: 11 }, defaultValue: 12 },
+    labelColor: { attribute: 'labelTier', dict: { 0: '#0f172a', 1: '#1e293b', 2: '#64748b' }, defaultValue: '#1e293b' },
+    // 0 档避无可避时仍强行绘制，其余让标签网格决定
+    labelVisibility: { whenData: { labelTier: 0 }, then: 'visible', else: 'auto' }
+  }
 }
 
 function apply(next: number[]) {
@@ -34,16 +26,15 @@ function apply(next: number[]) {
 
   const tiers = degreeToTier(graph, { ratios: next })
   for (const [node, tier] of Object.entries(tiers)) {
-    graph.mergeNodeAttributes(node, { labelTier: tier, forceLabel: tier === 0 })
+    graph.setNodeAttribute(node, 'labelTier', tier)
   }
-  labels.clear()
 }
 
 apply(ratios.value)
 </script>
 
 <template>
-  <SigmaGraph :graph="graph" :settings="settings" @before-render="labels.resetFrame()">
+  <SigmaGraph :graph="graph" :styles="styles" :settings="{ renderEdgeLabels: false }">
     <div class="demo-panel" data-at="top-left">
       <div class="demo-row">
         <span class="demo-label">累计占比</span>
@@ -57,7 +48,7 @@ apply(ratios.value)
           只分两档
         </button>
       </div>
-      <span class="demo-tag">0 档加粗加深并置 forceLabel，避无可避时仍会强行绘制</span>
+      <span class="demo-tag">档位经 dict 绑定映射到字号与配色</span>
     </div>
   </SigmaGraph>
 </template>

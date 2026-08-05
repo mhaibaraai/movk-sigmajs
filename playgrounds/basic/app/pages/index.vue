@@ -8,7 +8,7 @@ const groups = [
     title: '组件',
     to: '/graph',
     items: [
-      { api: 'SigmaGraph', to: '/graph', examples: ['GraphBasic', 'GraphExternal', 'GraphSettings', 'GraphPrograms', 'GraphEvents', 'GraphMultiInstance'] },
+      { api: 'SigmaGraph', to: '/graph', examples: ['GraphBasic', 'GraphExternal', 'GraphSettings', 'GraphPrimitives', 'GraphEvents', 'GraphMultiInstance'] },
       { api: 'SigmaOverlay', to: '/overlays', examples: ['OverlayNode', 'OverlayPosition'] },
       { api: 'SigmaTooltip', to: '/overlays', examples: ['Tooltip'] },
       { api: 'SigmaPopover', to: '/overlays', examples: ['Popover'] },
@@ -48,11 +48,8 @@ const groups = [
     items: [
       { api: 'applyGraphDiff', to: '/utils', examples: ['ApplyGraphDiff'] },
       { api: 'chainReducers', to: '/utils', examples: ['ChainReducers'] },
-      { api: 'curveParallelEdges', to: '/utils', examples: ['CurveParallelEdges'] },
-      { api: 'defineSigmaProgram', to: '/graph', examples: ['GraphPrograms'] },
       { api: 'sampleGraph', to: '/utils', examples: ['SampleGraph'] },
-      { api: 'degreeToSize', to: '/utils', examples: ['DegreeToSize'] },
-      { api: 'communityToColor', to: '/utils', examples: ['CommunityToColor'] }
+      { api: 'defineSigmaPrimitives', to: '/graph', examples: ['GraphPrimitives'] }
     ]
   },
   {
