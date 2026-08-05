@@ -18,27 +18,21 @@ importers:
       '@nuxt/kit':
         specifier: ^4.5.1
         version: 4.5.1(magic-string@1.1.0)(magicast@0.5.4)(oxc-parser@0.140.0)(rolldown@1.2.0)(unplugin@3.3.0(esbuild@0.28.1)(rolldown@1.2.0)(rollup@4.62.2)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0)))
-      '@sigma/edge-curve':
-        specifier: '>=3.0.0'
-        version: 3.1.0(sigma@3.0.3(graphology-types@0.24.8))
       '@sigma/export-image':
-        specifier: '>=3.0.0'
-        version: 3.0.0(sigma@3.0.3(graphology-types@0.24.8))
+        specifier: '>=4.0.0-alpha.3'
+        version: 4.0.0-alpha.3(sigma@4.0.0-alpha.7(graphology-types@0.24.8))
       '@sigma/node-border':
-        specifier: '>=3.0.0'
-        version: 3.0.0(sigma@3.0.3(graphology-types@0.24.8))
+        specifier: '>=4.0.0-alpha.3'
+        version: 4.0.0-alpha.3(sigma@4.0.0-alpha.7(graphology-types@0.24.8))
       '@sigma/node-image':
-        specifier: '>=3.0.0'
-        version: 3.0.0(sigma@3.0.3(graphology-types@0.24.8))
+        specifier: '>=4.0.0-alpha.3'
+        version: 4.0.0-alpha.3(sigma@4.0.0-alpha.7(graphology-types@0.24.8))
       '@sigma/node-piechart':
-        specifier: '>=3.0.0'
-        version: 3.0.1(sigma@3.0.3(graphology-types@0.24.8))
-      '@sigma/node-square':
-        specifier: '>=3.0.0'
-        version: 3.0.0(sigma@3.0.3(graphology-types@0.24.8))
+        specifier: '>=4.0.0-alpha.3'
+        version: 4.0.0-alpha.3(sigma@4.0.0-alpha.7(graphology-types@0.24.8))
       '@sigma/utils':
-        specifier: '>=3.0.0'
-        version: 3.0.0(sigma@3.0.3(graphology-types@0.24.8))
+        specifier: '>=4.0.0-alpha.2'
+        version: 4.0.0-alpha.2(sigma@4.0.0-alpha.7(graphology-types@0.24.8))
       '@vueuse/core':
         specifier: ^14.4.0
         version: 14.4.0(vue@3.5.40(typescript@6.0.3))
@@ -63,9 +57,6 @@ importers:
       graphology-metrics:
         specifier: '>=2.0.0'
         version: 2.4.0(graphology-types@0.24.8)
-      graphology-traversal:
-        specifier: '>=0.3.0'
-        version: 0.3.1(graphology-types@0.24.8)
     devDependencies:
       '@nuxt/eslint-config':
         specifier: ^1.16.0
@@ -110,8 +101,8 @@ importers:
         specifier: ^21.0.1
         version: 21.0.1(@types/node@26.1.1)(magicast@0.5.3)(supports-color@10.2.2)
       sigma:
-        specifier: ^3.0.3
-        version: 3.0.3(graphology-types@0.24.8)
+        specifier: 4.0.0-alpha.7
+        version: 4.0.0-alpha.7(graphology-types@0.24.8)
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -139,18 +130,15 @@ importers:
       '@nuxt/ui':
         specifier: ^4.10.0
         version: 4.10.0(33186a9166973bf2946962329e2d3aa7)
-      '@sigma/edge-curve':
-        specifier: ^3.1.0
-        version: 3.1.0(sigma@3.0.3(graphology-types@0.24.8))
       '@sigma/export-image':
-        specifier: ^3.0.0
-        version: 3.0.0(sigma@3.0.3(graphology-types@0.24.8))
+        specifier: 4.0.0-alpha.3
+        version: 4.0.0-alpha.3(sigma@4.0.0-alpha.7(graphology-types@0.24.8))
       '@sigma/node-border':
-        specifier: ^3.0.0
-        version: 3.0.0(sigma@3.0.3(graphology-types@0.24.8))
+        specifier: 4.0.0-alpha.3
+        version: 4.0.0-alpha.3(sigma@4.0.0-alpha.7(graphology-types@0.24.8))
       '@sigma/utils':
-        specifier: ^3.0.0
-        version: 3.0.0(sigma@3.0.3(graphology-types@0.24.8))
+        specifier: 4.0.0-alpha.2
+        version: 4.0.0-alpha.2(sigma@4.0.0-alpha.7(graphology-types@0.24.8))
       '@vercel/analytics':
         specifier: ^2.0.1
         version: 2.0.1(nuxt@4.5.1(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7(supports-color@10.2.2)))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7(supports-color@10.2.2)))(@modelcontextprotocol/sdk@1.30.0(supports-color@10.2.2)(zod@3.25.76))(@oxc-project/types@0.142.0)(@types/node@26.1.1)(@vue/compiler-sfc@3.5.40)(better-sqlite3@13.0.3)(cac@7.0.0)(db0@0.3.4(better-sqlite3@13.0.3))(esbuild@0.28.1)(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))(ioredis@5.11.1(supports-color@10.2.2))(lightningcss@1.33.0)(magicast@0.5.4)(meow@13.2.0)(optionator@0.9.4)(oxc-parser@0.142.0)(rollup-plugin-visualizer@7.0.1(rolldown@1.2.0)(rollup@4.62.2))(rollup@4.62.2)(srvx@0.12.5)(supports-color@10.2.2)(terser@5.49.0)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@6.0.3))(yaml@2.9.0))(vue@3.5.40(typescript@6.0.3))
@@ -182,8 +170,8 @@ importers:
         specifier: ^4.5.1
         version: 4.5.1(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7(supports-color@10.2.2)))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7(supports-color@10.2.2)))(@modelcontextprotocol/sdk@1.30.0(supports-color@10.2.2)(zod@3.25.76))(@oxc-project/types@0.142.0)(@types/node@26.1.1)(@vue/compiler-sfc@3.5.40)(better-sqlite3@13.0.3)(cac@7.0.0)(db0@0.3.4(better-sqlite3@13.0.3))(esbuild@0.28.1)(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))(ioredis@5.11.1(supports-color@10.2.2))(lightningcss@1.33.0)(magicast@0.5.4)(meow@13.2.0)(optionator@0.9.4)(oxc-parser@0.142.0)(rollup-plugin-visualizer@7.0.1(rolldown@1.2.0)(rollup@4.62.2))(rollup@4.62.2)(srvx@0.12.5)(supports-color@10.2.2)(terser@5.49.0)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@6.0.3))(yaml@2.9.0)
       sigma:
-        specifier: ^3.0.3
-        version: 3.0.3(graphology-types@0.24.8)
+        specifier: 4.0.0-alpha.7
+        version: 4.0.0-alpha.7(graphology-types@0.24.8)
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
@@ -197,18 +185,15 @@ importers:
       '@movk/sigma':
         specifier: workspace:*
         version: link:../..
-      '@sigma/edge-curve':
-        specifier: ^3.1.0
-        version: 3.1.0(sigma@3.0.3(graphology-types@0.24.8))
       '@sigma/export-image':
-        specifier: ^3.0.0
-        version: 3.0.0(sigma@3.0.3(graphology-types@0.24.8))
+        specifier: 4.0.0-alpha.3
+        version: 4.0.0-alpha.3(sigma@4.0.0-alpha.7(graphology-types@0.24.8))
       '@sigma/node-border':
-        specifier: ^3.0.0
-        version: 3.0.0(sigma@3.0.3(graphology-types@0.24.8))
+        specifier: 4.0.0-alpha.3
+        version: 4.0.0-alpha.3(sigma@4.0.0-alpha.7(graphology-types@0.24.8))
       '@sigma/utils':
-        specifier: ^3.0.0
-        version: 3.0.0(sigma@3.0.3(graphology-types@0.24.8))
+        specifier: 4.0.0-alpha.2
+        version: 4.0.0-alpha.2(sigma@4.0.0-alpha.7(graphology-types@0.24.8))
       graphology:
         specifier: ^0.26.0
         version: 0.26.0(graphology-types@0.24.8)
@@ -231,8 +216,8 @@ importers:
         specifier: ^4.5.1
         version: 4.5.1(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7(supports-color@10.2.2)))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7(supports-color@10.2.2)))(@modelcontextprotocol/sdk@1.30.0(supports-color@10.2.2)(zod@4.4.3))(@oxc-project/types@0.142.0)(@types/node@26.1.1)(@vue/compiler-sfc@3.5.40)(better-sqlite3@13.0.3)(db0@0.3.4(better-sqlite3@13.0.3))(esbuild@0.28.1)(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))(ioredis@5.11.1(supports-color@10.2.2))(lightningcss@1.33.0)(magicast@0.5.4)(meow@13.2.0)(optionator@0.9.4)(oxc-parser@0.142.0)(rollup-plugin-visualizer@7.0.1(rolldown@1.2.0)(rollup@4.62.2))(rollup@4.62.2)(srvx@0.12.5)(supports-color@10.2.2)(terser@5.49.0)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@6.0.3))(yaml@2.9.0)
       sigma:
-        specifier: ^3.0.3
-        version: 3.0.3(graphology-types@0.24.8)
+        specifier: 4.0.0-alpha.7
+        version: 4.0.0-alpha.7(graphology-types@0.24.8)
     devDependencies:
       graphology-types:
         specifier: ^0.24.8
@@ -256,8 +241,8 @@ importers:
         specifier: ^4.5.1
         version: 4.5.1(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7(supports-color@10.2.2)))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7(supports-color@10.2.2)))(@modelcontextprotocol/sdk@1.30.0(supports-color@10.2.2)(zod@4.4.3))(@oxc-project/types@0.142.0)(@types/node@26.1.1)(@vue/compiler-sfc@3.5.40)(better-sqlite3@13.0.3)(db0@0.3.4(better-sqlite3@13.0.3))(esbuild@0.28.1)(eslint@10.8.0(jiti@2.7.0)(supports-color@10.2.2))(ioredis@5.11.1(supports-color@10.2.2))(lightningcss@1.33.0)(magicast@0.5.4)(meow@13.2.0)(optionator@0.9.4)(oxc-parser@0.142.0)(rollup-plugin-visualizer@7.0.1(rolldown@1.2.0)(rollup@4.62.2))(rollup@4.62.2)(srvx@0.12.5)(supports-color@10.2.2)(terser@5.49.0)(typescript@6.0.3)(vite@8.1.5(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0))(vue-tsc@3.3.9(typescript@6.0.3))(yaml@2.9.0)
       sigma:
-        specifier: ^3.0.3
-        version: 3.0.3(graphology-types@0.24.8)
+        specifier: 4.0.0-alpha.7
+        version: 4.0.0-alpha.7(graphology-types@0.24.8)
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
@@ -3437,40 +3422,30 @@ packages:
   '@shikijs/vscode-textmate@10.0.2':
     resolution: {integrity: sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg==}
 
-  '@sigma/edge-curve@3.1.0':
-    resolution: {integrity: sha512-OFWkfAXEsm+X8l1K4K49cC0psB0gQ+gqxKA08HG5piNPdzrDZ5gG9Gza6htZ5AirOVwd/4/uq/gPpD5En+H+3Q==}
+  '@sigma/export-image@4.0.0-alpha.3':
+    resolution: {integrity: sha512-Vn58s2X0yLn47jObTS+vEvz5BoxUQj969BM3mA4R9ChXVF/HWVH+JOPDTp6qD4FgdChob8MWQEBCsKXz+BggjQ==}
     peerDependencies:
-      sigma: '>=3.0.0-beta.10'
+      sigma: '>=4.0.0-alpha.0'
 
-  '@sigma/export-image@3.0.0':
-    resolution: {integrity: sha512-6JmWle7byUzAOGE3P3ttDqn2PbdnNETyFU13i4R0G3PIZcIiVqPRpRWBkz11E89oxKEzEf1XdwQKa9VxHDMD0w==}
+  '@sigma/node-border@4.0.0-alpha.3':
+    resolution: {integrity: sha512-wNJdozlqXell1RC7/RvpMoX0iBD4082h7ZHr+3wfwRKsZWVF7c44jiHw+0WHq9pHL+/iVSbTImZhwL6RK2HcvQ==}
     peerDependencies:
-      sigma: '>=3.0.0-beta.10'
+      sigma: '>=4.0.0-alpha.0'
 
-  '@sigma/node-border@3.0.0':
-    resolution: {integrity: sha512-mE3zUfjvJVuAMhSjiP/zdlkqe0OVTETxd04XHUwof01YqdzTk0OB4ACJIhWrwgsBXl7tTd9lPuKoroafLh8MtQ==}
+  '@sigma/node-image@4.0.0-alpha.3':
+    resolution: {integrity: sha512-5U7Grj6apDvsVv7b67IobzkK7bX1z1lcXp099fbh+Z4COeeIFlduJPgDQQExL5PSHAEryYuvryJfEfRcoi3AKA==}
     peerDependencies:
-      sigma: '>=3.0.0-beta.17'
+      sigma: '>=4.0.0-alpha.0'
 
-  '@sigma/node-image@3.0.0':
-    resolution: {integrity: sha512-i4WLNPugDY4jgQEZtNSiSVj4HHXOraciXLtlgdygeUxMVEhH8PJ/+Q1vQ9f/SlKFnZQ+7vH3HnsSDW6FD9aP+g==}
+  '@sigma/node-piechart@4.0.0-alpha.3':
+    resolution: {integrity: sha512-dHpmrMqB00vQGyVJTdw0oxNrTNAFHjIfH+hHSiyaRySYGizOa1uKhP3c122JAbC4fYxb/UMPCLvp3Jdyu8ZuAg==}
     peerDependencies:
-      sigma: '>=3.0.0-beta.10'
+      sigma: '>=4.0.0-alpha.0'
 
-  '@sigma/node-piechart@3.0.1':
-    resolution: {integrity: sha512-VxN9e/aKEPhw3y+3kLeDXzfbJViy2yKSe4tBx71ejA+5bQza6ioMl99R2MtWKgwXIJucZnSjcItCI8FRAs+YoQ==}
+  '@sigma/utils@4.0.0-alpha.2':
+    resolution: {integrity: sha512-jt8K6rqpsTMExuGZsq0GdWaqRI/jv1ePZpv2SlEKINWQ6E6SjGM8CfzfqcWK6vR2e+asqx4WE7b/hzk3YWOiSA==}
     peerDependencies:
-      sigma: '>=3.0.0-beta.17'
-
-  '@sigma/node-square@3.0.0':
-    resolution: {integrity: sha512-hPX2oWo7WeaSe6M3D56AXsrLyg3F+7N/YsodaJh4Sw3KTce0GAFVWWPZZklu9CITz0xi3kEmlCGulqAH0cVG2w==}
-    peerDependencies:
-      sigma: '>=3.0.0-beta.17'
-
-  '@sigma/utils@3.0.0':
-    resolution: {integrity: sha512-JCMjj3CHpA8yh8HcWm1YBs4Zdo2s0YUR2YKZ2NUlM2Purkdd8odLuaGQ/R/guSrBz/y+tOLSaQX7hKF6fkUG1g==}
-    peerDependencies:
-      sigma: '>=3.0.0-beta.29'
+      sigma: '>=4.0.0-alpha.0'
 
   '@simple-git/args-pathspec@1.0.3':
     resolution: {integrity: sha512-ngJMaHlsWDTfjyq9F3VIQ8b7NXbBLq5j9i5bJ6XLYtD6qlDXT7fdKY2KscWWUF8t18xx052Y/PUO1K1TRc9yKA==}
@@ -6026,11 +6001,6 @@ packages:
     peerDependencies:
       graphology-types: '>=0.20.0'
 
-  graphology-traversal@0.3.1:
-    resolution: {integrity: sha512-lGLrLKEDKtNgAKgHVhVftKf3cb/nuWwuVPQZHXRnN90JWn0RSjco/s+NB2ARSlMapEMlbnPgv6j++427yTnU3Q==}
-    peerDependencies:
-      graphology-types: '>=0.20.0'
-
   graphology-types@0.24.8:
     resolution: {integrity: sha512-hDRKYXa8TsoZHjgEaysSRyPdT6uB78Ci8WnjgbStlQysz7xR52PInxNsmnB7IBOM1BhikxkNyCVEFgmPKnpx3Q==}
 
@@ -8351,8 +8321,8 @@ packages:
   siginfo@2.0.0:
     resolution: {integrity: sha512-ybx0WO1/8bSBLEWXZvEd7gMW3Sn3JFlW3TvX1nREbDLRNQNaeNN8WK0meBwPdAaOI7TtRRRJn/Es1zhrrCHu7g==}
 
-  sigma@3.0.3:
-    resolution: {integrity: sha512-5H0zFlx6/NTQpqBg4Rm569ZOpnBOXMaS25UQThIWMU3XyzI5AhmorK/gnl87BvJBLhQd0tW4C0LIp3enWzMoNw==}
+  sigma@4.0.0-alpha.7:
+    resolution: {integrity: sha512-Lodw/vVcXIyBIuW0t+cZJBchsOhif/9FoplGiqSp7nhHO7hUGNeNQS7Ad3nBmRveaVOr6ccAurIiYfIFKI7fWg==}
 
   signal-exit@3.0.7:
     resolution: {integrity: sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==}
@@ -13975,34 +13945,26 @@ snapshots:
 
   '@shikijs/vscode-textmate@10.0.2': {}
 
-  '@sigma/edge-curve@3.1.0(sigma@3.0.3(graphology-types@0.24.8))':
-    dependencies:
-      sigma: 3.0.3(graphology-types@0.24.8)
-
-  '@sigma/export-image@3.0.0(sigma@3.0.3(graphology-types@0.24.8))':
+  '@sigma/export-image@4.0.0-alpha.3(sigma@4.0.0-alpha.7(graphology-types@0.24.8))':
     dependencies:
       file-saver: 2.0.5
-      sigma: 3.0.3(graphology-types@0.24.8)
+      sigma: 4.0.0-alpha.7(graphology-types@0.24.8)
 
-  '@sigma/node-border@3.0.0(sigma@3.0.3(graphology-types@0.24.8))':
+  '@sigma/node-border@4.0.0-alpha.3(sigma@4.0.0-alpha.7(graphology-types@0.24.8))':
     dependencies:
-      sigma: 3.0.3(graphology-types@0.24.8)
+      sigma: 4.0.0-alpha.7(graphology-types@0.24.8)
 
-  '@sigma/node-image@3.0.0(sigma@3.0.3(graphology-types@0.24.8))':
+  '@sigma/node-image@4.0.0-alpha.3(sigma@4.0.0-alpha.7(graphology-types@0.24.8))':
     dependencies:
-      sigma: 3.0.3(graphology-types@0.24.8)
+      sigma: 4.0.0-alpha.7(graphology-types@0.24.8)
 
-  '@sigma/node-piechart@3.0.1(sigma@3.0.3(graphology-types@0.24.8))':
+  '@sigma/node-piechart@4.0.0-alpha.3(sigma@4.0.0-alpha.7(graphology-types@0.24.8))':
     dependencies:
-      sigma: 3.0.3(graphology-types@0.24.8)
+      sigma: 4.0.0-alpha.7(graphology-types@0.24.8)
 
-  '@sigma/node-square@3.0.0(sigma@3.0.3(graphology-types@0.24.8))':
+  '@sigma/utils@4.0.0-alpha.2(sigma@4.0.0-alpha.7(graphology-types@0.24.8))':
     dependencies:
-      sigma: 3.0.3(graphology-types@0.24.8)
-
-  '@sigma/utils@3.0.0(sigma@3.0.3(graphology-types@0.24.8))':
-    dependencies:
-      sigma: 3.0.3(graphology-types@0.24.8)
+      sigma: 4.0.0-alpha.7(graphology-types@0.24.8)
 
   '@simple-git/args-pathspec@1.0.3': {}
 
@@ -16872,12 +16834,6 @@ snapshots:
       graphology-types: 0.24.8
       graphology-utils: 2.5.2(graphology-types@0.24.8)
       mnemonist: 0.39.8
-
-  graphology-traversal@0.3.1(graphology-types@0.24.8):
-    dependencies:
-      graphology-indices: 0.17.0(graphology-types@0.24.8)
-      graphology-types: 0.24.8
-      graphology-utils: 2.5.2(graphology-types@0.24.8)
 
   graphology-types@0.24.8: {}
 
@@ -20625,7 +20581,7 @@ snapshots:
 
   siginfo@2.0.0: {}
 
-  sigma@3.0.3(graphology-types@0.24.8):
+  sigma@4.0.0-alpha.7(graphology-types@0.24.8):
     dependencies:
       events: 3.3.0
       graphology-utils: 2.5.2(graphology-types@0.24.8)

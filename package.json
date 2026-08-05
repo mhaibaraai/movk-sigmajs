@@ -1,9 +1,9 @@
 {
   "name": "@movk/sigma",
   "type": "module",
-  "version": "0.0.4",
+  "version": "1.0.0-alpha.0",
   "packageManager": "pnpm@11.20.0",
-  "description": "基于 sigma v3 的知识图谱可视化 Nuxt 模块：SigmaGraph 等声明式组件与 composables，覆盖渲染、交互、布局、分析与 DOM 覆盖层，面向 1000+ 节点的大规模图谱。",
+  "description": "基于 sigma v4 的知识图谱可视化 Nuxt 模块：SigmaGraph 等声明式组件与 composables，覆盖渲染、交互、布局、分析与 DOM 覆盖层，面向 1000+ 节点的大规模图谱。",
   "author": "YiXuan <mhaibaraai@gmail.com>",
   "license": "MIT",
   "repository": {
@@ -96,27 +96,21 @@
     "defu": "^6.1.7"
   },
   "peerDependencies": {
-    "@sigma/edge-curve": ">=3.0.0",
-    "@sigma/export-image": ">=3.0.0",
-    "@sigma/node-border": ">=3.0.0",
-    "@sigma/node-image": ">=3.0.0",
-    "@sigma/node-piechart": ">=3.0.0",
-    "@sigma/node-square": ">=3.0.0",
-    "@sigma/utils": ">=3.0.0",
+    "@sigma/export-image": ">=4.0.0-alpha.3",
+    "@sigma/node-border": ">=4.0.0-alpha.3",
+    "@sigma/node-image": ">=4.0.0-alpha.3",
+    "@sigma/node-piechart": ">=4.0.0-alpha.3",
+    "@sigma/utils": ">=4.0.0-alpha.2",
     "graphology": ">=0.26.0",
     "graphology-communities-louvain": ">=2.0.0",
     "graphology-layout": ">=0.6.0",
     "graphology-layout-forceatlas2": ">=0.10.0",
     "graphology-layout-noverlap": ">=0.4.0",
     "graphology-metrics": ">=2.0.0",
-    "graphology-traversal": ">=0.3.0",
-    "sigma": ">=3.0.0",
+    "sigma": ">=4.0.0-alpha.7",
     "vue": ">=3.5.0"
   },
   "peerDependenciesMeta": {
-    "@sigma/edge-curve": {
-      "optional": true
-    },
     "@sigma/export-image": {
       "optional": true
     },
@@ -127,9 +121,6 @@
       "optional": true
     },
     "@sigma/node-piechart": {
-      "optional": true
-    },
-    "@sigma/node-square": {
       "optional": true
     },
     "@sigma/utils": {
@@ -149,9 +140,6 @@
     },
     "graphology-metrics": {
       "optional": true
-    },
-    "graphology-traversal": {
-      "optional": true
     }
   },
   "devDependencies": {
@@ -169,7 +157,7 @@
     "happy-dom": "^20.11.1",
     "nuxt": "^4.5.1",
     "release-it": "^21.0.1",
-    "sigma": "^3.0.3",
+    "sigma": "4.0.0-alpha.7",
     "typescript": "~6.0.3",
     "vitest": "^4.1.10",
     "vue": "^3.5.40",

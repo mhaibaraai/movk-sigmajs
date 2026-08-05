@@ -29,11 +29,12 @@ export interface OptimizeDepResolver {
  * runtime 新增对某个包的 import 时，这里要同步补一条
  */
 export const OPTIMIZE_DEPS_CANDIDATES: OptimizeDepCandidate[] = [
-  // 必需 peer：graphology 被 Graph.vue 静态 import，sigma 两条在 onMounted 里动态 import
+  // 必需 peer：graphology 被 Graph.vue 静态 import，sigma 各条在 onMounted 里动态 import
   { id: 'graphology' },
   { id: 'sigma' },
   { id: 'sigma/settings' },
-  // createNodeShapeProgram 静态引用这两条，整个模块由使用方经 defineSigmaProgram 延迟加载
+  // 使用方声明 primitives 时会取用内置形状与路径的工厂函数
+  { id: 'sigma/primitives' },
   { id: 'sigma/rendering' },
   { id: 'sigma/utils' },
 
@@ -49,13 +50,12 @@ export const OPTIMIZE_DEPS_CANDIDATES: OptimizeDepCandidate[] = [
   { id: 'graphology-metrics/centrality/closeness' },
   { id: 'graphology-communities-louvain' },
 
-  // sigma 生态：前三个由库内动态 import，渲染程序由使用方经 defineSigmaProgram 延迟加载
-  { id: '@sigma/edge-curve' },
+  // sigma 生态：前两个由库内动态 import，其余由使用方在 primitives 里取用。
+  // edge-curve 与 node-square 无 v4 版本，能力已进核心
   { id: '@sigma/export-image' },
   { id: '@sigma/utils' },
   { id: '@sigma/node-image' },
   { id: '@sigma/node-border' },
-  { id: '@sigma/node-square' },
   { id: '@sigma/node-piechart' },
 
   // 传递依赖：events 是 graphology 的 dependency，graphology-utils 是布局包的 dependency。
