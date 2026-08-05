@@ -74,6 +74,8 @@ function load(count: number) {
 <style scoped>
 .wrap {
   position: relative;
+  /* .example-stage 是 flex 行容器，不给宽度会缩成内容宽 */
+  width: 100%;
   height: 100%;
 }
 
