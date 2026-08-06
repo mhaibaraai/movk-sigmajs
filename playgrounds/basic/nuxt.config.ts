@@ -8,7 +8,8 @@ const dataDir = fileURLToPath(new URL('../../docs/public/data', import.meta.url)
 export default defineNuxtConfig({
   modules: ['@movk/sigma'],
   components: [
-    { path: examplesDir, pathPrefix: false, global: true }
+    { path: examplesDir, pathPrefix: false, global: true },
+    { path: '~/components' }
   ],
   imports: { dirs: [corpusDir] },
   devtools: { enabled: true },
