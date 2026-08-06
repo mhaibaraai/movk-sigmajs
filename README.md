@@ -1,6 +1,6 @@
 # @movk/sigma
 
-面向 Vue 3 / Nuxt 4 的 [sigma v3](https://www.sigmajs.org/) 声明式封装，专注大规模知识图谱可视化。
+面向 Vue 3 / Nuxt 4 的 [sigma v4](https://www.sigmajs.org/) 声明式封装，专注大规模知识图谱可视化。
 
 ## 设计原则
 
@@ -11,7 +11,7 @@
 - 数据双通道：传 `data` 由库做增量 diff，传 `graph` 则库完全不碰数据，只负责渲染与生命周期
 - 渲染程序、布局、控件全都可以绕过，库不劫持画布
 - 不 re-export 上游，`sigma` 与 `graphology` 保持 peer 依赖，不夹带第二份实例
-- 用户自带的 `settings.nodeReducer` / `edgeReducer` 位于 reducer 链首，不会被库的高亮、过滤吞掉
+- 用户自带的 `nodeReducer` / `edgeReducer`（`SigmaGraph` 的独立 props）位于 reducer 链首，不会被库的高亮、过滤吞掉
 
 ## 安装
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * 纯原生逃生舱：不使用 @movk/sigma 的任何 composable、控件或工具函数。
+ * 纯原生逃生舱：不使用 Movk Sigma 的任何 composable、控件或工具函数。
  *
  * 只用 SigmaGraph 建实例，之后全部走 sigma / graphology 的原生 API。
  * 数据也自己管——传 graph 而不是 data，组件完全不碰它。

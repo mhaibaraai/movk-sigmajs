@@ -19,8 +19,7 @@ const labelDensity = shallowRef(1)
 const settings = computed(() => ({
   hideEdgesOnMove: hideEdgesOnMove.value,
   labelRenderedSizeThreshold: labelThreshold.value,
-  labelDensity: labelDensity.value,
-  defaultEdgeColor: '#e2e8f0'
+  labelDensity: labelDensity.value
 }))
 
 function load() {
