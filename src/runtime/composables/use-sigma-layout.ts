@@ -9,7 +9,7 @@ const SUPERVISED_LAYOUTS = new Set<SigmaLayoutName>(['forceatlas2', 'noverlap'])
 
 const DEFAULT_COMPONENT_GAP = 60
 
-const DEFAULT_COMPONENT_EDGE_LENGTH = 100
+const DEFAULT_COMPONENT_SPACING = 100
 
 /** 节点未给 size 时的占位半径，仅用于算分量外接圆 */
 const FALLBACK_NODE_RADIUS = 1
@@ -29,10 +29,11 @@ export interface SigmaLayoutComponentOptions {
    */
   gap?: number
   /**
-   * 归一化后的目标平均边长，让疏密不同的分量在打包时尺度可比
+   * 归一化后每个节点分到的平均间距，图坐标。分量按节点数缩放到同样的密度，
+   * 少数长边拉高平均边长的星形分量才不会被压成一坨
    * @defaultValue 100
    */
-  edgeLength?: number
+  spacing?: number
 }
 
 export interface UseSigmaLayoutOptions {
@@ -172,34 +173,6 @@ function seedMissingPositions(sub: Graph, scale: number): void {
   })
 }
 
-/** 缩放到统一的平均边长，疏密不同的分量打包后尺度才可比 */
-function normalizeScale(sub: Graph, edgeLength: number): void {
-  if (sub.size === 0) {
-    return
-  }
-
-  let total = 0
-  sub.forEachEdge((_edge, _attributes, _source, _target, sourceAttributes, targetAttributes) => {
-    total += Math.hypot(
-      (sourceAttributes.x as number) - (targetAttributes.x as number),
-      (sourceAttributes.y as number) - (targetAttributes.y as number)
-    )
-  })
-
-  const mean = total / sub.size
-  if (!mean) {
-    return
-  }
-
-  const factor = edgeLength / mean
-  sub.forEachNode((node, attributes) => {
-    sub.mergeNodeAttributes(node, {
-      x: (attributes.x as number) * factor,
-      y: (attributes.y as number) * factor
-    })
-  })
-}
-
 /** 分量的外接圆：圆心取包围盒中心，半径含节点自身的绘制半径 */
 function measureComponent(keys: string[], sub: Graph): ComponentBlock {
   let minX = Number.POSITIVE_INFINITY
@@ -222,6 +195,26 @@ function measureComponent(keys: string[], sub: Graph): ComponentBlock {
 }
 
 /**
+ * 缩放到「每个节点分到 spacing 见方」的密度，并把坐标归零到分量中心。
+ *
+ * 不按平均边长归一：星形分量的平均边长会被少数长边拉高，一圈叶子因此被压在同一个
+ * 半径上，节点数越多挤得越狠。按节点数定目标半径，各分量的密度才真正一致。
+ */
+function normalizeScale(block: ComponentBlock, spacing: number): ComponentBlock {
+  const target = spacing * Math.sqrt(block.sub.order) / 2
+  const factor = target / block.radius
+
+  block.sub.forEachNode((node, attributes) => {
+    block.sub.mergeNodeAttributes(node, {
+      x: ((attributes.x as number) - block.center.x) * factor,
+      y: ((attributes.y as number) - block.center.y) * factor
+    })
+  })
+
+  return { ...block, center: { x: 0, y: 0 }, radius: target }
+}
+
+/**
  * 布局算法的统一入口，并托管 worker 的生命周期。
  *
  * ForceAtlas2 与 Noverlap 的 worker 会持续占用线程，组件卸载或 HMR 时不 kill 就泄漏，
@@ -239,7 +232,7 @@ export function useSigmaLayout(
   const component = byComponent
     ? {
         gap: DEFAULT_COMPONENT_GAP,
-        edgeLength: DEFAULT_COMPONENT_EDGE_LENGTH,
+        spacing: DEFAULT_COMPONENT_SPACING,
         ...(byComponent === true ? {} : byComponent)
       }
     : null
@@ -281,7 +274,7 @@ export function useSigmaLayout(
    * 打包借 `circlepack`——它本来就按节点 `size` 摆放不等圆，正是「摆一堆大小不一的分量」
    * 这件事；`rng` 固定而非 `Math.random`，同一份数据每次布局结果一致。
    */
-  async function assignByComponent(target: Graph, gap: number, edgeLength: number) {
+  async function assignByComponent(target: Graph, gap: number, spacing: number) {
     const components = connectedComponents(target)
     if (components.length <= 1) {
       await loadOneShot(target)
@@ -293,12 +286,11 @@ export function useSigmaLayout(
     const blocks: ComponentBlock[] = []
 
     for (const [position, sub] of subs.entries()) {
-      seedMissingPositions(sub, edgeLength * Math.sqrt(sub.order))
+      seedMissingPositions(sub, spacing * Math.sqrt(sub.order))
       if (sub.order > 1) {
         await loadOneShot(sub)
       }
-      normalizeScale(sub, edgeLength)
-      blocks.push(measureComponent(components[position]!, sub))
+      blocks.push(normalizeScale(measureComponent(components[position]!, sub), spacing))
     }
 
     const packer = new Graph()
@@ -322,7 +314,7 @@ export function useSigmaLayout(
 
   function assignLayout(target: Graph) {
     return component
-      ? assignByComponent(target, component.gap, component.edgeLength)
+      ? assignByComponent(target, component.gap, component.spacing)
       : loadOneShot(target)
   }
 
