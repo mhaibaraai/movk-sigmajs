@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.1.2](https://github.com/mhaibaraai/movk-sigmajs/compare/v0.1.1...v0.1.2) (2026-08-06)
+
+### Bug Fixes
+
+* **layout:** 分量归一化改按节点数定密度 ([104a12e](https://github.com/mhaibaraai/movk-sigmajs/commit/104a12e084181590bb77ea561b79e00daefcfc5e))
+
 ## [0.1.1](https://github.com/mhaibaraai/movk-sigmajs/compare/v0.1.0...v0.1.1) (2026-08-06)
 
 ### Features
