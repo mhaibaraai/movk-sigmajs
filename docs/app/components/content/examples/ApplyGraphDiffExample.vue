@@ -24,7 +24,7 @@ function snapshot(prefix: string) {
 /** 先把坐标打乱，模拟「跑过布局」的状态 */
 function shuffle() {
   graph.forEachNode((node) => {
-    graph.mergeNodeAttributes(node, { x: (Math.random() - 0.5) * 40, y: (Math.random() - 0.5) * 40 })
+    graph.mergeNodeAttributes(node, { x: (Math.random() - 0.5) * 360, y: (Math.random() - 0.5) * 360 })
   })
   snapshot('已打乱坐标')
 }
@@ -37,7 +37,7 @@ function syncWithoutPositions() {
     nodes: [
       { key: 'n0', attributes: { label: '改了标签的 n0', size: 16, color: '#f43f5e' } },
       { key: 'n1', attributes: { label: '改了颜色的 n1', size: 11, color: '#f59e0b' } },
-      { key: 'fresh', attributes: { label: '新增节点', x: 0, y: 20, size: 11, color: '#a855f7' } }
+      { key: 'fresh', attributes: { label: '新增节点', x: 0, y: 220, size: 11, color: '#a855f7' } }
     ],
     edges: [
       { source: 'n0', target: 'n1' },

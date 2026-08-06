@@ -8,14 +8,14 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
-    "@nuxt/ui": "^4.10.0",
-    "@movk/nuxt-docs": "^2.2.0",
+    "@iconify-json/lucide": "^1.2.121",
+    "@movk/nuxt-docs": "^2.2.1",
     "@movk/sigma": "workspace:*",
     "@nuxt/content": "^3.15.2",
-    "@sigma/edge-curve": "^3.1.0",
-    "@sigma/export-image": "^3.0.0",
-    "@sigma/node-border": "^3.0.0",
-    "@sigma/utils": "^3.0.0",
+    "@nuxt/ui": "^4.10.0",
+    "@sigma/export-image": "4.0.0-alpha.3",
+    "@sigma/node-border": "4.0.0-alpha.3",
+    "@sigma/utils": "4.0.0-alpha.2",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "better-sqlite3": "^13.0.3",
@@ -25,8 +25,8 @@
     "graphology-layout-forceatlas2": "^0.10.1",
     "graphology-layout-noverlap": "^0.4.2",
     "graphology-metrics": "^2.4.0",
-    "nuxt": "^4.5.1",
-    "sigma": "^3.0.3",
+    "nuxt": "^4.5.2",
+    "sigma": "4.0.0-alpha.7",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {

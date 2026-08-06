@@ -67,7 +67,7 @@ function computeExtent(): Extent | null {
 
   instance.getGraph().forEachNode((key) => {
     const display = instance.getNodeDisplayData(key)
-    if (!display || display.hidden) {
+    if (!display || display.visibility === 'hidden') {
       return
     }
     found = true
@@ -144,7 +144,7 @@ function draw() {
   context.fillStyle = nodeColor
   instance.getGraph().forEachNode((key) => {
     const display = instance.getNodeDisplayData(key)
-    if (!display || display.hidden) {
+    if (!display || display.visibility === 'hidden') {
       return
     }
     const point = project(display, box, width, height)

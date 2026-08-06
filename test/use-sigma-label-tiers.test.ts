@@ -8,6 +8,7 @@ import type { UseSigmaLabelTiersOptions, UseSigmaLabelTiersReturn } from '../src
 
 const state = vi.hoisted(() => ({
   instances: [] as Array<{
+    options: Record<string, unknown>
     settings: Record<string, unknown>
     camera: { ratio: number, handlers: Record<string, (() => void) | undefined> }
   }>
@@ -27,10 +28,12 @@ vi.mock('sigma', () => {
   }
 
   class MockSigma {
+    options: Record<string, unknown> = {}
     settings: Record<string, unknown>
     camera = new MockCamera()
-    constructor(_graph: unknown, _container: unknown, settings: Record<string, unknown>) {
-      this.settings = settings
+    constructor(_graph: unknown, _container: unknown, options: { settings: Record<string, unknown> }) {
+      this.options = options
+      this.settings = options.settings
       state.instances.push(this)
     }
 
@@ -56,7 +59,7 @@ vi.mock('sigma', () => {
   return { default: MockSigma }
 })
 
-type Reducer = (key: string, data: Record<string, unknown>) => Record<string, unknown>
+type Reducer = (...args: unknown[]) => Record<string, unknown>
 
 async function mountTiers(options: UseSigmaLabelTiersOptions = {}) {
   let api!: UseSigmaLabelTiersReturn
@@ -92,7 +95,12 @@ async function mountTiers(options: UseSigmaLabelTiersOptions = {}) {
       instance.camera.handlers.updated?.()
       await nextTick()
     },
-    nodeReducer: () => instance.settings.nodeReducer as Reducer | null
+    nodeReducer: () => {
+      const reducer = instance.options.nodeReducer as Reducer
+      // v4 把图属性放在第三参数，档位从那里读
+      return (key: string, attributes: Record<string, unknown> = {}) =>
+        reducer(key, {}, attributes, {}, {}, {})
+    }
   }
 }
 
@@ -132,14 +140,15 @@ describe('useSigmaLabelTiers', () => {
     expect(api.tier.value).toBe(0)
   })
 
-  it('超出当前档位的节点标签被置空', async () => {
+  it('超出当前档位的节点标签被隐藏', async () => {
     const { moveCamera, nodeReducer } = await mountTiers()
 
     await moveCamera(1.5)
-    const reduce = nodeReducer()!
+    const reduce = nodeReducer()
 
-    expect(reduce('b', { label: 'B', labelTier: 2 }).label).toBeNull()
-    expect(reduce('a', { label: 'A', labelTier: 0 }).label).toBe('A')
+    // 隐藏而非置空：sigma 用 auto 的标签参与网格竞争，hidden 的直接让出名额
+    expect(reduce('b', { labelTier: 2 }).labelVisibility).toBe('hidden')
+    expect(reduce('a', { labelTier: 0 }).labelVisibility).toBeUndefined()
   })
 
   it('没有档位属性的节点不受影响', async () => {
@@ -147,16 +156,16 @@ describe('useSigmaLabelTiers', () => {
 
     await moveCamera(3)
 
-    expect(nodeReducer()!('c', { label: 'C' }).label).toBe('C')
+    expect(nodeReducer()('c', {}).labelVisibility).toBeUndefined()
   })
 
   it('读取的属性名可配置', async () => {
     const { moveCamera, nodeReducer } = await mountTiers({ attribute: 'rankTier' })
 
     await moveCamera(3)
-    const reduce = nodeReducer()!
+    const reduce = nodeReducer()
 
-    expect(reduce('b', { label: 'B', rankTier: 2 }).label).toBeNull()
-    expect(reduce('b', { label: 'B', labelTier: 2 }).label).toBe('B')
+    expect(reduce('b', { rankTier: 2 }).labelVisibility).toBe('hidden')
+    expect(reduce('b', { labelTier: 2 }).labelVisibility).toBeUndefined()
   })
 })

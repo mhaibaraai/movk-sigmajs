@@ -17,7 +17,13 @@ function load() {
 
 <template>
   <div class="wrap">
-    <SigmaGraph v-if="data" :data="data" :settings="{ hideEdgesOnMove: true, labelRenderedSizeThreshold: 10 }">
+    <!-- 面板里能打乱坐标、能跑 ForceAtlas2，跨度会在 1000 与几十之间来回变。
+         v4 默认 size 是图坐标单位，不切到 screen 语义节点尺寸会跟着乱跳 -->
+    <SigmaGraph
+      v-if="data"
+      :data="data"
+      :settings="{ hideEdgesOnMove: true, labelRenderedSizeThreshold: 10, itemSizesReference: 'screen' }"
+    >
       <ScaleLayoutPanel />
       <ScaleStatsPanel :build-ms="buildMs" :started-at="startedAt" />
     </SigmaGraph>
@@ -33,6 +39,8 @@ function load() {
 <style scoped>
 .wrap {
   position: relative;
+  /* .example-stage 是 flex 行容器，不给宽度会缩成内容宽 */
+  width: 100%;
   height: 100%;
 }
 

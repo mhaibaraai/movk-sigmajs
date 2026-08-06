@@ -1,21 +1,37 @@
 import Graph from 'graphology'
 import { enableAutoUnmount, mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, nextTick } from 'vue'
 import SigmaGraph from '../src/runtime/components/Graph.vue'
 import { useSigmaSelection } from '../src/runtime/composables/use-sigma-selection'
 import type { UseSigmaSelectionOptions, UseSigmaSelectionReturn } from '../src/runtime/composables/use-sigma-selection'
 
+type ItemState = { isHighlighted?: boolean }
+type Reducer = (...args: unknown[]) => Record<string, unknown>
+
+/**
+ * v4 把交互状态存在 sigma 内部，reducer 每次调用时收到对应条目的 state 与图级
+ * graphState。mock 必须真的维护这份状态，否则「读 state 做淡出」的行为无从验证
+ */
 const state = vi.hoisted(() => ({
-  instances: [] as Array<{ settings: Record<string, unknown>, handlers: Record<string, (payload: unknown) => void> }>
+  instances: [] as Array<{
+    options: Record<string, unknown>
+    handlers: Record<string, (payload: unknown) => void>
+    nodeStates: Map<string, ItemState>
+    edgeStates: Map<string, ItemState>
+    getGraphState: () => Record<string, boolean>
+  }>
 }))
 
 vi.mock('sigma', () => {
   class MockSigma {
-    settings: Record<string, unknown>
+    options: Record<string, unknown>
     handlers: Record<string, (payload: unknown) => void> = {}
-    constructor(_graph: unknown, _container: unknown, settings: Record<string, unknown>) {
-      this.settings = settings
+    nodeStates = new Map<string, ItemState>()
+    edgeStates = new Map<string, ItemState>()
+
+    constructor(_graph: unknown, _container: unknown, options: Record<string, unknown>) {
+      this.options = options
       state.instances.push(this)
     }
 
@@ -23,24 +39,46 @@ vi.mock('sigma', () => {
       this.handlers[event] = handler
     }
 
+    setNodesState(keys: string[], patch: ItemState) {
+      for (const key of keys) {
+        this.nodeStates.set(key, { ...this.nodeStates.get(key), ...patch })
+      }
+    }
+
+    setNodeState(key: string, patch: ItemState) {
+      this.setNodesState([key], patch)
+    }
+
+    setEdgesState(keys: string[], patch: ItemState) {
+      for (const key of keys) {
+        this.edgeStates.set(key, { ...this.edgeStates.get(key), ...patch })
+      }
+    }
+
+    setEdgeState(key: string, patch: ItemState) {
+      this.setEdgesState([key], patch)
+    }
+
+    getGraphState() {
+      const anyHighlighted = [...this.nodeStates.values(), ...this.edgeStates.values()]
+        .some(item => item.isHighlighted)
+
+      return { hasHighlighted: anyHighlighted, hasHovered: false, isIdle: true }
+    }
+
     off() {}
     resize() {}
     kill() {}
     setGraph() {}
     refresh() {}
-    setSettings(next: Record<string, unknown>) {
-      this.settings = next
-    }
-
+    setSettings() {}
     getSettings() {
-      return this.settings
+      return {}
     }
   }
 
   return { default: MockSigma }
 })
-
-type Reducer = (key: string, data: Record<string, unknown>) => Record<string, unknown>
 
 function seededGraph() {
   const graph = new Graph()
@@ -75,12 +113,32 @@ async function mountSelection(options: UseSigmaSelectionOptions = {}) {
   })
 
   const instance = state.instances[0]!
+
+  /** 按 sigma 的调用方式跑一次归约：带上该条目当前的 state 与图级状态 */
+  function runNode(key: string, data: Record<string, unknown> = {}) {
+    const reducer = instance.options.nodeReducer as Reducer
+    return reducer(key, data, {}, instance.nodeStates.get(key) ?? {}, instance.getGraphState(), graph)
+  }
+
+  function runEdge(key: string, data: Record<string, unknown> = {}) {
+    const reducer = instance.options.edgeReducer as Reducer
+    return reducer(key, data, {}, instance.edgeStates.get(key) ?? {}, instance.getGraphState(), graph)
+  }
+
+  /** 焦点变化经 watch 落到状态，断言前要等一拍 */
+  async function select(key: string | null) {
+    api.select(key)
+    await nextTick()
+  }
+
   return {
     api,
     graph,
-    emit: (event: string, payload: unknown) => instance.handlers[event]?.(payload),
-    nodeReducer: () => instance.settings.nodeReducer as Reducer | null,
-    edgeReducer: () => instance.settings.edgeReducer as Reducer | null
+    instance,
+    select,
+    runNode,
+    runEdge,
+    emit: (event: string, payload: unknown) => instance.handlers[event]?.(payload)
   }
 }
 
@@ -130,47 +188,71 @@ describe('useSigmaSelection', () => {
   })
 
   it('高亮集合含焦点节点及其直接邻居', async () => {
-    const { api } = await mountSelection()
+    const { api, select } = await mountSelection()
 
-    api.select('a')
+    await select('a')
 
     expect([...api.highlighted.value].sort()).toEqual(['a', 'b'])
   })
 
-  it('无焦点时归约不改动任何节点', async () => {
-    const { nodeReducer } = await mountSelection()
+  it('焦点及邻居被写入 isHighlighted 状态', async () => {
+    const { instance, select } = await mountSelection()
 
-    expect(nodeReducer()!('far', { label: 'FAR', color: '#111' })).toMatchObject({ label: 'FAR', color: '#111' })
+    await select('a')
+
+    expect(instance.nodeStates.get('a')).toMatchObject({ isHighlighted: true })
+    expect(instance.nodeStates.get('b')).toMatchObject({ isHighlighted: true })
+    expect(instance.nodeStates.get('far')?.isHighlighted).toBeFalsy()
+  })
+
+  it('焦点转移时清除上一次的高亮状态', async () => {
+    const { instance, select } = await mountSelection()
+
+    await select('a')
+    await select('far')
+
+    expect(instance.nodeStates.get('a')).toMatchObject({ isHighlighted: false })
+    expect(instance.nodeStates.get('far')).toMatchObject({ isHighlighted: true })
+  })
+
+  it('无焦点时归约不改动任何节点', async () => {
+    const { runNode } = await mountSelection()
+
+    expect(runNode('far', { label: 'FAR', color: '#111' }))
+      .toMatchObject({ label: 'FAR', color: '#111' })
   })
 
   it('有焦点时无关节点被淡出且隐藏标签', async () => {
-    const { api, nodeReducer } = await mountSelection({ dimColor: '#eee' })
+    const { select, runNode } = await mountSelection({ dimColor: '#eee' })
 
-    api.select('a')
+    await select('a')
 
-    expect(nodeReducer()!('a', {})).toMatchObject({ highlighted: true })
-    expect(nodeReducer()!('b', { label: 'B' })).toMatchObject({ label: 'B' })
-    expect(nodeReducer()!('far', { label: 'FAR' })).toMatchObject({ color: '#eee', label: null })
+    expect(runNode('b', { label: 'B' })).toMatchObject({ label: 'B' })
+    expect(runNode('far', { label: 'FAR' }))
+      .toMatchObject({ color: '#eee', labelVisibility: 'hidden' })
   })
 
-  it('dim 关闭时不淡出，只标记焦点', async () => {
-    const { api, nodeReducer } = await mountSelection({ dim: false })
+  it('dim 关闭时不淡出，只写状态', async () => {
+    const { instance, select, runNode } = await mountSelection({ dim: false })
 
-    api.select('a')
+    await select('a')
 
-    expect(nodeReducer()!('far', { label: 'FAR', color: '#111' })).toMatchObject({ color: '#111', label: 'FAR' })
+    expect(runNode('far', { label: 'FAR', color: '#111' }))
+      .toMatchObject({ color: '#111', label: 'FAR' })
+    expect(instance.nodeStates.get('a')).toMatchObject({ isHighlighted: true })
   })
 
   it('与焦点相连的边保留，其余淡出', async () => {
-    const { api, graph, edgeReducer } = await mountSelection({ dimColor: '#eee' })
+    const { graph, select, runEdge } = await mountSelection({ dimColor: '#eee' })
 
-    api.select('a')
+    await select('a')
 
     const incident = graph.edge('a', 'b')!
     const remote = graph.edge('b', 'far')!
 
-    expect(edgeReducer()!(incident, { label: 'e' })).toMatchObject({ label: 'e' })
-    expect(edgeReducer()!(remote, { label: 'e' })).toMatchObject({ color: '#eee', label: null })
+    expect(runEdge(incident, { label: 'e' })).toMatchObject({ label: 'e' })
+    expect(runEdge(remote, { label: 'e' }))
+      .toMatchObject({ color: '#eee', labelVisibility: 'hidden' })
   })
 
   it('clear 同时清空悬浮与选中', async () => {

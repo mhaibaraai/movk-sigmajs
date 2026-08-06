@@ -42,5 +42,14 @@
     >
       <ScaleLayoutExample />
     </ExampleCard>
+
+    <ExampleCard
+      title="真实数据集"
+      name="WikipediaDatasetExample"
+      description="sigma 官方的 wikipedia 数据集，2085 节点 / 5409 边 / 24 个社区。颜色与 size 都要自行换算，坐标与 size 按同一比例归一化。"
+      height="480px"
+    >
+      <WikipediaDatasetExample />
+    </ExampleCard>
   </div>
 </template>

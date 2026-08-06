@@ -13,8 +13,8 @@ const nodes = Array.from({ length: 16 }, (_, index) => {
     attributes: {
       label: `文件 ${index + 1}`,
       category: categories[index % 4],
-      x: Math.cos(angle) * 16,
-      y: Math.sin(angle) * 16,
+      x: Math.cos(angle) * 160,
+      y: Math.sin(angle) * 160,
       size: 10,
       color: colors[index % 4]
     }

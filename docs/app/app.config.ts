@@ -8,12 +8,6 @@ export default defineAppConfig({
     position: 'top-center' as const,
     duration: 3000
   },
-  ui: {
-
-  },
-  aiChat: {
-    faqQuestions: {}
-  },
   github: {
     rootDir: 'docs',
     commitPath: 'src/runtime'

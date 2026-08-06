@@ -64,11 +64,11 @@ export function useSigmaLabelTiers(options: UseSigmaLabelTiersOptions = {}): Use
 
   const { refresh } = useSigmaReducer({
     order,
-    node(_key, data) {
-      const value = data[attribute]
+    node(_key, _data, attributes) {
+      const value = attributes[attribute]
 
       if (typeof value === 'number' && value > tier.value) {
-        return { label: null }
+        return { labelVisibility: 'hidden' }
       }
 
       return {}

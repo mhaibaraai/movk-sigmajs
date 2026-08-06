@@ -7,8 +7,8 @@ function makeData(color: string, label: string) {
     options: { type: 'mixed' as const, multi: false, allowSelfLoops: true },
     nodes: [
       { key: 'a', attributes: { label: `${label} A`, x: 0, y: 0, size: 14, color } },
-      { key: 'b', attributes: { label: `${label} B`, x: 12, y: 5, size: 11, color } },
-      { key: 'c', attributes: { label: `${label} C`, x: 6, y: -8, size: 11, color } }
+      { key: 'b', attributes: { label: `${label} B`, x: 320, y: 140, size: 11, color } },
+      { key: 'c', attributes: { label: `${label} C`, x: 160, y: -220, size: 11, color } }
     ],
     edges: [
       { source: 'a', target: 'b' },

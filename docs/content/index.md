@@ -1,15 +1,16 @@
 ---
 seo:
-  title: '@movk/sigma'
-  description: A declarative sigma v3 wrapper for Vue 3 and Nuxt 4 — components and composables for large-scale knowledge graph visualization.
+  title: Movk Sigma
+  description: A declarative sigma v4 wrapper for Vue 3 and Nuxt 4 — components and composables for large-scale knowledge graph visualization.
 ---
 
 ::u-page-hero{class="dark:bg-gradient-to-b from-neutral-900 to-neutral-950"}
 ---
 orientation: horizontal
-ui:
-  container: lg:py-20
 ---
+#top
+:hero-background
+
 #title
 :::motion
 把知识图谱写成[组件]{.text-primary}
@@ -20,7 +21,7 @@ ui:
 ---
 transition: { duration: 0.6, delay: 0.3 }
 ---
-基于 sigma v3 的 Nuxt 模块，11 个组件、16 个 composables、7 个工具函数，覆盖渲染、交互、布局、分析与 DOM 覆盖层，面向 1000+ 节点的大规模图谱。封装是加法，不是围墙——原生 `Sigma` 与 `Graph` 实例始终直达。
+基于 sigma v4 的 Nuxt 模块，11 个组件、16 个 composables、7 个工具函数，覆盖渲染、交互、布局、分析与 DOM 覆盖层，面向 1000+ 节点的大规模图谱。封装是加法，不是围墙——原生 `Sigma` 与 `Graph` 实例始终直达。
 :::
 
 #links

@@ -8,35 +8,25 @@
 
 import type {
   ApplyGraphDiffOptions,
-  CreateLabelRendererOptions,
-  CreateNodeShapeProgramOptions,
-  CurveParallelEdgesOptions,
   DegreeToTierOptions,
   LabelPlacementsOptions,
-  PolygonExtentOptions,
+  SdfPolygonOptions,
+  SdfStarOptions,
   SigmaCentralityKind,
   SigmaContext,
   SigmaEdgePredicate,
+  SigmaEdgeReducer,
   SigmaEventHandlers,
   SigmaExportOptions,
-  SigmaLabelAnchor,
-  SigmaLabelGeometry,
-  SigmaLabelLayout,
-  SigmaLabelLayoutOptions,
-  SigmaLabelPlacement,
-  SigmaLabelRect,
-  SigmaLabelRenderer,
   SigmaLabelTierBreakpoint,
-  SigmaLabelTierStyle,
   SigmaLayoutName,
-  SigmaNodeBorder,
-  SigmaNodeShape,
   SigmaNodePredicate,
-  SigmaPrograms,
+  SigmaNodeReducer,
   SigmaReducerEntry,
   SigmaSearchResult,
   UseSigmaCameraReturn,
   UseSigmaDragOptions,
+  UseSigmaDragReturn,
   UseSigmaExportReturn,
   UseSigmaFilterReturn,
   UseSigmaGraphReturn,
@@ -48,42 +38,33 @@ import type {
   UseSigmaNeighborhoodReturn,
   UseSigmaReducerReturn,
   UseSigmaSearchReturn,
-  UseSigmaSelectionReturn
+  UseSigmaSelectionReturn,
+  UseSigmaStateReturn
 } from '@movk/sigma'
 
 // 用一次每个类型，未解析的类型会在此处报错
 type Assert<T> = T
 export type _Exports = [
   Assert<ApplyGraphDiffOptions>,
-  Assert<CreateLabelRendererOptions>,
-  Assert<CreateNodeShapeProgramOptions>,
-  Assert<CurveParallelEdgesOptions>,
   Assert<DegreeToTierOptions>,
   Assert<LabelPlacementsOptions>,
-  Assert<PolygonExtentOptions>,
+  Assert<SdfPolygonOptions>,
+  Assert<SdfStarOptions>,
   Assert<SigmaCentralityKind>,
   Assert<SigmaContext>,
   Assert<SigmaEdgePredicate>,
+  Assert<SigmaEdgeReducer>,
   Assert<SigmaEventHandlers>,
   Assert<SigmaExportOptions>,
-  Assert<SigmaLabelAnchor>,
-  Assert<SigmaLabelGeometry>,
-  Assert<SigmaLabelLayout>,
-  Assert<SigmaLabelLayoutOptions>,
-  Assert<SigmaLabelPlacement>,
-  Assert<SigmaLabelRect>,
-  Assert<SigmaLabelRenderer>,
   Assert<SigmaLabelTierBreakpoint>,
-  Assert<SigmaLabelTierStyle>,
   Assert<SigmaLayoutName>,
-  Assert<SigmaNodeBorder>,
-  Assert<SigmaNodeShape>,
   Assert<SigmaNodePredicate>,
-  Assert<SigmaPrograms>,
+  Assert<SigmaNodeReducer>,
   Assert<SigmaReducerEntry>,
   Assert<SigmaSearchResult>,
   Assert<UseSigmaCameraReturn>,
   Assert<UseSigmaDragOptions>,
+  Assert<UseSigmaDragReturn>,
   Assert<UseSigmaExportReturn>,
   Assert<UseSigmaFilterReturn>,
   Assert<UseSigmaGraphReturn>,
@@ -95,10 +76,12 @@ export type _Exports = [
   Assert<UseSigmaNeighborhoodReturn>,
   Assert<UseSigmaReducerReturn>,
   Assert<UseSigmaSearchReturn>,
-  Assert<UseSigmaSelectionReturn>
+  Assert<UseSigmaSelectionReturn>,
+  Assert<UseSigmaStateReturn>
 ]
 
 // 一个具体值断言，确认结构而不止于名字可解析
 const _hit: SigmaSearchResult = { type: 'node', id: 'n0', label: '节点', field: 'label' }
 const _kind: SigmaCentralityKind = 'betweenness'
-export const _samples = [_hit, _kind]
+const _shape: SdfPolygonOptions = { name: 'hex', sides: 6 }
+export const _samples = [_hit, _kind, _shape]

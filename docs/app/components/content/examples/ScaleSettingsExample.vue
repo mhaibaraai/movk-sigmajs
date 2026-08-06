@@ -19,8 +19,7 @@ const labelDensity = shallowRef(1)
 const settings = computed(() => ({
   hideEdgesOnMove: hideEdgesOnMove.value,
   labelRenderedSizeThreshold: labelThreshold.value,
-  labelDensity: labelDensity.value,
-  defaultEdgeColor: '#e2e8f0'
+  labelDensity: labelDensity.value
 }))
 
 function load() {
@@ -71,6 +70,8 @@ function load() {
 <style scoped>
 .wrap {
   position: relative;
+  /* .example-stage 是 flex 行容器，不给宽度会缩成内容宽 */
+  width: 100%;
   height: 100%;
 }
 

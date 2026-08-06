@@ -15,11 +15,12 @@ const ring = shallowRef(true)
 useSigmaSelection()
 useSigmaFilter()
 
+// v4 把图属性放在第三参数，第二个是已归约的显示数据
 const { refresh } = useSigmaReducer({
   order: 400,
-  node: (_key, attributes): Partial<NodeDisplayData> =>
-    ring.value && attributes.category === '应急预案'
-      ? { color: '#f59e0b', size: (attributes.size ?? 8) * 1.6, forceLabel: true }
+  node: (_key, data, attributes): Partial<NodeDisplayData> =>
+    ring.value && attributes.category === 'Network Science'
+      ? { color: '#f59e0b', size: data.size * 1.6, labelVisibility: 'visible' }
       : {},
   edge: (): Partial<EdgeDisplayData> => (ring.value ? { size: 2 } : {})
 })
@@ -34,7 +35,7 @@ function toggle() {
   <div class="demo-panel" data-at="top-left">
     <div class="demo-row">
       <button type="button" :aria-pressed="ring" @click="toggle">
-        突出「应急预案」
+        突出「Network Science」
       </button>
     </div>
     <span class="demo-tag">与内建的选中高亮、过滤同时在链上，点击节点可验证互不覆盖</span>

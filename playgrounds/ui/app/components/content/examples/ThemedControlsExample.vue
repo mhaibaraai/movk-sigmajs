@@ -10,8 +10,8 @@ const data = {
   options: { type: 'mixed' as const, multi: false, allowSelfLoops: true },
   nodes: [
     { key: 'a', attributes: { label: '管理制度', x: 0, y: 0, size: 16, color: '#f43f5e' } },
-    { key: 'b', attributes: { label: '技术标准', x: 16, y: 6, size: 13, color: '#3b82f6' } },
-    { key: 'c', attributes: { label: '操作规程', x: 8, y: -10, size: 13, color: '#22c55e' } }
+    { key: 'b', attributes: { label: '技术标准', x: 320, y: 140, size: 13, color: '#3b82f6' } },
+    { key: 'c', attributes: { label: '操作规程', x: 160, y: -220, size: 13, color: '#22c55e' } }
   ],
   edges: [
     { source: 'a', target: 'b' },

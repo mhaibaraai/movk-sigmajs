@@ -9,7 +9,10 @@ import type { NodeDisplayData } from 'sigma/types'
  * 用到时才动态导入，并按图版本缓存，同一版本重复调用不重算。
  */
 const { graph } = useSigma()
-const { maxDegree, centrality, communities } = useSigmaMetrics()
+const { degrees, maxDegree, centrality, communities } = useSigmaMetrics()
+
+/** 分类配色，社区编号超出长度时循环取用 */
+const PALETTE = ['#f43f5e', '#3b82f6', '#22c55e', '#a855f7', '#f59e0b', '#14b8a6']
 
 const mode = shallowRef<'none' | 'degree' | 'betweenness' | 'closeness' | 'community'>('none')
 const summary = shallowRef('')
@@ -50,7 +53,9 @@ async function detectCommunities() {
   error.value = ''
   try {
     const partition = await communities()
-    colors.value = communityToColor(partition)
+    colors.value = Object.fromEntries(
+      Object.entries(partition).map(([node, community]) => [node, PALETTE[community % PALETTE.length]!])
+    )
     mode.value = 'community'
     summary.value = `社区数 ${new Set(Object.values(partition)).size}`
     refresh()
@@ -60,10 +65,11 @@ async function detectCommunities() {
   }
 }
 
+/** 半径 ∝ sqrt(度数)，面积才正比于度数 */
 function applyDegreeSize() {
-  const sizes = degreeToSize(graph.value, [4, 24])
-  for (const [node, size] of Object.entries(sizes)) {
-    graph.value.setNodeAttribute(node, 'size', size)
+  const max = Math.max(maxDegree.value, 1)
+  for (const [node, degree] of Object.entries(degrees.value)) {
+    graph.value.setNodeAttribute(node, 'size', 4 + Math.sqrt(degree / max) * 20)
   }
   mode.value = 'none'
   summary.value = `度数直接写回属性，最大度 ${maxDegree.value}`
@@ -91,7 +97,7 @@ function applyDegreeSize() {
         Louvain 社区着色
       </button>
       <button type="button" @click="applyDegreeSize">
-        degreeToSize
+        度数映射尺寸
       </button>
     </div>
     <span class="demo-tag">{{ error || summary || '点一个指标看视觉映射' }}</span>

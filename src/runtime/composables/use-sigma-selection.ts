@@ -4,6 +4,7 @@ import type { EdgeDisplayData, NodeDisplayData } from 'sigma/types'
 import { useSigma } from './use-sigma'
 import { useSigmaEvents } from './use-sigma-events'
 import { useSigmaReducer } from './use-sigma-reducer'
+import { useSigmaState } from './use-sigma-state'
 
 export interface UseSigmaSelectionOptions {
   /**
@@ -17,7 +18,8 @@ export interface UseSigmaSelectionOptions {
    */
   click?: boolean
   /**
-   * 高亮时把无关的节点与边淡出
+   * 高亮时把无关的节点与边淡出。关掉后只写 `isHighlighted` 状态，
+   * 外观完全交给 styles 的 `whenState` 规则
    * @defaultValue true
    */
   dim?: boolean
@@ -49,15 +51,17 @@ export interface UseSigmaSelectionReturn {
 }
 
 /**
- * 悬浮与选中的状态机，并内建高亮与淡出的归约。
+ * 悬浮与选中的状态机，把焦点及其邻居写进 sigma 的 `isHighlighted` 状态。
  *
- * 焦点节点及其直接邻居保持原样，其余淡出且隐藏标签。归约经 reducer 链登记，
- * 与过滤、图例显隐等其他归约共存而不互相覆盖。
+ * 状态与外观分离：本 composable 只负责「谁被高亮」，`dim` 打开时附带一条淡出归约
+ * 保证开箱可用，需要自定义外观时关掉它并在 styles 里写 `whenState: 'isHighlighted'`。
  */
 export function useSigmaSelection(options: UseSigmaSelectionOptions = {}): UseSigmaSelectionReturn {
   const { hover = true, click = true, dim = true, dimColor = '#d1d5db', order = 100 } = options
 
   const { graph } = useSigma()
+  const { setNodesState, setEdgesState } = useSigmaState()
+
   const hovered = shallowRef<string | null>(null)
   const selected = shallowRef<string | null>(null)
 
@@ -71,35 +75,61 @@ export function useSigmaSelection(options: UseSigmaSelectionOptions = {}): UseSi
     return new Set([focus, ...graph.value.neighbors(focus)])
   })
 
+  const highlightedEdges = computed(() => {
+    const focus = focused.value
+    if (!focus || !graph.value.hasNode(focus)) {
+      return new Set<string>()
+    }
+    return new Set(graph.value.edges(focus))
+  })
+
+  let previousNodes: string[] = []
+  let previousEdges: string[] = []
+
+  function syncState() {
+    const nextNodes = [...highlighted.value]
+    const nextEdges = [...highlightedEdges.value]
+
+    const clearedNodes = previousNodes.filter(key => !highlighted.value.has(key))
+    const clearedEdges = previousEdges.filter(key => !highlightedEdges.value.has(key))
+
+    if (clearedNodes.length > 0) {
+      setNodesState(clearedNodes, { isHighlighted: false })
+    }
+    if (clearedEdges.length > 0) {
+      setEdgesState(clearedEdges, { isHighlighted: false })
+    }
+    if (nextNodes.length > 0) {
+      setNodesState(nextNodes, { isHighlighted: true })
+    }
+    if (nextEdges.length > 0) {
+      setEdgesState(nextEdges, { isHighlighted: true })
+    }
+
+    previousNodes = nextNodes
+    previousEdges = nextEdges
+  }
+
   const { refresh } = useSigmaReducer({
     order,
-    node(key, data) {
-      const focus = focused.value
-      if (!focus) {
+    node(key, data, attributes, state, graphState) {
+      if (!dim || !graphState.hasHighlighted || state.isHighlighted) {
         return data as Partial<NodeDisplayData>
       }
-      if (key === focus) {
-        return { ...data, highlighted: true, zIndex: 1 } as Partial<NodeDisplayData>
-      }
-      if (highlighted.value.has(key) || !dim) {
-        return data as Partial<NodeDisplayData>
-      }
-      return { ...data, color: dimColor, label: null, zIndex: 0 } as Partial<NodeDisplayData>
+      return { ...data, color: dimColor, labelVisibility: 'hidden', zIndex: 0 } as Partial<NodeDisplayData>
     },
-    edge(key, data) {
-      const focus = focused.value
-      if (!focus || !dim) {
+    edge(key, data, attributes, state, graphState) {
+      if (!dim || !graphState.hasHighlighted || state.isHighlighted) {
         return data as Partial<EdgeDisplayData>
       }
-      if (graph.value.hasEdge(key) && graph.value.hasExtremity(key, focus)) {
-        return { ...data, zIndex: 1 } as Partial<EdgeDisplayData>
-      }
-      return { ...data, color: dimColor, label: null, zIndex: 0 } as Partial<EdgeDisplayData>
+      return { ...data, color: dimColor, labelVisibility: 'hidden', zIndex: 0 } as Partial<EdgeDisplayData>
     }
   })
 
-  // 归约函数本身不变，变的是它读取的焦点，需要主动让 sigma 重跑
-  watch(focused, refresh)
+  watch(focused, () => {
+    syncState()
+    refresh()
+  })
 
   if (hover) {
     useSigmaEvents({

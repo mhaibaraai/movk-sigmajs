@@ -1,8 +1,6 @@
 # AGENTS.md
 
-`@movk/sigma` —— 基于 sigma v3 的知识图谱可视化 Nuxt 模块，为 Vue 3 / Nuxt 4 提供声明式组件与 composables。
-
-完整设计依据见 [references/movk-sigma-architecture.md](references/movk-sigma-architecture.md)，动手前先读第三节（出口兼容）与第五节（七个技术难点）。不熟悉 sigma.js 本身的先看 [references/sigmajs-guide.md](references/sigmajs-guide.md)，那份讲上游库怎么工作。
+`@movk/sigma` —— 基于 sigma v4 的知识图谱可视化 Nuxt 模块，为 Vue 3 / Nuxt 4 提供声明式组件与 composables。
 
 ## 目录结构
 
@@ -13,19 +11,20 @@ src/
     ├── components/       # core 与 controls 两组，文件名不带前缀
     ├── composables/
     ├── utils/
-    ├── programs/         # 自建渲染程序，静态引用 sigma/rendering，不进自动导入
     ├── types/
     └── index.css         # 可选样式表
 docs/                     # @movk/nuxt-docs 文档站，示例的唯一数据源
 ├── app/components/content/examples/
-├── app/utils/corpus.ts
+├── app/utils/corpus.ts   # 示例数据的唯一入口
+├── app/data/             # 打进 bundle 的数据集子集
 ├── app/assets/css/examples.css
+├── public/data/          # 官方完整数据集，按需 fetch
+├── scripts/              # 子集派生脚本
 └── content/docs/         # 一 API 一页
 playgrounds/
 ├── basic/                # 零 UI 依赖，反向引用 docs 的示例，纯原生逃生舱
 └── ui/                   # @movk/nuxt，接口驱动的完整场景与插槽接管
 test/                     # vitest + happy-dom + @vue/test-utils
-references/               # 架构方案与背景资料
 ```
 
 两个 playground 的分工见「演示应用」一节，示例与文档页的组织约定见「文档站」一节。
@@ -42,21 +41,21 @@ references/               # 架构方案与背景资料
 
 **不准开 `shamefully-hoist=true`。** 它把所有依赖提升到根 `node_modules`，会让漏写的 import 也能解析成功，正好掩盖上面这类 bug。某些依赖（如 `@movk/nuxt` 要求的 `tailwindcss`）的安装文档会建议开它，一律改用「在需要的 workspace 里显式安装」绕开。
 
-### sigma 与 @sigma/* 只能动态导入
+### sigma 的每个子路径都只能动态导入
 
-sigma 在模块顶层就读 `WebGL2RenderingContext`，服务端与 happy-dom 都没有这个全局，**静态 `import 'sigma'` 或 `import 'sigma/settings'` 会让 SSR 直接 ReferenceError**。
+sigma **每个**子路径在模块顶层就读 `WebGL2RenderingContext`——`sigma`、`sigma/settings`、`sigma/rendering`、`sigma/primitives`、`sigma/types` 无一例外。服务端与 happy-dom 都没有这个全局，**静态 import 任何一条会让 SSR 直接 ReferenceError**。v4 的范围比 v3 更大，别按老印象只防主入口。
 
-runtime 代码里 sigma 一律 `await import('sigma')`，放在 `onMounted` 之后；类型侧用 `import type`，编译期擦除不影响。graphology 无此问题，可正常静态导入。
+runtime 代码里一律 `await import('sigma')`，放在 `onMounted` 之后；类型侧用 `import type`，编译期擦除不影响。graphology 无此问题，可正常静态导入。
 
-`@sigma/node-image`、`@sigma/node-border`、`@sigma/edge-curve`、`@sigma/export-image` 同样如此，**使用方也不能静态 import 它们**。所以 `programs` prop 支持 `defineSigmaProgram(() => import('@sigma/node-border').then(...))` 这种延迟声明，组件会在建实例前解析完。
+`@sigma/node-image`、`@sigma/node-border`、`@sigma/export-image` 同样如此，**使用方也不能静态 import 它们**。所以 `primitives` prop 支持 `defineSigmaPrimitives(async () => { const { sdfCircle } = await import('sigma/rendering'); ... })` 这种延迟声明，组件会在建实例前解析完。
 
 连带的三条：异步 `onMounted` 要能在实例化完成前被卸载中断；测试需要 `test/setup/webgl-globals.ts` 补桩才能加载真实的 `sigma/settings`；所有可选 peer（布局、metrics、louvain）一律 `await import()` 并在 `catch` 里给出「装哪个包」的可操作提示。
 
-### src/runtime/programs/ 不进自动导入
+### 自建形状必须是纯数据
 
-本库自建的渲染程序（`createNodeShapeProgram`）静态引用 `sigma/rendering` 与 `sigma/utils`，与上一条同理，被 SSR 打进包即 ReferenceError。因此 `programs/` **不进 `addImportsDir`**，也不许被 `utils/` 或 `composables/` 里任何文件引用；`types/public.ts` 只汇出它的类型，不汇出值。
+`utils/node-shape.ts` 的 `sdfPolygon()` / `sdfStar()` 返回 `{ name, glsl, inradiusFactor }`，**不 import sigma 的任何值**。这正是它们能进 `addImportsDir`、能被使用方直接写在模块顶层的原因。
 
-使用方只经 `@movk/sigma/programs/*` 子路径 import，并且要包在 `defineSigmaProgram()` 里。stub 开发态的 `dist/runtime/` 里是 `.ts` 而出口映射指向 `.js`，`module.ts` 因此补了一条 `@movk/sigma/programs` 别名——新增 `programs/` 下的文件不需要改这条，新增**目录**才要。
+新增形状时守住这条：一旦为了复用某个常量而 import `sigma/rendering`，整个 `utils/` 就会被 SSR 打进包并 ReferenceError。需要内置形状时让使用方在 `defineSigmaPrimitives()` 里自行取用。
 
 ### 模块级状态必须客户端隔离
 
@@ -72,13 +71,13 @@ runtime 代码里 sigma 一律 `await import('sigma')`，放在 `onMounted` 之�
 - 不做 settings 白名单：`settings` 整体透传，不逐字段枚举、不过滤未知键
 - 不 re-export 上游：不转发 sigma / graphology 的任何值或类型，用户从原包直接 import。**本库自己的**类型不在此列——它们全部从 `@movk/sigma` 根出口，汇总在 `src/runtime/types/public.ts`，新增公开类型时同步加一行 re-export，`test/type-exports.test-d.ts` 会在 typecheck 时兜底
 - `sigma` 与 `graphology` 保持 peer 依赖，不进 dependencies
-- 用户自带的 `settings.nodeReducer` / `edgeReducer` 作为 reducer 链的基座执行，不得被吞掉
+- 用户自带的 `nodeReducer` / `edgeReducer`（`SigmaGraph` 的独立 props，v4 已不在 `settings` 上）作为 reducer 链的基座执行，不得被吞掉
 
 ### 类型一律用官方类型包
 
 - **禁止安装任何 `@types/*`**：该生态全部包自带 `.d.ts`，`@types/sigma`、`@types/graphology` 等根本不存在
 - **禁止自造已有类型**：图数据契约直接用 `graphology-types` 的 `SerializedGraph`，不要写 `GraphData` 这类同义接口
-- 库内类型一律从官方类型派生：`settings` 写成 `Partial<Settings>`，`programs` 从 `NodeProgramType` / `EdgeProgramType` 派生
+- 库内类型一律从官方类型派生：`settings` 写成 `Partial<Settings>`，`styles` 与 `primitives` 直接用 `StylesDeclaration` / `PrimitivesDeclaration`
 
 类型来源速查：
 
@@ -86,15 +85,17 @@ runtime 代码里 sigma 一律 `await import('sigma')`，放在 `onMounted` 之�
 | --- | --- |
 | `graphology-types` | `SerializedGraph`、`SerializedNode`、`SerializedEdge`、`Attributes` |
 | `graphology` | `Graph` |
-| `sigma/settings` | `Settings`（reducer 类型未单独导出，见下） |
-| `sigma/types` | `NodeDisplayData`、`EdgeDisplayData`、`CameraState`、`Coordinates`、`MouseCoords` |
-| `sigma/rendering` | `NodeProgramType`、`EdgeProgramType` |
+| `sigma/settings` | `Settings`（v4 只剩行为与性能项，视觉项全在 styles） |
+| `sigma/types` | `NodeDisplayData`、`EdgeDisplayData`、`NodeReducer`、`EdgeReducer`、`StylesDeclaration`、`BaseNodeState`、`BaseEdgeState`、`BaseGraphState`、`LabelPosition`、`CameraState`、`Coordinates`、`MouseCoords` |
+| `sigma/primitives` | `PrimitivesDeclaration`、`CustomNodeShape`、`NodePrimitives`、`EdgePrimitives` |
+| `sigma/rendering` | `SDFShape`、`FragmentLayer`、`ValueSource` |
 
-sigma **没有**导出 `NodeReducer` / `EdgeReducer`，它们只是 `Settings` 上的内联字段类型。库内一律派生，不要自己重写一份签名：
+v4 **直接导出** `NodeReducer` / `EdgeReducer`，不必再从 `Settings` 派生——它们已不在 settings 上，而是构造选项。
+
+`sigma/types` 也 re-export 了 styles 相关类型，**没有 `sigma/types/styles` 这个子路径**。少数没被 re-export 的（`NodeStyleRule` 等）从 `StylesDeclaration` 索引派生：
 
 ```ts
-export type SigmaNodeReducer = NonNullable<Settings['nodeReducer']>
-export type SigmaEdgeReducer = NonNullable<Settings['edgeReducer']>
+type NodeStyles = NonNullable<StylesDeclaration['nodes']>
 ```
 
 ### 通用方法先查 @movk/core
@@ -103,7 +104,7 @@ export type SigmaEdgeReducer = NonNullable<Settings['edgeReducer']>
 
 已迁入 core 的还有 `clamp`、`mapRange`、`createRegistry`、`pipe`，本库不再自带。
 
-core 里确实没有的通用能力，先写在 `src/runtime/utils/` 并在 JSDoc 标注 `@todo 待移入 @movk/core`，便于后续搬迁。图与 sigma 领域的逻辑（`applyGraphDiff`、`chainReducers`、`curveParallelEdges` 等）不属于 core 范畴，正常放 `src/runtime/utils/`。
+core 里确实没有的通用能力，先写在 `src/runtime/utils/` 并在 JSDoc 标注 `@todo 待移入 @movk/core`，便于后续搬迁。图与 sigma 领域的逻辑（`applyGraphDiff`、`chainReducers`、`sdfPolygon` 等）不属于 core 范畴，正常放 `src/runtime/utils/`。
 
 ## 命名约定
 
@@ -122,13 +123,13 @@ pnpm install
 pnpm dev:prepare     # 首次或依赖变更后必须先跑，两个 playground 与 docs 一起 prepare
 pnpm dev             # 启动 playgrounds/basic
 pnpm dev:ui          # 启动 playgrounds/ui
-pnpm dev:docs        # 启动 docs
+pnpm docs            # 启动 docs
 pnpm test            # vitest
 pnpm typecheck
 pnpm lint
 ```
 
-改动 `src/` 后若 playground 或 docs 表现异常，先重跑 `pnpm dev:prepare`。`nuxt-component-meta` 只在启动时解析一次，改了组件 JSDoc 要重启 `dev:docs` 才能看到新的 API 表。
+改动 `src/` 后若 playground 或 docs 表现异常，先重跑 `pnpm dev:prepare`。`nuxt-component-meta` 只在启动时解析一次，改了组件 JSDoc 要重启 `pnpm docs` 才能看到新的 API 表。
 
 已经踩过的坑：
 
@@ -139,10 +140,16 @@ pnpm lint
 - 改完 `src/runtime/index.css` 必须重跑 `pnpm dev:prepare`，playground 加载的是 `dist/` 里的副本，不重新 stub 就还是旧样式
 - **一页里能同时存活的 Sigma 实例有硬上限**：每个实例占 3 个 WebGL 上下文（`sigma-edges` / `sigma-nodes` / `sigma-hoverNodes` 三张画布走 WebGL，另外四张是 2D），浏览器上限多为 16 个。超出后最早的上下文被强制丢弃、画布直接变空白，只在控制台留一行 `Too many active WebGL contexts` 的警告。示例列表页一律经 `ExampleCard` 视口内懒挂载，同屏不超过四个实例
 - 控件插槽的作用域要连行为一起给。只暴露数据（如图例只给 `groups`）会让「接管外观」等于「丢掉功能」，与设计前提相悖
+- 文档站的 `.example-stage` 是 **flex 行容器**。示例根节点若是自己的 `div`（而不是直接给 `SigmaGraph`），只声明 `height: 100%` 会缩成内容宽，图被压成一条。这类容器必须一并写 `width: 100%`
+- **布局会毁掉 360 单位的坐标约定**：`circular` / `random` 默认 `scale` 为 1，跨度只剩 1~2 个单位；`forceatlas2` 用 `inferSettings()` 会收敛到几十个单位。跑布局的示例一律传 `itemSizesReference: 'screen'` 让 size 退回像素语义——布局后归一化坐标按不住 worker 版 ForceAtlas2，它每一帧都在回写坐标
+- **v4 的节点 `size` 是图坐标单位，不是屏幕像素**：`itemSizesReference` 默认从 v3 的 `'screen'` 改成了 `'positions'`，渲染半径 = `size × 每坐标单位的像素数`，也就是说决定视觉大小的是 size 与坐标跨度的**比值**。v3 时代「坐标随便写、size 当像素填」的数据搬到 v4 会渲染出比画布还大的色块。示例一律把坐标跨度取在 360 单位左右（对应 `.example-stage` 的 420px 减去 `stagePadding`），使每单位约等于 1px、size 数值读起来就是像素半径；新写示例要守这个约定。库不覆盖这个默认值，语义与逃生方式写在 `docs/content/docs/6.guides/4.node-size.md`
+- **`glDrawArraysInstanced: Active draw buffers with missing fragment shader outputs` 是浏览器驱动层的良性告警，不是本库的 bug**：已用 chrome-devtools 在 `/graph` 页实测，`GraphBasicExample`（无 `primitives`/`styles`）与 `GraphPrimitivesExample`（有自建 `primitives`）在各自 Sigma 实例刚建好时都会各触发几次，与是否传 `primitives`/`styles` 无关。已装的 `sigma@4.0.0-alpha.7` 源码里也没有任何 `gl.drawBuffers` / MRT 用法（`generateFragmentShader` 恒定只声明一个 `out vec4 fragColor`），picking 走的是单附件 framebuffer 两遍渲染，语义上对不上这条警告字面描述的场景，sigma.js 官方仓库也未见同款 issue。判断是 macOS Chrome 的 ANGLE-Metal 后端在 WebGL2 实例化绘制上的驱动告警，可安全忽略，不必为此改动 runtime 代码或示例配置
 
 - 模块装进消费方的 `node_modules` 后，Vite 的依赖扫描不进 node_modules 里的源码，runtime 对 graphology / sigma 系列的 import 拿不到预构建，浏览器直接收到 CJS 报缺少命名导出。声明由 `src/optimize-deps.ts` 内置，runtime 新增对某个包的 import 时要同步补一条候选。传递依赖（`events`、`graphology-utils/*`）必须写成 Vite 的 `parent > child` 形式，未安装的可选 peer 必须探测后跳过——直接塞进 `optimizeDeps.include` 会换来一串启动告警
 - 根 `tsconfig.json` 必须 `extends: "./.nuxt/tsconfig.json"`。改成 project references 写法会让 `vue-tsc --noEmit` 完全跳过 `src/`，typecheck 空转却仍退出码 0
 - 组件 emits 的类型要逐条写出。用 `{ [K in SigmaEventType]: ... }` 这类映射类型派生，`vue-tsc` 能过但 `pnpm build` 会失败——`@vue/compiler-sfc` 要在编译期静态提取事件名，解析不了跨包映射类型
+- **中文节点标签在 2 倍屏上会整体不渲染，起因是上游节点标签图集按 `64 × devicePixelRatio` 烘字形**：2 倍屏单个字形连同 buffer 约 144px，2048² 的图集一页只装得下约 190 个，中文字形集溢出后游标翻到 `atlasIndex: 1`，而 `updateAtlasTexture()` 只上传 `textures[0]`，`finalizeCurrentTexture()` 在翻页那一刻（`cursor.x === 0 && rowHeight === 0`）又把它算成 1px 宽。表现是标签全部进了 `displayedNodeLabels`、字符也提交给了绘制，屏幕上却一个字都没有，且无任何报错——边标签字形少不受影响，1 倍屏也正常，极易误判成 `labelSize` 太小。`utils/node-label-atlas.ts` 在实例建好、首帧之前把图集换成不乘 `devicePixelRatio` 的 64，可容约 600 个字形；字号经 `labelAtlasFontSize` prop 可调。这套内部字段（`internals.labelProgram`、`atlasFontSize`、`atlasManager`）上游全是 private，升级 sigma 后要回归验证。新 manager 的类从现有实例原型取而不从 `sigma` 命名导入——测试里 `vi.mock('sigma')` 的工厂只返回 `default`，多取一个导出会让所有挂载组件的用例报错
+- 上一条与 `glDrawArraysInstanced` 那条告警无关，排查时别被它带偏：告警在 1 倍屏同样出现，而 1 倍屏标签是正常的
 
 ## 演示应用
 
@@ -168,11 +175,11 @@ pnpm lint
 
 ## 文档站
 
-`docs/` 是 `@movk/nuxt-docs` 的消费方，`pnpm dev:docs` 起站。入门、组件、composables、工具函数、渲染程序、指南六个分组，一 API 一页已补齐。部署未排期。
+`docs/` 是 `@movk/nuxt-docs` 的消费方，`pnpm docs` 起站。入门、组件、composables、工具函数、指南五个分组，一 API 一页已补齐。部署未排期。
 
 ### 示例的唯一数据源在 docs
 
-46 个示例、`corpus.ts`、`examples.css` 全部住在 `docs/app/`，`playgrounds/basic` 经 `components` / `imports.dirs` / `css` 三处的绝对路径**反向引用**同一份文件。不要在 basic 下重建这些目录，两份会立刻漂移。
+50 个示例、`corpus.ts`、`examples.css` 与 `public/data/` 全部住在 `docs/`，`playgrounds/basic` 经 `components` / `imports.dirs` / `css` / `nitro.publicAssets` 四处的绝对路径**反向引用**同一份文件。不要在 basic 下重建这些目录，两份会立刻漂移。
 
 物理位置必须在 docs 侧，因为 `ComponentExample.vue` 用 `import.meta.glob('~/components/content/examples/**/*.vue')` 找预览组件，`~` 硬绑 docs 自身 srcDir。示例放在别处时**预览会静默消失**——模板是 `v-else-if="resolvedComponent"`，没有兜底分支也不报错，只剩源码块。改完示例位置务必肉眼确认预览还在。
 
@@ -187,6 +194,13 @@ pnpm lint
 - **不准用 `@nuxt/ui` 的自动导入**。示例现在住在装了 `@nuxt/ui` 的 docs 里，误用 `UButton` 这类组件在文档站看不出问题，只有 basic 构建会炸。`pnpm dev:build` 是这条的守门人
 - 组件示例的数据内联，因为数据形状本身就是演示内容；composable 与规模示例用 `demoGraph()` / `createScaleGraph()`，那些示例讲的是行为，数据只是背景板
 - 示例内的注释会出现在文档的源码展示里，只写验证点，一两行
+
+**示例数据取自 sigma 官方数据集**。`docs/public/data/wikipedia.json` 是从上游 v4 仓库原样 copy 的完整数据集（2085 节点 / 5409 边 / 24 社区），来源与 commit 记在同目录 README。分工照搬上游：
+
+- `demoGraph()` 是同步函数，示例里 `const data = demoGraph()` 一行就要拿到数据，所以它读的是 `docs/app/data/wikipedia-subset.json`——一份 160 节点的子集，随包打进 bundle。子集由 `docs/scripts/build-wikipedia-subset.mjs` 从完整数据集派生，改了取样规则要重跑
+- 完整数据集只由 `loadWikipediaGraph()` 按需 `fetch('/data/wikipedia.json')`，886 KB 不该在挂载时加载
+- `demoGraph()` 把节点 key 重编为 `n0..nN`（`n0` 恒为枢纽）。示例与文档正文都按这套稳定 id 引用节点，**不要改成真实 key**，否则六处按 `'n0'` / `'n3'` 取节点的示例会一起失效
+- `createScaleGraph()` 仍是合成数据，且应当保持：规模示例要 2k / 5k / 20k 节点，官方公开数据目录里最大的图也只有 2085 个，上游那批万级数据集是构建时从 SNAP 下载、不入库的
 
 **成对的示例**：`useSigma()` 是 inject，必须在 `SigmaGraph` 子树内调用，所以 composable 示例一律是 `XxxExample.vue`（渲染图的外壳）加 `XxxPanel.vue`（消费上下文的面板）两个文件。这也正是真实应用的结构。
 
@@ -213,7 +227,7 @@ nitro 的 `h3-next`（`npm:h3@2` 别名）不受这条 override 影响，那是�
 ## 测试要求
 
 - 工具函数与 composables 必须有单测，重点覆盖：`applyGraphDiff` 的坐标保留、`chainReducers` 的合成顺序、`useSigmaGraph` 的 version 递增、`useSigmaNeighborhood` 的 BFS 深度
-- 出口兼容专项断言：`settings` 未知键透传后仍能从 `sigma.getSettings()` 读回、用户自带 reducer 位于链首且被调用
+- 出口兼容专项断言：`settings` 未知键透传后仍能从 `sigma.getSettings()` 读回、`styles` 与 `primitives` 原样到达构造选项、用户自带 reducer 位于链首且被调用
 - 组件测试用 `@vue/test-utils`，WebGL 相关 mock 掉 Sigma 构造
 - **同一用例内不要并发挂载多个 `SigmaGraph`**：组件在 `onMounted` 里动态 `import('sigma')`，同一 tick 内的并发导入会让 vitest 的 mock 漏掉一个，第二个实例拿到真实 sigma 后崩在 WebGL 上。顺序挂载即可（先 `await` 前一个就绪）
 - 需要真实 Nuxt 环境的场景用 `@nuxt/test-utils` 加 `test/fixtures/*`

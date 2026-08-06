@@ -15,8 +15,8 @@ const nodes = Array.from({ length: 20 }, (_, index) => {
     attributes: {
       label: `${categories[index % 4]} ${index + 1}`,
       category: categories[index % 4],
-      x: Math.cos(angle) * 18,
-      y: Math.sin(angle) * 18,
+      x: Math.cos(angle) * 180,
+      y: Math.sin(angle) * 180,
       size: 9,
       color: colors[index % 4]
     }

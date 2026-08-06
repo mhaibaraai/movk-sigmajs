@@ -42,7 +42,7 @@ function update() {
 
   if (props.node !== undefined) {
     const display = instance.getNodeDisplayData(props.node)
-    if (!display || display.hidden) {
+    if (!display || display.visibility === 'hidden') {
       hidden.value = true
       return
     }

@@ -1,12 +1,3 @@
-/**
- * 控件与覆盖层的默认外观。
- *
- * 变量分两层：primitive 是配色与尺寸的原子值，semantic 按用途引用 primitive。
- * 改主题通常只需覆盖 primitive；要单独调某个控件再覆盖对应的 semantic。
- * 选择器一律包 :where() 把优先级降到 0，使用方无需 !important 即可覆盖。
- * 整份样式可用模块的 `sigma.css` 选项关闭。
- */
-
 :where(.sigma-root) {
   /* primitive */
   --sigma-color-bg: #fff;
@@ -49,11 +40,6 @@
   --sigma-minimap-viewport: var(--sigma-color-accent);
 }
 
-/**
- * 深色模式走两条通道，因为两种切换方式都很常见：
- * 系统偏好，以及 Nuxt UI / Tailwind 的 .dark 类策略。
- * 系统偏好那条要排除应用强制浅色（.light）的情况，否则手动切浅色时控件仍是深的。
- */
 @media (prefers-color-scheme: dark) {
   :where(html:not(.light)) :where(.sigma-root) {
     --sigma-color-bg: #1f2328;
@@ -132,10 +118,6 @@
   font-size: var(--sigma-font-size);
 }
 
-/* 交叉轴不拉伸，每个控件按自身内容定宽；否则纵向排布时窄控件会被最宽的那个撑开，
-   缩放按钮组会变成一个空盒子。
-   这几条 align-items 一律写在 :where() 里保持优先级为 0，
-   写进上面的基础规则会因优先级更高而盖掉后续的停靠侧覆盖 */
 :where(.sigma-controls) {
   align-items: flex-start;
 }
@@ -144,7 +126,6 @@
   flex-direction: column;
 }
 
-/* 靠右停靠时向右对齐，各控件的右边缘才齐平 */
 :where(.sigma-controls[data-direction="vertical"][data-position$="right"]) {
   align-items: flex-end;
 }
@@ -169,7 +150,6 @@
   right: var(--sigma-control-inset);
 }
 
-/* 控件组：一列按钮共用一块底板 */
 .sigma-control-group {
   display: flex;
   flex-direction: inherit;
@@ -254,7 +234,6 @@
   box-shadow: var(--sigma-shadow-md);
 }
 
-/* 结果列表在底部停靠时向上展开，避免超出容器 */
 :where(.sigma-controls[data-position^="bottom"]) .sigma-search-results {
   top: auto;
   bottom: calc(var(--sigma-control-size) + var(--sigma-space));

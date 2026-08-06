@@ -12,11 +12,11 @@ const props = withDefaults(defineProps<{
   name?: string
   /**
    * 舞台高度
-   * @defaultValue '360px'
+   * @defaultValue '500px'
    */
   height?: string
 }>(), {
-  height: '360px'
+  height: '500px'
 })
 
 const root = shallowRef<HTMLElement | null>(null)

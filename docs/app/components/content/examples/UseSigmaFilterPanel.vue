@@ -14,7 +14,7 @@ const mode = shallowRef<'none' | 'category' | 'degree' | 'hubs' | 'edge'>('none'
 function byCategory() {
   mode.value = 'category'
   edgeFilter.value = null
-  nodeFilter.value = (_key, attributes) => attributes.category === '技术标准'
+  nodeFilter.value = (_key, attributes) => attributes.category === 'Network Science'
 }
 
 function byDegree() {
@@ -26,7 +26,7 @@ function byDegree() {
 function byEdgeLabel() {
   mode.value = 'edge'
   nodeFilter.value = null
-  edgeFilter.value = (_key, attributes) => attributes.label === '引用'
+  edgeFilter.value = (_key, attributes) => attributes.label === '跨域'
 }
 
 function hubsOnly() {

@@ -1,13 +1,13 @@
 title: 版本发布
-description: 查看 @movk/sigma 的版本更新、功能增强与问题修复。
+description: 查看 Movk Sigma 的版本更新、功能增强与问题修复。
 seo:
   title: Releases
-  description: Release notes for @movk/sigma — new features, improvements and bug fixes.
+  description: Release notes for Movk Sigma — new features, improvements and bug fixes.
 navigation: false
 releases: https://ungh.cc/repos/mhaibaraai/movk-sigmajs/releases
 hero:
   title: 版本发布
-  description: 查看 @movk/sigma 的版本更新、功能增强与问题修复。
+  description: 查看 Movk Sigma 的版本更新、功能增强与问题修复。
   links:
     - label: 在 GitHub 上标星
       color: neutral

@@ -1,5 +1,7 @@
 import { shallowRef } from 'vue'
 import type { Ref } from 'vue'
+import type { Settings } from 'sigma/settings'
+import type { CameraState, PrimitivesDeclaration, StylesDeclaration } from 'sigma/types'
 import { useSigma } from './use-sigma'
 
 export interface SigmaExportOptions {
@@ -7,10 +9,22 @@ export interface SigmaExportOptions {
   width?: number
   /** 导出高度，省略则用当前视口高度 */
   height?: number
-  /** 背景色，省略则透明 */
+  /**
+   * 背景色
+   * @defaultValue 'transparent'
+   */
   backgroundColor?: string
-  /** 参与绘制的图层，省略则导出全部 */
-  layers?: string[]
+  /** 导出时的相机状态，省略则沿用当前视角 */
+  cameraState?: CameraState
+  /**
+   * 只在这次导出生效的渲染覆盖。用于导出一套与屏幕不同的外观，
+   * 例如去掉选中淡出、换成打印友好的配色
+   */
+  sigmaOverrides?: {
+    primitives?: PrimitivesDeclaration
+    styles?: StylesDeclaration
+    settings?: Partial<Settings>
+  }
 }
 
 export interface UseSigmaExportReturn {
@@ -25,12 +39,7 @@ export interface UseSigmaExportReturn {
   download: (filename?: string, options?: SigmaExportOptions) => Promise<void>
 }
 
-/**
- * 把当前画面导出为 PNG。
- *
- * 依赖可选 peer `@sigma/export-image`，用到时才动态加载：它与 sigma 本体一样
- * 在模块顶层读 WebGL 全局，静态 import 会让 SSR 直接崩。
- */
+/** 把当前画面导出为 PNG，依赖可选 peer `@sigma/export-image`，用到时才动态加载 */
 export function useSigmaExport(): UseSigmaExportReturn {
   const { whenReady } = useSigma()
   const isExporting = shallowRef(false)
@@ -44,13 +53,13 @@ export function useSigmaExport(): UseSigmaExportReturn {
     }
   }
 
-  /** layers 省略时传 null 而非 undefined，对应上游「全部图层」的取值 */
   function toImageOptions(options: SigmaExportOptions = {}) {
     return {
-      layers: options.layers ?? null,
-      width: options.width ?? null,
-      height: options.height ?? null,
-      ...(options.backgroundColor === undefined ? {} : { backgroundColor: options.backgroundColor })
+      ...(options.width === undefined ? {} : { width: options.width }),
+      ...(options.height === undefined ? {} : { height: options.height }),
+      ...(options.backgroundColor === undefined ? {} : { backgroundColor: options.backgroundColor }),
+      ...(options.cameraState === undefined ? {} : { cameraState: options.cameraState }),
+      ...(options.sigmaOverrides === undefined ? {} : { sigmaOverrides: options.sigmaOverrides })
     }
   }
 

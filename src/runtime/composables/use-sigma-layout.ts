@@ -54,7 +54,7 @@ export interface UseSigmaLayoutReturn {
  * ForceAtlas2 与 Noverlap 的 worker 会持续占用线程，组件卸载或 HMR 时不 kill 就泄漏，
  * 这里统一在作用域销毁时释放。
  *
- * 全部布局包都是可选 peer，用到时才动态导入；未安装则给出可操作的报错。
+ * 全部布局包都是可选 peer，用到时才动态导入。
  */
 export function useSigmaLayout(
   name: SigmaLayoutName,

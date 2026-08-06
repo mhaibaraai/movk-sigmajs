@@ -18,7 +18,7 @@ let seq = 0
 function addNode() {
   seq += 1
   const key = `extra-${seq}`
-  graph.value.addNode(key, { label: key, x: Math.cos(seq) * 20, y: Math.sin(seq) * 20, size: 8, color: '#f59e0b' })
+  graph.value.addNode(key, { label: key, x: Math.cos(seq) * 220, y: Math.sin(seq) * 220, size: 8, color: '#f59e0b' })
   graph.value.addEdge('n0', key)
 }
 

@@ -8,7 +8,7 @@
 const nodes = Array.from({ length: 40 }, (_, index) => {
   const ring = Math.floor(index / 10)
   const angle = ((index % 10) / 10) * Math.PI * 2
-  const radius = 8 + ring * 9
+  const radius = 60 + ring * 40
   return {
     key: `n${index}`,
     attributes: {

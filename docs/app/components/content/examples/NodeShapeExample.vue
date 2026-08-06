@@ -1,51 +1,57 @@
 <script setup lang="ts">
 import Graph from 'graphology'
-import type { SigmaNodeBorder } from '@movk/sigma'
+import type { StylesDeclaration } from 'sigma/types'
 
 /**
  * 形状是与颜色正交的第二个编码维度：类别一多，光靠配色早就分不开了。
- * 节点的 type 属性即 programs.node 的键名，缺省走 defaultNodeType（'circle'）。
+ * 节点的 shape 属性对应 primitives.nodes.shapes 里声明的形状名。
  */
-const SHAPES = ['circle', 'square', 'diamond', 'hexagon', 'triangle'] as const
+const SHAPES = ['circle', 'square', 'diamond', 'hexagon', 'star'] as const
 
 const graph = new Graph()
 graph.import(demoGraph({ nodes: 16, extraEdges: 1 }))
 
-// 空心环：外圈按类别取色，内部填白
-graph.forEachNode((node, attributes) => {
+graph.forEachNode((node) => {
   const index = Number(node.slice(1))
-  graph.mergeNodeAttributes(node, {
-    type: SHAPES[index % SHAPES.length],
-    borderColor: attributes.color,
-    color: '#ffffff',
-    size: 14
-  })
+  graph.setNodeAttribute(node, 'shape', SHAPES[index % SHAPES.length])
 })
 
-const borders: SigmaNodeBorder[] = [
-  // pixels 模式：按半径比例算的描边在小节点上只有 1px 出头，会被抗锯齿抹淡
-  { size: { value: 2, mode: 'pixels' }, color: { attribute: 'borderColor' } },
-  { size: { fill: true }, color: { attribute: 'color' } }
-]
+/**
+ * sdfPolygon / sdfStar 返回纯数据，可直接写在外层；内置的 sdfCircle 与 layerFill
+ * 来自 sigma/rendering，那个模块顶层就读 WebGL 全局，必须延迟到客户端加载
+ */
+const primitives = defineSigmaPrimitives(async () => {
+  const { sdfCircle, layerFill } = await import('sigma/rendering')
 
-// sigma 与 @movk/sigma 的渲染程序都在模块顶层读 WebGL 全局，只能延迟加载
-const load = (options: Record<string, unknown>) => defineSigmaProgram(() =>
-  import('@movk/sigma/programs/node-shape').then(m => m.createNodeShapeProgram({ borders, ...options }))
-)
+  return {
+    nodes: {
+      shapes: [
+        sdfCircle(),
+        sdfPolygon({ name: 'square', sides: 4, rotation: Math.PI / 4 }),
+        sdfPolygon({ name: 'diamond', sides: 4 }),
+        sdfPolygon({ name: 'hexagon', sides: 6 }),
+        sdfStar({ name: 'star', points: 5, innerRatio: 0.45 })
+      ],
+      layers: [layerFill()]
+    }
+  }
+})
 
-const programs = {
-  node: {
-    circle: load({ shape: 'circle' }),
-    square: load({ sides: 4 }),
-    diamond: load({ sides: 4, rotation: Math.PI / 4 }),
-    hexagon: load({ sides: 6 }),
-    triangle: load({ sides: 3, rotation: -Math.PI / 2 })
+const styles: StylesDeclaration = {
+  nodes: {
+    shape: { attribute: 'shape', defaultValue: 'circle' },
+    size: 14
   }
 }
 </script>
 
 <template>
-  <SigmaGraph :graph="graph" :programs="programs" :settings="{ renderEdgeLabels: false }">
+  <SigmaGraph
+    :graph="graph"
+    :primitives="primitives"
+    :styles="styles"
+    :settings="{ renderEdgeLabels: false }"
+  >
     <NodeShapePanel />
   </SigmaGraph>
 </template>

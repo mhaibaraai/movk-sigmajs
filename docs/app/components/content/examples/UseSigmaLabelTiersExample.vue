@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Graph from 'graphology'
+import type { StylesDeclaration } from 'sigma/types'
 
 /**
  * 缩放分级：视野越广，只留下越重要的那几档标签。
@@ -13,26 +14,16 @@ for (const [node, tier] of Object.entries(tiers)) {
   graph.setNodeAttribute(node, 'labelTier', tier)
 }
 
-const labels = createLabelRenderer({
-  maxChars: 6,
-  tiers: {
-    0: { size: 14, weight: '600', color: '#0f172a' },
-    1: { size: 12, weight: '500', color: '#1e293b' },
-    2: { size: 11, weight: '400', color: '#64748b' }
+const styles: StylesDeclaration = {
+  nodes: {
+    labelSize: { attribute: 'labelTier', dict: { 0: 14, 1: 12, 2: 11 }, defaultValue: 12 },
+    labelColor: { attribute: 'labelTier', dict: { 0: '#0f172a', 1: '#1e293b', 2: '#64748b' }, defaultValue: '#1e293b' }
   }
-})
-
-const settings = {
-  labelSize: 12,
-  labelColor: { color: '#1e293b' },
-  renderEdgeLabels: false,
-  defaultDrawNodeLabel: labels.drawNodeLabel,
-  defaultDrawNodeHover: labels.drawNodeHover
 }
 </script>
 
 <template>
-  <SigmaGraph :graph="graph" :settings="settings" @before-render="labels.resetFrame()">
+  <SigmaGraph :graph="graph" :styles="styles" :settings="{ renderEdgeLabels: false }">
     <UseSigmaLabelTiersPanel />
   </SigmaGraph>
 </template>

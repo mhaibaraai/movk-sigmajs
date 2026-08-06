@@ -32,11 +32,19 @@
     </ExampleCard>
 
     <ExampleCard
-      title="自定义渲染程序"
-      name="GraphProgramsExample"
-      description="经 defineSigmaProgram 延迟加载 @sigma/node-border 与 @sigma/edge-curve。"
+      title="渲染原语"
+      name="GraphPrimitivesExample"
+      description="primitives 声明可用的形状与路径，styles 决定谁用哪个。平行边由 parallelPath 自动分散。"
     >
-      <GraphProgramsExample />
+      <GraphPrimitivesExample />
+    </ExampleCard>
+
+    <ExampleCard
+      title="连接线类型"
+      name="EdgeTypeExample"
+      description="path/head 按边的 kind 属性做 dict 绑定，同一份 primitives 声明下不同边可选不同线型与端点。"
+    >
+      <EdgeTypeExample />
     </ExampleCard>
 
     <ExampleCard

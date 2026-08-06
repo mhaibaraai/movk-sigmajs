@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Graph from 'graphology'
 import { shallowRef } from 'vue'
+import type { LabelPosition, StylesDeclaration } from 'sigma/types'
 
 /**
  * 方位由邻居方向反推：邻居单位向量之和指向连线最密处，取反即最空的一侧。
@@ -9,42 +10,36 @@ import { shallowRef } from 'vue'
 const graph = new Graph()
 graph.import(demoGraph({ nodes: 18, extraEdges: 1 }))
 
-const labels = createLabelRenderer({ maxChars: 6 })
 const derived = shallowRef(false)
 
-const settings = {
-  labelSize: 12,
-  labelColor: { color: '#1e293b' },
-  renderEdgeLabels: false,
-  defaultDrawNodeLabel: labels.drawNodeLabel,
-  defaultDrawNodeHover: labels.drawNodeHover
+const styles: StylesDeclaration = {
+  nodes: {
+    labelPosition: { attribute: 'labelPlacement', defaultValue: 'below' },
+    labelSize: 12,
+    labelColor: '#1e293b'
+  }
 }
 
 function apply(next: boolean) {
   derived.value = next
 
-  if (next) {
-    const placements = labelPlacements(graph)
-    for (const [node, placement] of Object.entries(placements)) {
-      graph.setNodeAttribute(node, 'labelPlacement', placement)
-    }
-  }
-  else {
-    graph.forEachNode(node => graph.setNodeAttribute(node, 'labelPlacement', 'bottom'))
-  }
+  const placements: Record<string, LabelPosition> = next
+    ? labelPlacements(graph)
+    : Object.fromEntries(graph.nodes().map(node => [node, 'below' as LabelPosition]))
 
-  // 首选方位变了，跨帧记忆里的旧位置要一并作废
-  labels.clear()
+  for (const [node, placement] of Object.entries(placements)) {
+    graph.setNodeAttribute(node, 'labelPlacement', placement)
+  }
 }
 
 apply(false)
 </script>
 
 <template>
-  <SigmaGraph :graph="graph" :settings="settings" @before-render="labels.resetFrame()">
+  <SigmaGraph :graph="graph" :styles="styles" :settings="{ renderEdgeLabels: false }">
     <div class="demo-panel" data-at="top-left">
       <div class="demo-row">
-        <span class="demo-label">首选方位</span>
+        <span class="demo-label">标签方位</span>
         <button type="button" :aria-pressed="!derived" @click="apply(false)">
           一律朝下
         </button>
@@ -52,7 +47,7 @@ apply(false)
           背离邻居
         </button>
       </div>
-      <span class="demo-tag">派生结果只是首选位，真正落哪一侧仍由帧内避让决定</span>
+      <span class="demo-tag">方位写进属性，由 styles 的 labelPosition 读取</span>
     </div>
   </SigmaGraph>
 </template>
