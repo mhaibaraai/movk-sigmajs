@@ -148,6 +148,8 @@ pnpm lint
 - 模块装进消费方的 `node_modules` 后，Vite 的依赖扫描不进 node_modules 里的源码，runtime 对 graphology / sigma 系列的 import 拿不到预构建，浏览器直接收到 CJS 报缺少命名导出。声明由 `src/optimize-deps.ts` 内置，runtime 新增对某个包的 import 时要同步补一条候选。传递依赖（`events`、`graphology-utils/*`）必须写成 Vite 的 `parent > child` 形式，未安装的可选 peer 必须探测后跳过——直接塞进 `optimizeDeps.include` 会换来一串启动告警
 - 根 `tsconfig.json` 必须 `extends: "./.nuxt/tsconfig.json"`。改成 project references 写法会让 `vue-tsc --noEmit` 完全跳过 `src/`，typecheck 空转却仍退出码 0
 - 组件 emits 的类型要逐条写出。用 `{ [K in SigmaEventType]: ... }` 这类映射类型派生，`vue-tsc` 能过但 `pnpm build` 会失败——`@vue/compiler-sfc` 要在编译期静态提取事件名，解析不了跨包映射类型
+- **中文节点标签在 2 倍屏上会整体不渲染，起因是上游节点标签图集按 `64 × devicePixelRatio` 烘字形**：2 倍屏单个字形连同 buffer 约 144px，2048² 的图集一页只装得下约 190 个，中文字形集溢出后游标翻到 `atlasIndex: 1`，而 `updateAtlasTexture()` 只上传 `textures[0]`，`finalizeCurrentTexture()` 在翻页那一刻（`cursor.x === 0 && rowHeight === 0`）又把它算成 1px 宽。表现是标签全部进了 `displayedNodeLabels`、字符也提交给了绘制，屏幕上却一个字都没有，且无任何报错——边标签字形少不受影响，1 倍屏也正常，极易误判成 `labelSize` 太小。`utils/node-label-atlas.ts` 在实例建好、首帧之前把图集换成不乘 `devicePixelRatio` 的 64，可容约 600 个字形；字号经 `labelAtlasFontSize` prop 可调。这套内部字段（`internals.labelProgram`、`atlasFontSize`、`atlasManager`）上游全是 private，升级 sigma 后要回归验证。新 manager 的类从现有实例原型取而不从 `sigma` 命名导入——测试里 `vi.mock('sigma')` 的工厂只返回 `default`，多取一个导出会让所有挂载组件的用例报错
+- 上一条与 `glDrawArraysInstanced` 那条告警无关，排查时别被它带偏：告警在 1 倍屏同样出现，而 1 倍屏标签是正常的
 
 ## 演示应用
 
