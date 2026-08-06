@@ -1,5 +1,76 @@
 # Changelog
 
+## [0.1.0](https://github.com/mhaibaraai/movk-sigmajs/compare/v0.0.4...v0.1.0) (2026-08-06)
+
+### ⚠ BREAKING CHANGES
+
+* **runtime:** 需要 sigma >= 4.0.0-alpha.7。programs prop 与
+  defineSigmaProgram() 移除，改用 primitives；节点隐藏从 hidden 改为
+  visibility；标签置空从 label: null 改为 labelVisibility: 'hidden'。
+
+### Features
+
+* **composables:** 新增 useSigmaLabelTiers 按相机比例分级标签 ([132313b](https://github.com/mhaibaraai/movk-sigmajs/commit/132313b93db9a2b5fade65c0c9b1473e7c8b53cd))
+* **docs:** 升级 @movk/nuxt-docs 并接入 AI 对话与 Vercel Analytics ([0a39890](https://github.com/mhaibaraai/movk-sigmajs/commit/0a398909b0815b28a25f6d62d9becd2f399e4b15))
+* **docs:** 示例数据改用 sigma 官方 wikipedia 数据集 ([baf49df](https://github.com/mhaibaraai/movk-sigmajs/commit/baf49df99aa3bcaa0f7ab98e5d14af23d5d83a00))
+* **examples:** 演示边的 path 与 head 按属性绑定 ([7fb8ad0](https://github.com/mhaibaraai/movk-sigmajs/commit/7fb8ad0abceabf999e5f65a6778e3f336450457c))
+* **programs:** 新增 createNodeShapeProgram 多边形与星形节点 ([a0a0395](https://github.com/mhaibaraai/movk-sigmajs/commit/a0a03952dfb2eef6e25abf24aa0a11011a0ea540))
+* **runtime:** primitives 支持延迟声明 ([e05f256](https://github.com/mhaibaraai/movk-sigmajs/commit/e05f256d99ac55c97b8a864db091d94e186a1d22))
+* **runtime:** 迁移到 sigma v4 的 styles/primitives/state 架构 ([c5a1bf6](https://github.com/mhaibaraai/movk-sigmajs/commit/c5a1bf6342c8b637eafd8f34985382060f5827c3)), references [#app](https://github.com/mhaibaraai/movk-sigmajs/issues/app)
+* **types:** 汇出标签与形状相关的公开类型 ([6673652](https://github.com/mhaibaraai/movk-sigmajs/commit/6673652640c5c31cc246410b0fede7ccc1599ff1))
+* **utils:** 新增标签避让绘制层与档位、方位派生 ([110329b](https://github.com/mhaibaraai/movk-sigmajs/commit/110329b742d5446869c08d2c730f19785e64f1e9))
+
+### Bug Fixes
+
+* **examples:** useSigma 示例不再写死节点 id ([a995fb2](https://github.com/mhaibaraai/movk-sigmajs/commit/a995fb297c8651de42d1313fc141cb545fdc03fb))
+* **examples:** 修复带 wrap 容器的示例被压成内容宽 ([a6d5dae](https://github.com/mhaibaraai/movk-sigmajs/commit/a6d5daed6e4cf3d357422e24149f6a600cf1307e))
+* **examples:** 修正 themed 页三个示例的节点尺寸 ([b896059](https://github.com/mhaibaraai/movk-sigmajs/commit/b896059ac4d901e7ccb41ad359dd2068681dda26))
+* **examples:** 示例坐标跨度对齐 v4 的 size 语义 ([914e0cc](https://github.com/mhaibaraai/movk-sigmajs/commit/914e0cc794ddd197055e386c10c0c1018c3d9dd4))
+* **examples:** 跑布局的示例切到 screen 尺寸语义 ([7871e0a](https://github.com/mhaibaraai/movk-sigmajs/commit/7871e0a196f5142711ef70ba441864043ba2354e))
+* **graph:** 修正 2 倍屏下中文节点标签整体不渲染 ([fcb5b9b](https://github.com/mhaibaraai/movk-sigmajs/commit/fcb5b9bd3037515a99e8ffec55b58a52836550ae))
+* **optimize-deps:** 探测忽略 NODE_PATH 暴露的包 ([d077f7a](https://github.com/mhaibaraai/movk-sigmajs/commit/d077f7a6c05949a922381464415aeb240435b117))
+* **runtime:** styles 变更改比引用而非比值 ([8b3bf61](https://github.com/mhaibaraai/movk-sigmajs/commit/8b3bf615024d66634dfd9ee43684be8858e64131))
+
+### Documentation
+
+* **agents:** 同步数据集接入与新踩的坑 ([b7d0056](https://github.com/mhaibaraai/movk-sigmajs/commit/b7d0056a1206e1787ca5f48a066a478e7d00b549))
+* **agents:** 红线与类型来源表同步到 v4 ([37084f0](https://github.com/mhaibaraai/movk-sigmajs/commit/37084f07eddf9c9e11e78cd6075532234592c983))
+* **agents:** 补上 programs 目录的红线与文档站现状 ([d1264f0](https://github.com/mhaibaraai/movk-sigmajs/commit/d1264f07469028e36e86fd0a9093759a88813724))
+* **composables:** 按现有实现重写 useSigmaDrag 页 ([ef621cd](https://github.com/mhaibaraai/movk-sigmajs/commit/ef621cdc7d4a44b98cf2d7f9dea3f5a93186be47))
+* **guides:** 新增节点尺寸与坐标量级指南 ([b527e3f](https://github.com/mhaibaraai/movk-sigmajs/commit/b527e3f01d803f432c841c4d2dd3114ac0339708))
+* llms 元信息中的 sigma 版本改为 v4 ([3e75d15](https://github.com/mhaibaraai/movk-sigmajs/commit/3e75d155c266ab7cee958ec2f3da6b9b3064ddbe))
+* **references:** 移除 references 目录和相关内容 ([26680f6](https://github.com/mhaibaraai/movk-sigmajs/commit/26680f6f73ad6381746e834d049173d3b5965514))
+* 修正 reducer 归属表述并升级依赖 ([54acd63](https://github.com/mhaibaraai/movk-sigmajs/commit/54acd632c97965821809afe929d8f7a5ad3afdef))
+* 文档站适配 v4 ([a3eecd2](https://github.com/mhaibaraai/movk-sigmajs/commit/a3eecd23a314e3aa45ab79b0a5eeebbb54c64747))
+* 新增渲染程序分组与五个 API 页 ([ab9971a](https://github.com/mhaibaraai/movk-sigmajs/commit/ab9971a8e15b973f95825787066f0450a583d013))
+* 补充节点标签字形图集的说明与踩坑 ([e87d09f](https://github.com/mhaibaraai/movk-sigmajs/commit/e87d09feb5243a292e552f654dd88ff86c63442e))
+
+### Code Refactoring
+
+* **docs:** 示例与 playground 页面适配 v4 ([7fd8872](https://github.com/mhaibaraai/movk-sigmajs/commit/7fd8872795e16fe4db5e8202f88656594ab7ef4e))
+* **runtime:** 精简 runtime 代码注释 ([706d743](https://github.com/mhaibaraai/movk-sigmajs/commit/706d7432fab6dcce87595b1b3822e4cc05800451))
+
+### Tests
+
+* 测试套件适配 v4 API ([8529e91](https://github.com/mhaibaraai/movk-sigmajs/commit/8529e9153cf651e01d37deff5fe212d8954d691d)), references [#app](https://github.com/mhaibaraai/movk-sigmajs/issues/app)
+* 覆盖标签绘制层、图侧派生、缩放分级与形状着色器 ([8acb6b1](https://github.com/mhaibaraai/movk-sigmajs/commit/8acb6b1f429b467ce54102f63aaf9cd6e24106cc))
+
+### Build System
+
+* **deps:** 依赖基线切换到 sigma v4 ([114b5e1](https://github.com/mhaibaraai/movk-sigmajs/commit/114b5e1d86c3a9cc2373256fa40d9bc4e7fd19a0))
+
+### Chores
+
+* **deps:** playgrounds/ui 的 @movk/nuxt 升到 1.7.1 ([0f7c949](https://github.com/mhaibaraai/movk-sigmajs/commit/0f7c9493e8fbeaae652619902010ca81eee8e196))
+* **docs:** 清理空的 ui 与 aiChat 配置项 ([862f159](https://github.com/mhaibaraai/movk-sigmajs/commit/862f159c9f915a09fe94ab36add4505b0b90bc1a))
+* **playground-ui:** 升级 @movk/nuxt 并简化会话密钥配置 ([2006d55](https://github.com/mhaibaraai/movk-sigmajs/commit/2006d55b02154ac3348e64af919ffb4de1c37980))
+* **playground-ui:** 启用图标客户端打包并新增通用组件目录 ([fb07ec7](https://github.com/mhaibaraai/movk-sigmajs/commit/fb07ec75ca078e02fd750cb086b60949b4b1802d))
+* **playground-ui:** 精简冗余注释 ([9c6bf11](https://github.com/mhaibaraai/movk-sigmajs/commit/9c6bf11f57dfc0f0a6b8bb7e291156f4c5034c6e))
+* 升级 pnpm 与根依赖版本 ([7f4270e](https://github.com/mhaibaraai/movk-sigmajs/commit/7f4270e56c2c44f9f148b8a7e92420335086cfb5))
+* 更新 pnpm 锁文件 ([6133f5d](https://github.com/mhaibaraai/movk-sigmajs/commit/6133f5d62a60e05dfa934a36a038984168d32e5a))
+* 清理冗余配置与脚本名 ([435f033](https://github.com/mhaibaraai/movk-sigmajs/commit/435f0332dfd904adcf732dc5d10a67fc66c60f96))
+* 版本回退并补充文档与 playground 调整 ([abb1622](https://github.com/mhaibaraai/movk-sigmajs/commit/abb1622e1c54a13bf824af1670a96688880fc00a))
+
 ## [0.0.4](https://github.com/mhaibaraai/movk-sigmajs/compare/v0.0.3...v0.0.4) (2026-07-30)
 
 ### ⚠ BREAKING CHANGES
