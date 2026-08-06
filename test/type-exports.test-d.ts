@@ -18,7 +18,10 @@ import type {
   SigmaEdgeReducer,
   SigmaEventHandlers,
   SigmaExportOptions,
+  SigmaFitInsets,
+  SigmaFitOptions,
   SigmaLabelTierBreakpoint,
+  SigmaLayoutComponentOptions,
   SigmaLayoutName,
   SigmaNodePredicate,
   SigmaNodeReducer,
@@ -56,7 +59,10 @@ export type _Exports = [
   Assert<SigmaEdgeReducer>,
   Assert<SigmaEventHandlers>,
   Assert<SigmaExportOptions>,
+  Assert<SigmaFitInsets>,
+  Assert<SigmaFitOptions>,
   Assert<SigmaLabelTierBreakpoint>,
+  Assert<SigmaLayoutComponentOptions>,
   Assert<SigmaLayoutName>,
   Assert<SigmaNodePredicate>,
   Assert<SigmaNodeReducer>,
@@ -84,4 +90,5 @@ export type _Exports = [
 const _hit: SigmaSearchResult = { type: 'node', id: 'n0', label: '节点', field: 'label' }
 const _kind: SigmaCentralityKind = 'betweenness'
 const _shape: SdfPolygonOptions = { name: 'hex', sides: 6 }
-export const _samples = [_hit, _kind, _shape]
+const _fit: SigmaFitOptions = { animate: false, minRatio: 0.12, insets: { top: 96, left: 288 } }
+export const _samples = [_hit, _kind, _shape, _fit]
