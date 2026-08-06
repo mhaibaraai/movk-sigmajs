@@ -67,7 +67,39 @@ function makeSupervisorMock() {
 vi.mock('graphology-layout-forceatlas2/worker', () => ({ default: makeSupervisorMock() }))
 vi.mock('graphology-layout-noverlap/worker', () => ({ default: makeSupervisorMock() }))
 
-async function mountLayout(name: SigmaLayoutName, options: UseSigmaLayoutOptions = {}) {
+/** 默认图：一个三点分量加三个孤立点 */
+function makeGraph(): Graph {
+  const graph = new Graph()
+  for (let i = 0; i < 6; i++) {
+    graph.addNode(`n${i}`, { x: 0, y: 0 })
+  }
+  graph.addEdge('n0', 'n1')
+  graph.addEdge('n1', 'n2')
+
+  return graph
+}
+
+/** 三个互不相连的三角形，用来验证分量打包 */
+function makeComponentGraph(): Graph {
+  const graph = new Graph()
+
+  for (let group = 0; group < 3; group++) {
+    for (let i = 0; i < 3; i++) {
+      graph.addNode(`c${group}-${i}`, { x: Math.cos(i) * 10, y: Math.sin(i) * 10, size: 5 })
+    }
+    graph.addEdge(`c${group}-0`, `c${group}-1`)
+    graph.addEdge(`c${group}-1`, `c${group}-2`)
+    graph.addEdge(`c${group}-2`, `c${group}-0`)
+  }
+
+  return graph
+}
+
+async function mountLayout(
+  name: SigmaLayoutName,
+  options: UseSigmaLayoutOptions = {},
+  graph: Graph = makeGraph()
+) {
   let api!: UseSigmaLayoutReturn
 
   const Child = defineComponent({
@@ -76,13 +108,6 @@ async function mountLayout(name: SigmaLayoutName, options: UseSigmaLayoutOptions
       return () => h('span')
     }
   })
-
-  const graph = new Graph()
-  for (let i = 0; i < 6; i++) {
-    graph.addNode(`n${i}`, { x: 0, y: 0 })
-  }
-  graph.addEdge('n0', 'n1')
-  graph.addEdge('n1', 'n2')
 
   const wrapper = mount(SigmaGraph, {
     props: { graph } as never,
@@ -201,5 +226,89 @@ describe('useSigmaLayout worker 生命周期', () => {
     await api.start()
 
     expect(state.workerSettings[0]).toMatchObject({ settings: expect.objectContaining({ gravity: 42 }) })
+  })
+})
+
+/** 分量的外接圆：圆心取包围盒中心，半径含节点自身的绘制半径 */
+function measure(graph: Graph, keys: string[]) {
+  const xs = keys.map(key => graph.getNodeAttribute(key, 'x') as number)
+  const ys = keys.map(key => graph.getNodeAttribute(key, 'y') as number)
+  const size = Math.max(...keys.map(key => Number(graph.getNodeAttribute(key, 'size')) || 1))
+
+  const minX = Math.min(...xs) - size
+  const minY = Math.min(...ys) - size
+  const maxX = Math.max(...xs) + size
+  const maxY = Math.max(...ys) + size
+
+  return {
+    center: { x: (minX + maxX) / 2, y: (minY + maxY) / 2 },
+    radius: Math.hypot(maxX - minX, maxY - minY) / 2
+  }
+}
+
+function groupKeys(graph: Graph, group: number): string[] {
+  return graph.nodes().filter(key => key.startsWith(`c${group}-`))
+}
+
+describe('useSigmaLayout 按连通分量布局', () => {
+  it('各分量的外接圆互不相交', async () => {
+    const graph = makeComponentGraph()
+    const { api } = await mountLayout('forceatlas2', { byComponent: true, iterations: 30 }, graph)
+
+    await api.assign()
+
+    const circles = [0, 1, 2].map(group => measure(graph, groupKeys(graph, group)))
+
+    for (let i = 0; i < circles.length; i++) {
+      for (let j = i + 1; j < circles.length; j++) {
+        const a = circles[i]!
+        const b = circles[j]!
+        const distance = Math.hypot(a.center.x - b.center.x, a.center.y - b.center.y)
+        expect(distance).toBeGreaterThan(a.radius + b.radius)
+      }
+    }
+  })
+
+  it('同一份数据连跑两次坐标一致', async () => {
+    const first = makeComponentGraph()
+    const second = makeComponentGraph()
+
+    await (await mountLayout('forceatlas2', { byComponent: true, iterations: 30 }, first)).api.assign()
+    await (await mountLayout('forceatlas2', { byComponent: true, iterations: 30 }, second)).api.assign()
+
+    for (const key of first.nodes()) {
+      expect(second.getNodeAttribute(key, 'x')).toBeCloseTo(first.getNodeAttribute(key, 'x') as number)
+      expect(second.getNodeAttribute(key, 'y')).toBeCloseTo(first.getNodeAttribute(key, 'y') as number)
+    }
+  })
+
+  it('单分量图退回整图布局', async () => {
+    const graph = new Graph()
+    for (let i = 0; i < 4; i++) {
+      graph.addNode(`n${i}`, { x: Math.cos(i) * 10, y: Math.sin(i) * 10 })
+    }
+    graph.addEdge('n0', 'n1')
+    graph.addEdge('n1', 'n2')
+    graph.addEdge('n2', 'n3')
+
+    const { api } = await mountLayout('forceatlas2', { byComponent: true, iterations: 30 }, graph)
+    await api.assign()
+
+    expect(graph.nodes().every(key => Number.isFinite(graph.getNodeAttribute(key, 'x')))).toBe(true)
+  })
+
+  it('与 worker 互斥：isSupervised 为 false，start 不创建 supervisor', async () => {
+    const { api } = await mountLayout(
+      'forceatlas2',
+      { byComponent: true, iterations: 30 },
+      makeComponentGraph()
+    )
+
+    expect(api.isSupervised).toBe(false)
+
+    await api.start()
+
+    expect(state.supervisors).toHaveLength(0)
+    expect(api.isRunning.value).toBe(false)
   })
 })
