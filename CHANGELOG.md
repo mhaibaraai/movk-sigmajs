@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.1.1](https://github.com/mhaibaraai/movk-sigmajs/compare/v0.1.0...v0.1.1) (2026-08-06)
+
+### Features
+
+* **camera:** fitTo 支持浮层遮挡与相机比例下限 ([3e4cf98](https://github.com/mhaibaraai/movk-sigmajs/commit/3e4cf98048e0efb950b60afca706e5405862b0fc))
+* **layout:** useSigmaLayout 支持按连通分量布局 ([a7b6df2](https://github.com/mhaibaraai/movk-sigmajs/commit/a7b6df207dbda92ccc524eeae32f5c2f9ea38ac5))
+
+### Documentation
+
+* 补充按连通分量布局与浮层遮挡 fit 的说明与示例 ([9ffb9ec](https://github.com/mhaibaraai/movk-sigmajs/commit/9ffb9ecb23edb6d5a4b8ba13d950887fdce81fff))
+
+### Chores
+
+* **types:** 从根出口导出新增的布局与相机选项类型 ([c61278c](https://github.com/mhaibaraai/movk-sigmajs/commit/c61278c9f10ba13a8d2b931a2efe7ae2dd6a9f66))
+
 ## [0.1.0](https://github.com/mhaibaraai/movk-sigmajs/compare/v0.0.4...v0.1.0) (2026-08-06)
 
 ### ⚠ BREAKING CHANGES
