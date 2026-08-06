@@ -4,8 +4,6 @@ const links = [
   { to: '/themed', label: '插槽接管外观', icon: 'i-lucide-palette' }
 ]
 
-// @nuxt/ui 的 color mode 会往 <html> 上写 .dark，
-// 内置控件的深色通道之一正是 :where(html.dark) :where(.sigma-root)
 const colorMode = useColorMode()
 </script>
 

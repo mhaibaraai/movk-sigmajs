@@ -1,15 +1,8 @@
 <script setup lang="ts">
-/**
- * 完整知识图谱场景。
- *
- * 首屏走概览接口，坐标由服务端预先算好并随数据下发——架构方案第九节说的
- * 「最稳的路径」，前端一帧布局都不用跑。
- */
 import type { StylesDeclaration } from 'sigma/types'
 
 const limit = ref(300)
 
-// styles 只在构造时读取，提到顶层保持引用稳定
 const styles: StylesDeclaration = {
   edges: { color: '#e2e8f0' }
 }
