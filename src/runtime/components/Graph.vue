@@ -31,6 +31,7 @@ import { applyGraphDiff } from '../utils/apply-graph-diff'
 import type { ApplyGraphDiffOptions } from '../utils/apply-graph-diff'
 import { chainReducers } from '../utils/chain-reducers'
 import { isLazySigmaPrimitives } from '../utils/define-sigma-primitives'
+import { DEFAULT_NODE_LABEL_ATLAS_FONT_SIZE, applyNodeLabelAtlasFontSize } from '../utils/node-label-atlas'
 
 defineOptions({ name: 'SigmaGraph', inheritAttrs: false })
 
@@ -65,6 +66,15 @@ const props = defineProps<{
   nodeReducer?: NodeReducer
   /** 自带的边归约，作为 reducer 链的基座执行 */
   edgeReducer?: EdgeReducer
+  /**
+   * 节点标签 SDF 字形图集的源字号，不是标签显示字号（后者在 `styles` 的 `labelSize`）。
+   *
+   * 上游按 `64 × devicePixelRatio` 生成字形，2 倍屏上 2048² 的图集一页只装得下约 190 个，
+   * 中文字形集溢出后节点标签会整体消失，故这里压回 64。Latin 字形集不受此限，
+   * 想在大字号下更锐利可以调高
+   * @defaultValue 64
+   */
+  labelAtlasFontSize?: number
   /** 实例 id，登记后可经 `useSigmaById(id)` 在组件树之外访问 */
   id?: string
   /** `applyGraphDiff` 的行为选项 */
@@ -342,6 +352,13 @@ async function createInstance() {
     nodeReducer: dispatchNodeReducer,
     edgeReducer: dispatchEdgeReducer
   })
+
+  // 必须赶在首帧之前：此刻图集里还没有任何字形，换掉整个 manager 不丢数据
+  applyNodeLabelAtlasFontSize(
+    instance,
+    props.labelAtlasFontSize ?? DEFAULT_NODE_LABEL_ATLAS_FONT_SIZE,
+    primitives?.nodes?.label?.font
+  )
 
   for (const event of SIGMA_EVENTS) {
     instance.on(event as SigmaEventType, (payload: unknown) => {
