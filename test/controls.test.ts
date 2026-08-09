@@ -34,13 +34,13 @@ vi.mock('sigma', () => {
 
     getCamera() {
       return {
-        animatedZoom: async () => {
+        zoomIn: async () => {
           this.camera.zoomIn++
         },
-        animatedUnzoom: async () => {
+        zoomOut: async () => {
           this.camera.zoomOut++
         },
-        animatedReset: async () => {
+        reset: async () => {
           this.camera.reset++
         },
         animate: async (target: unknown) => {

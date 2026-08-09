@@ -177,7 +177,7 @@ describe('SigmaGraph 出口兼容', () => {
     expect(state.calls[1]!.options.styles).toMatchObject({ nodes: { color: '#222' } })
   })
 
-  it('绑定 sigma 的全部 52 个事件', async () => {
+  it('绑定 sigma 的全部 53 个事件', async () => {
     await mountGraph()
 
     expect(state.events).toContain('clickNode')
@@ -185,7 +185,8 @@ describe('SigmaGraph 出口兼容', () => {
     expect(state.events).toContain('afterRender')
     expect(state.events).toContain('clickNodeLabel')
     expect(state.events).toContain('nodeDragStart')
-    expect(state.events).toHaveLength(52)
+    expect(state.events).toContain('afterTexturesUpload')
+    expect(state.events).toHaveLength(53)
   })
 
   it('settings 变化后经 setSettings 同步，仍不做键过滤', async () => {

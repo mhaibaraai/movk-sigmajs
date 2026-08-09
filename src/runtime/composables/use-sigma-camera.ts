@@ -119,17 +119,17 @@ export function useSigmaCamera(): UseSigmaCameraReturn {
   return {
     async zoomIn(options) {
       const instance = await whenReady()
-      await instance.getCamera().animatedZoom(options)
+      await instance.getCamera().zoomIn(options)
     },
 
     async zoomOut(options) {
       const instance = await whenReady()
-      await instance.getCamera().animatedUnzoom(options)
+      await instance.getCamera().zoomOut(options)
     },
 
     async reset(options) {
       const instance = await whenReady()
-      await instance.getCamera().animatedReset(options)
+      await instance.getCamera().reset(options)
     },
 
     async goto(state, options) {

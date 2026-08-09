@@ -132,6 +132,8 @@ const SIGMA_EVENT_FLAGS: Record<SigmaEventType, true> = {
   afterProcess: true,
   beforeRender: true,
   afterRender: true,
+  // 纹理上传完毕，供外部 GPU 数据写入方接管（如 @sigma/layout-fa2-gpu）
+  afterTexturesUpload: true,
   resize: true,
   kill: true,
   moveBody: true,
