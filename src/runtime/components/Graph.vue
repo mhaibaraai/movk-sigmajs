@@ -256,8 +256,16 @@ const dispatchNodeReducer: NodeReducer = (key, data, attributes, state, graphSta
 const dispatchEdgeReducer: EdgeReducer = (key, data, attributes, state, graphState, instanceGraph) =>
   composedEdge?.(key, data, attributes, state, graphState, instanceGraph) ?? data
 
+/*
+ * 刷新前先取一次图级状态：`setNodeState` 系列只把标志位标脏，`hasHighlighted` 等要
+ * 等下一次 flush 才重算，而 `refresh()` 内部把未 flush 的 graphState 直接喂给归约。
+ * 状态刚写完就刷新时（悬浮解除是典型场景），归约会拿旧标志算出淡出态，`processNodes`
+ * 再把它烘进 labelGrid，之后的状态刷新只改样式不重建栅格，标签就再也回不来。
+ * `getGraphState()` 会先 flush，读一下即可让归约与条目状态对齐。
+ */
 function refreshReducers() {
   composeReducers()
+  sigma.value?.getGraphState()
   sigma.value?.refresh()
 }
 

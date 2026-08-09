@@ -67,6 +67,10 @@ vi.mock('sigma', () => {
     kill() {}
     setGraph() {}
     refresh() {}
+    getGraphState() {
+      return { hasHighlighted: false, hasHovered: false, isIdle: true }
+    }
+
     setSettings(next: Record<string, unknown>) {
       this.settings = next
     }
