@@ -13,7 +13,12 @@ type SigmaOptions = {
 }
 
 const state = vi.hoisted(() => ({
-  instances: [] as Array<{ options: Record<string, unknown>, settings: Record<string, unknown>, refreshes: number }>
+  instances: [] as Array<{
+    options: Record<string, unknown>
+    settings: Record<string, unknown>
+    refreshes: number
+    calls: string[]
+  }>
 }))
 
 vi.mock('sigma', () => {
@@ -21,6 +26,8 @@ vi.mock('sigma', () => {
     options: Record<string, unknown>
     settings: Record<string, unknown>
     refreshes = 0
+    /** 记录调用次序：图级状态必须在归约刷新之前被 flush */
+    calls: string[] = []
     constructor(_graph: unknown, _container: unknown, options: { settings: Record<string, unknown> }) {
       this.options = options
       this.settings = options.settings
@@ -34,6 +41,12 @@ vi.mock('sigma', () => {
     setGraph() {}
     refresh() {
       this.refreshes++
+      this.calls.push('refresh')
+    }
+
+    getGraphState() {
+      this.calls.push('getGraphState')
+      return { hasHighlighted: false, hasHovered: false, isIdle: true }
     }
 
     setSettings(next: Record<string, unknown>) {
@@ -166,6 +179,28 @@ describe('reducer 链', () => {
   it('注册与注销都会触发重绘', async () => {
     await mountWithReducers([() => useSigmaReducer({ node: (_key, data) => data })])
     expect(state.instances[0]!.refreshes).toBeGreaterThan(0)
+  })
+
+  /*
+   * 条目状态刚变更时 sigma 的图级标志还是脏的，`refresh()` 内部读的就是那份旧值。
+   * 归约会据此把非高亮项算成淡出态并被写进标签栅格，而随后的状态刷新不重建栅格，
+   * 标签就永久消失。刷新前读一次 `getGraphState()` 触发 flush 是这条链路的前提
+   */
+  it('每次归约刷新前都先 flush 图级状态', async () => {
+    let refresh!: () => void
+
+    await mountWithReducers([
+      () => {
+        refresh = useSigmaReducer({ node: (_key, data) => data }).refresh
+      }
+    ])
+
+    const instance = state.instances[0]!
+    instance.calls.length = 0
+
+    refresh()
+
+    expect(instance.calls).toEqual(['getGraphState', 'refresh'])
   })
 })
 
