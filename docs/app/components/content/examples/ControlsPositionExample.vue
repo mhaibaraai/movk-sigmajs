@@ -1,6 +1,12 @@
 <script setup lang="ts">
-// 控件容器负责四角停靠与排布方向，停靠信息落到 data-position / data-direction 上由 CSS 消费。
-// 插槽内容走正常文档流，容器替使用方做了绝对定位这件事
+// 八个停靠位：四角加四条边的中点，语序固定为「纵向-横向」
+// 停靠信息落到 data-position 上由 CSS 消费，插槽内容走正常文档流
+const positions = [
+  'top-left', 'top-center', 'top-right',
+  'middle-left', 'middle-right',
+  'bottom-left', 'bottom-center', 'bottom-right'
+] as const
+
 const data = {
   attributes: {},
   options: { type: 'mixed' as const, multi: false, allowSelfLoops: true },
@@ -18,20 +24,10 @@ const data = {
 
 <template>
   <SigmaGraph :data="data">
-    <SigmaControls position="top-left" direction="horizontal">
-      <SigmaZoomControl :reset="false" />
-    </SigmaControls>
-
-    <SigmaControls position="top-right">
-      <SigmaZoomControl />
-    </SigmaControls>
-
-    <SigmaControls position="bottom-left" direction="horizontal">
-      <SigmaFullscreenControl />
-    </SigmaControls>
-
-    <SigmaControls position="bottom-right">
-      <SigmaFullscreenControl />
+    <SigmaControls v-for="position in positions" :key="position" :position="position">
+      <div class="sigma-control-group" style="padding: 4px 8px">
+        {{ position }}
+      </div>
     </SigmaControls>
   </SigmaGraph>
 </template>
