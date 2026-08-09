@@ -36,7 +36,7 @@ function onReady(instance: Sigma) {
   graph.setNodeAttribute('x', 'size', 20)
 
   // 原生相机 API
-  instance.getCamera().animatedReset({ duration: 300 })
+  instance.getCamera().reset({ duration: 300 })
 }
 </script>
 
