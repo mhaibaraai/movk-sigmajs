@@ -9,7 +9,7 @@ async function callNative() {
   const instance = await whenReady()
 
   // 原生相机 API
-  instance.getCamera().animatedReset({ duration: 400 })
+  instance.getCamera().reset({ duration: 400 })
 
   // 原生 graphology mutation，sigma 自动重绘。
   // 面板与外壳传什么数据是解耦的，节点 id 从图里现取，不写死

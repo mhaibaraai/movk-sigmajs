@@ -14,7 +14,7 @@ const ids = useSigmaIds()
 const order = computed(() => context.value?.graph.value.order ?? 0)
 
 function zoomFromOutside() {
-  context.value?.sigma.value?.getCamera().animatedZoom({ duration: 300 })
+  context.value?.sigma.value?.getCamera().zoomIn({ duration: 300 })
 }
 
 function paintFromOutside() {
