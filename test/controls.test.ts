@@ -127,6 +127,26 @@ describe('SigmaControls', () => {
     expect(el.attributes('data-position')).toBe('bottom-right')
     expect(el.attributes('data-direction')).toBe('vertical')
   })
+
+  const positions = [
+    'top-left', 'top-center', 'top-right',
+    'middle-left', 'middle-right',
+    'bottom-left', 'bottom-center', 'bottom-right'
+  ] as const
+
+  it.each(positions)('停靠位 %s 原样落到 data-position', async (position) => {
+    const { wrapper } = await mountControl(() => h(SigmaControls, { position }, () => 'x'))
+
+    expect(wrapper.find('.sigma-controls').attributes('data-position')).toBe(position)
+  })
+
+  const directions = ['vertical', 'vertical-reverse', 'horizontal', 'horizontal-reverse'] as const
+
+  it.each(directions)('排布方向 %s 原样落到 data-direction', async (direction) => {
+    const { wrapper } = await mountControl(() => h(SigmaControls, { direction }, () => 'x'))
+
+    expect(wrapper.find('.sigma-controls').attributes('data-direction')).toBe(direction)
+  })
 })
 
 describe('SigmaZoomControl', () => {
