@@ -140,7 +140,7 @@ const programs = {
 | `SigmaTooltip` | 悬浮或点击触发的提示层，支持节点与边 |
 | `SigmaPopover` | 常驻浮层，`v-model:open` 控制显隐 |
 | `SigmaContextMenu` | 右键菜单 |
-| `SigmaControls` | 控件容器，四角停靠与横竖排布 |
+| `SigmaControls` | 控件容器，八向停靠与横竖正反排布 |
 | `SigmaZoomControl` | 缩放与复位 |
 | `SigmaFullscreenControl` | 全屏切换 |
 | `SigmaSearchControl` | 节点搜索与定位 |

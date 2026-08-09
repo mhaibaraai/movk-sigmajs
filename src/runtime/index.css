@@ -108,7 +108,7 @@
   white-space: normal;
 }
 
-/* 控件容器：按停靠角绝对定位。插槽内容走正常流，必须自行定位，容器替使用方做了这件事 */
+/* 控件容器：按停靠位绝对定位。插槽内容走正常流，必须自行定位，容器替使用方做了这件事 */
 .sigma-controls {
   position: absolute;
   z-index: var(--sigma-control-z);
@@ -126,11 +126,23 @@
   flex-direction: column;
 }
 
-:where(.sigma-controls[data-direction="vertical"][data-position$="right"]) {
+:where(.sigma-controls[data-direction="vertical-reverse"]) {
+  flex-direction: column-reverse;
+}
+
+:where(.sigma-controls[data-direction="horizontal-reverse"]) {
+  flex-direction: row-reverse;
+}
+
+:where(.sigma-controls[data-direction^="vertical"][data-position$="center"]) {
+  align-items: center;
+}
+
+:where(.sigma-controls[data-direction^="vertical"][data-position$="right"]) {
   align-items: flex-end;
 }
 
-:where(.sigma-controls[data-direction="horizontal"]) {
+:where(.sigma-controls[data-direction^="horizontal"]) {
   align-items: center;
 }
 
@@ -148,6 +160,17 @@
 
 :where(.sigma-controls[data-position$="right"]) {
   right: var(--sigma-control-inset);
+}
+
+/* 居中轴由 50% 加位移接管，inset 只作用于另一条轴 */
+:where(.sigma-controls[data-position^="middle"]) {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+:where(.sigma-controls[data-position$="center"]) {
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .sigma-control-group {
