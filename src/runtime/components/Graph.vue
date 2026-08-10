@@ -188,6 +188,8 @@ const emit = defineEmits<{
   'beforeRender': []
   /** 每帧绘制后 */
   'afterRender': []
+  /** 每帧纹理上传完成后 */
+  'afterTexturesUpload': []
   /** 容器尺寸变化、画布已重新适配 */
   'resize': []
   /** 实例被销毁 */
