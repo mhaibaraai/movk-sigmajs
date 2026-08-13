@@ -26,7 +26,7 @@
     "graphology-layout-noverlap": "^0.4.2",
     "graphology-metrics": "^2.4.0",
     "nuxt": "^4.5.2",
-    "sigma": "4.0.0-beta.0",
+    "sigma": "4.0.0-beta.1",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {

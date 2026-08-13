@@ -20,4 +20,4 @@ allowBuilds:
   vue-demi: false
 
 patchedDependencies:
-  sigma@4.0.0-beta.0: patches/sigma@4.0.0-beta.0.patch
+  sigma@4.0.0-beta.1: patches/sigma@4.0.0-beta.1.patch
