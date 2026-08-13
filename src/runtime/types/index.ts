@@ -44,6 +44,18 @@ export interface SigmaReducerEntry {
   order?: number
 }
 
+/**
+ * 判断某节点/边当前是否应被视为「过滤隐藏」，用于拦截交互与覆盖层渲染。
+ *
+ * 与 `SigmaReducerEntry` 分离：归约链决定「画成什么样」，这份登记表单独回答
+ * 「点击/悬浮/DOM 覆盖层要不要理会它」——两者判断口径必须一致，但不是同一件事，
+ * 归约器可以纯函数地在每帧重算，而交互层需要一个随时可查、不依赖渲染时机的谓词
+ */
+export interface SigmaVisibilityGuard {
+  isNodeHidden?: (key: string) => boolean
+  isEdgeHidden?: (key: string) => boolean
+}
+
 /** 内置布局算法名 */
 export type SigmaLayoutName = 'forceatlas2' | 'noverlap' | 'circular' | 'circlepack' | 'random'
 
@@ -74,6 +86,15 @@ export interface SigmaContext {
   registerReducer: (entry: SigmaReducerEntry) => () => void
   /** 让 sigma 重跑归约并重绘 */
   refreshReducers: () => void
+  /**
+   * 登记一个「是否被过滤隐藏」的查询函数，返回注销函数。
+   * 由 `useSigmaFilter()` 调用，支持多个过滤源同时生效
+   */
+  registerVisibilityGuard: (guard: SigmaVisibilityGuard) => () => void
+  /** 综合已登记的 guard，判断该节点当前是否应视为被过滤隐藏 */
+  isNodeFilteredOut: (key: string) => boolean
+  /** 综合已登记的 guard，判断该边当前是否应视为被过滤隐藏 */
+  isEdgeFilteredOut: (key: string) => boolean
 }
 
 export const SIGMA_CONTEXT_KEY: InjectionKey<SigmaContext> = Symbol('movk-sigma')
