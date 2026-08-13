@@ -18,7 +18,7 @@
     "graphology-layout-forceatlas2": "^0.10.1",
     "graphology-layout-noverlap": "^0.4.2",
     "graphology-metrics": "^2.4.0",
-    "nuxt": "^4.5.1",
+    "nuxt": "^4.5.2",
     "sigma": "4.0.0-alpha.7"
   },
   "devDependencies": {
