@@ -62,7 +62,8 @@
   "style": "./dist/runtime/index.css",
   "main": "./dist/module.mjs",
   "files": [
-    "dist"
+    "dist",
+    "patches"
   ],
   "scripts": {
     "prepack": "nuxt-module-build build",
