@@ -46,11 +46,11 @@ export default defineNuxtConfig({
 
 `sigma` 与 `@sigma/*` 在模块顶层就读 `WebGL2RenderingContext`，静态 import 会让 SSR 直接报错。库内一律动态导入，**使用方也不要静态 import 它们**——渲染程序用 `defineSigmaProgram()` 声明延迟加载，见下方 `programs` 用法。
 
-### sigma v4-beta 已知渲染缺陷
+### 隐藏元素必须接入 sigma patch
 
-sigma v4-beta 把「隐藏元素」处理成整个顶点缓冲清零，但 v4 的几何/颜色已经搬进纹理，清零后节点/边会错读到纹理里第 0 号元素的数据，渲染成它的复制品；边还有第二处独立缺陷，隐藏边会让后续可见边的 dash/gap/曲率行号错位。库自己的 `useSigmaFilter` 已经改用不触发这两处缺陷的实现，不受影响，详见其文档的「只动视图层」一节。
+sigma v4-beta 把「隐藏元素」处理成整个顶点缓冲清零，但 v4 的几何/颜色已经搬进纹理、缓冲里只剩纹理行号，清零后行号读回 `0`——而索引 0 是一个真实存在的元素，于是每个被隐藏的节点/边都被画成它的完整副本、并顶掉它的拾取 ID；边还有第二处独立缺陷，隐藏边会让后续可见边的 dash/gap/曲率行号错位。
 
-只有当你的代码**脱离 `useSigmaFilter`**、自己产出 `visibility: 'hidden'`（最典型的是 `useSigmaState` 配合 `whenState: 'isHidden'`，详见其文档）时才会踩到——这种情况下，本仓库随包发布了修复这两处缺陷的 `patches/sigma@4.0.0-beta.0.patch`（安装后位于 `node_modules/@movk/sigma/patches/`），复制到自己项目的 `patches/` 目录下，用 [`pnpm patch`](https://pnpm.io/cli/patch) 接上：
+**凡是会产出 `visibility: 'hidden'` 的路径都会踩到**，包括 `useSigmaFilter`（以及内部复用它的 `SigmaLegend`）、以及 `useSigmaState` 配合 `whenState: 'isHidden'`。症状是 payload 里第一个节点渲染异常且无法交互、实线关系被画成虚线。本仓库随包发布了修复这两处缺陷的 `patches/sigma@4.0.0-beta.0.patch`（安装后位于 `node_modules/@movk/sigma/patches/`），**用到过滤或隐藏功能就必须接入**：复制到自己项目的 `patches/` 目录下，用 [`pnpm patch`](https://pnpm.io/cli/patch) 接上：
 
 ```yaml
 # pnpm-workspace.yaml
