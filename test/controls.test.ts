@@ -417,16 +417,14 @@ describe('SigmaLegend', () => {
     expect(wrapper.find('.sigma-legend-item').text()).toContain('未分类')
   })
 
-  it('点击条目切换该组显隐并落到 reducer 的 opacity', async () => {
+  it('点击条目切换该组显隐并落到 reducer 的 visibility', async () => {
     const { wrapper, instance } = await mountControl(() => h(SigmaLegend, { field: 'type' }))
 
     await wrapper.findAll('.sigma-legend-item')[0]!.trigger('click')
 
-    // SigmaLegend 内部直接复用 useSigmaFilter，隐藏靠透明化表达而非 visibility，
-    // 见 use-sigma-filter.ts 顶部注释
-    const reducer = instance.options.nodeReducer as (...args: unknown[]) => { opacity?: number }
-    expect(reducer('a', {}, {}, {}, {}, {}).opacity).toBe(0)
-    expect(reducer('c', {}, {}, {}, {}, {}).opacity).toBeUndefined()
+    const reducer = instance.options.nodeReducer as (...args: unknown[]) => { visibility?: string }
+    expect(reducer('a', {}, {}, {}, {}, {}).visibility).toBe('hidden')
+    expect(reducer('c', {}, {}, {}, {}, {}).visibility).toBeUndefined()
     expect(wrapper.findAll('.sigma-legend-item')[0]!.attributes('aria-pressed')).toBe('false')
   })
 
@@ -438,9 +436,9 @@ describe('SigmaLegend', () => {
     await item.trigger('click')
 
     // 过滤归约常驻链上，清空后不再隐藏任何节点
-    const reducer = instance.options.nodeReducer as (...args: unknown[]) => { opacity?: number }
-    expect(reducer('a', {}, {}, {}, {}, {}).opacity).toBeUndefined()
-    expect(reducer('c', {}, {}, {}, {}, {}).opacity).toBeUndefined()
+    const reducer = instance.options.nodeReducer as (...args: unknown[]) => { visibility?: string }
+    expect(reducer('a', {}, {}, {}, {}, {}).visibility).toBeUndefined()
+    expect(reducer('c', {}, {}, {}, {}, {}).visibility).toBeUndefined()
     expect(item.attributes('aria-pressed')).toBe('true')
   })
 

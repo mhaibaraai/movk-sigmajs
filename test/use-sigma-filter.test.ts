@@ -102,7 +102,7 @@ describe('useSigmaFilter', () => {
     const { api, nodeReducer } = await mountFilter()
 
     expect(api.hiddenCount.value).toBe(0)
-    expect(nodeReducer()('drop', { size: 1 })).not.toMatchObject({ opacity: 0 })
+    expect(nodeReducer()('drop', { size: 1 })).not.toMatchObject({ visibility: 'hidden' })
   })
 
   it('节点谓词返回 false 的被隐藏', async () => {
@@ -111,20 +111,9 @@ describe('useSigmaFilter', () => {
     api.nodeFilter.value = (_key, attributes) => attributes.group === 'a'
     await nextTick()
 
-    expect(nodeReducer()('keep', {})).not.toMatchObject({ opacity: 0 })
-    expect(nodeReducer()('drop', {})).toMatchObject({ color: 'transparent', opacity: 0, labelVisibility: 'hidden' })
+    expect(nodeReducer()('keep', {})).not.toMatchObject({ visibility: 'hidden' })
+    expect(nodeReducer()('drop', {})).toMatchObject({ visibility: 'hidden' })
     expect(api.hiddenCount.value).toBe(1)
-  })
-
-  it('隐藏节点不产出 visibility 字段', async () => {
-    // sigma v4-beta 的 GPU index-0 碰撞缺陷靠 visibility:'hidden' 触发，见
-    // use-sigma-filter.ts 顶部注释；这条断言防止将来有人手滑改回去
-    const { api, nodeReducer } = await mountFilter()
-
-    api.nodeFilter.value = () => false
-    await nextTick()
-
-    expect(nodeReducer()('drop', {})).not.toHaveProperty('visibility')
   })
 
   it('only 只保留给定节点', async () => {
@@ -133,8 +122,8 @@ describe('useSigmaFilter', () => {
     api.only(['keep'])
     await nextTick()
 
-    expect(nodeReducer()('keep', {})).not.toMatchObject({ opacity: 0 })
-    expect(nodeReducer()('other', {})).toMatchObject({ color: 'transparent', opacity: 0, labelVisibility: 'hidden' })
+    expect(nodeReducer()('keep', {})).not.toMatchObject({ visibility: 'hidden' })
+    expect(nodeReducer()('other', {})).toMatchObject({ visibility: 'hidden' })
     expect(api.hiddenCount.value).toBe(2)
   })
 
@@ -144,8 +133,8 @@ describe('useSigmaFilter', () => {
     api.only(['keep', 'other'])
     await nextTick()
 
-    expect(edgeReducer()(graph.edge('keep', 'other')!, {})).not.toMatchObject({ opacity: 0 })
-    expect(edgeReducer()(graph.edge('keep', 'drop')!, {})).toMatchObject({ color: 'transparent', opacity: 0, labelVisibility: 'hidden' })
+    expect(edgeReducer()(graph.edge('keep', 'other')!, {})).not.toMatchObject({ visibility: 'hidden' })
+    expect(edgeReducer()(graph.edge('keep', 'drop')!, {})).toMatchObject({ visibility: 'hidden' })
   })
 
   it('hideDanglingEdges 关闭后边不随端点隐藏', async () => {
@@ -154,7 +143,7 @@ describe('useSigmaFilter', () => {
     api.only(['keep'])
     await nextTick()
 
-    expect(edgeReducer()(graph.edge('keep', 'drop')!, {})).not.toMatchObject({ opacity: 0 })
+    expect(edgeReducer()(graph.edge('keep', 'drop')!, {})).not.toMatchObject({ visibility: 'hidden' })
   })
 
   it('边谓词独立生效', async () => {
@@ -163,8 +152,8 @@ describe('useSigmaFilter', () => {
     api.edgeFilter.value = (_key, attributes) => attributes.kind === 'x'
     await nextTick()
 
-    expect(edgeReducer()(graph.edge('keep', 'other')!, {})).not.toMatchObject({ opacity: 0 })
-    expect(edgeReducer()(graph.edge('keep', 'drop')!, {})).toMatchObject({ color: 'transparent', opacity: 0, labelVisibility: 'hidden' })
+    expect(edgeReducer()(graph.edge('keep', 'other')!, {})).not.toMatchObject({ visibility: 'hidden' })
+    expect(edgeReducer()(graph.edge('keep', 'drop')!, {})).toMatchObject({ visibility: 'hidden' })
   })
 
   it('reset 清空全部过滤', async () => {
@@ -176,7 +165,7 @@ describe('useSigmaFilter', () => {
     await nextTick()
 
     expect(api.hiddenCount.value).toBe(0)
-    expect(nodeReducer()('drop', {})).not.toMatchObject({ opacity: 0 })
+    expect(nodeReducer()('drop', {})).not.toMatchObject({ visibility: 'hidden' })
   })
 
   it('过滤只作用于视图，不改动图数据', async () => {

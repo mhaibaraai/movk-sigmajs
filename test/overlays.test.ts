@@ -1,14 +1,13 @@
 import Graph from 'graphology'
 import { enableAutoUnmount, mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { defineComponent, h, nextTick } from 'vue'
+import type { defineComponent } from 'vue'
+import { h, nextTick } from 'vue'
 import SigmaGraph from '../src/runtime/components/Graph.vue'
 import SigmaOverlay from '../src/runtime/components/Overlay.vue'
 import SigmaTooltip from '../src/runtime/components/Tooltip.vue'
 import SigmaPopover from '../src/runtime/components/Popover.vue'
 import SigmaContextMenu from '../src/runtime/components/ContextMenu.vue'
-import { useSigmaFilter } from '../src/runtime/composables/use-sigma-filter'
-import type { UseSigmaFilterReturn } from '../src/runtime/composables/use-sigma-filter'
 
 const state = vi.hoisted(() => ({
   instances: [] as Array<{
@@ -161,22 +160,13 @@ describe('SigmaOverlay', () => {
     expect(instance.framedCalls).toBeGreaterThan(before)
   })
 
-  it('节点被 useSigmaFilter 过滤后覆盖层跟着隐藏', async () => {
-    // useSigmaFilter 的过滤态节点靠透明化表达隐藏（见 use-sigma-filter.ts 顶部注释），
-    // 不会让 display.visibility 变化，SigmaOverlay 必须单独查 isNodeFilteredOut
-    let filterApi!: UseSigmaFilterReturn
-    const { wrapper, instance } = await mountInGraph(defineComponent({
-      setup() {
-        filterApi = useSigmaFilter()
-        return () => h(SigmaOverlay, { node: 'a' }, () => '内容')
-      }
-    }))
+  it('节点转为 visibility hidden 后覆盖层跟着隐藏', async () => {
+    const { wrapper, instance } = await mountInGraph(() => h(SigmaOverlay, { node: 'a' }, () => '内容'))
     await nextTick()
 
     expect(wrapper.find('.sigma-overlay').attributes('style')).not.toContain('display: none')
 
-    filterApi.only(['b'])
-    await nextTick()
+    instance.hiddenNodes.add('a')
     instance.handlers.afterRender?.(undefined)
     await nextTick()
 

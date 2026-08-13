@@ -38,7 +38,7 @@ const props = withDefaults(defineProps<{
  * 全程使用 framed 坐标：`getNodeDisplayData` 返回的是它，相机的 x / y 也是它，
  * 于是画点、画视口框、点击回写三者同在一个坐标系里，不必来回转换。
  */
-const { sigma, isNodeFilteredOut } = useSigma()
+const { sigma } = useSigma()
 const canvasRef = useTemplateRef<HTMLCanvasElement>('canvas')
 const rootRef = useTemplateRef<HTMLDivElement>('root')
 
@@ -67,8 +67,7 @@ function computeExtent(): Extent | null {
 
   instance.getGraph().forEachNode((key) => {
     const display = instance.getNodeDisplayData(key)
-    // 同 draw() 里的过滤检查，见下方注释
-    if (!display || display.visibility === 'hidden' || isNodeFilteredOut(key)) {
+    if (!display || display.visibility === 'hidden') {
       return
     }
     found = true
@@ -145,9 +144,7 @@ function draw() {
   context.fillStyle = nodeColor
   instance.getGraph().forEachNode((key) => {
     const display = instance.getNodeDisplayData(key)
-    // useSigmaFilter 的过滤态节点靠透明化表达隐藏，不会让 visibility 变化，
-    // 必须单独查 isNodeFilteredOut，否则过滤后节点会继续画进缩略图
-    if (!display || display.visibility === 'hidden' || isNodeFilteredOut(key)) {
+    if (!display || display.visibility === 'hidden') {
       return
     }
     const point = project(display, box, width, height)

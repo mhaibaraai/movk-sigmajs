@@ -26,7 +26,7 @@ import type {
 } from 'sigma/types'
 import { registerSigma } from '../composables/use-sigma'
 import { SIGMA_CONTEXT_KEY, SIGMA_EVENTS } from '../types'
-import type { SigmaContext, SigmaPrimitivesSource, SigmaReducer, SigmaReducerEntry, SigmaVisibilityGuard } from '../types'
+import type { SigmaContext, SigmaPrimitivesSource, SigmaReducer, SigmaReducerEntry } from '../types'
 import { applyGraphDiff } from '../utils/apply-graph-diff'
 import type { ApplyGraphDiffOptions } from '../utils/apply-graph-diff'
 import { chainReducers } from '../utils/chain-reducers'
@@ -284,37 +284,13 @@ function registerReducer(entry: SigmaReducerEntry): () => void {
   }
 }
 
-const visibilityGuards: SigmaVisibilityGuard[] = []
-
-function registerVisibilityGuard(guard: SigmaVisibilityGuard): () => void {
-  visibilityGuards.push(guard)
-
-  return () => {
-    const index = visibilityGuards.indexOf(guard)
-    if (index !== -1) {
-      visibilityGuards.splice(index, 1)
-    }
-  }
-}
-
-function isNodeFilteredOut(key: string): boolean {
-  return visibilityGuards.some(guard => guard.isNodeHidden?.(key) === true)
-}
-
-function isEdgeFilteredOut(key: string): boolean {
-  return visibilityGuards.some(guard => guard.isEdgeHidden?.(key) === true)
-}
-
 const context: SigmaContext = {
   sigma,
   graph,
   isReady: readonly(isReady),
   whenReady: () => (sigma.value ? Promise.resolve(sigma.value) : readyPromise),
   registerReducer,
-  refreshReducers,
-  registerVisibilityGuard,
-  isNodeFilteredOut,
-  isEdgeFilteredOut
+  refreshReducers
 }
 
 provide(SIGMA_CONTEXT_KEY, context)
