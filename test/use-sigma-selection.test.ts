@@ -3,6 +3,8 @@ import { enableAutoUnmount, mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent, h, nextTick } from 'vue'
 import SigmaGraph from '../src/runtime/components/Graph.vue'
+import { useSigmaFilter } from '../src/runtime/composables/use-sigma-filter'
+import type { UseSigmaFilterReturn } from '../src/runtime/composables/use-sigma-filter'
 import { useSigmaSelection } from '../src/runtime/composables/use-sigma-selection'
 import type { UseSigmaSelectionOptions, UseSigmaSelectionReturn } from '../src/runtime/composables/use-sigma-selection'
 
@@ -142,6 +144,57 @@ async function mountSelection(options: UseSigmaSelectionOptions = {}) {
   }
 }
 
+/**
+ * 同一子树内同时挂 useSigmaFilter() 与 useSigmaSelection()，验证两者经共享的
+ * SigmaContext（registerVisibilityGuard/isNodeFilteredOut）联动——这是过滤态节点
+ * 点不中、淡出归约不会把它们重新点亮的唯一保障，见 use-sigma-filter.ts 顶部注释
+ */
+async function mountFilteredSelection(options: UseSigmaSelectionOptions = {}) {
+  let filterApi!: UseSigmaFilterReturn
+  let selectionApi!: UseSigmaSelectionReturn
+
+  const Child = defineComponent({
+    setup() {
+      filterApi = useSigmaFilter()
+      selectionApi = useSigmaSelection(options)
+      return () => h('span')
+    }
+  })
+
+  const graph = seededGraph()
+  const wrapper = mount(SigmaGraph, {
+    props: { graph } as never,
+    slots: { default: () => h(Child) }
+  })
+
+  await vi.waitFor(() => {
+    if (!wrapper.vm.sigma) {
+      throw new Error('sigma 尚未就绪')
+    }
+  })
+
+  const instance = state.instances[0]!
+
+  function runNode(key: string, data: Record<string, unknown> = {}) {
+    const reducer = instance.options.nodeReducer as Reducer
+    return reducer(key, data, {}, instance.nodeStates.get(key) ?? {}, instance.getGraphState(), graph)
+  }
+
+  async function select(key: string | null) {
+    selectionApi.select(key)
+    await nextTick()
+  }
+
+  return {
+    filterApi,
+    selectionApi,
+    graph,
+    select,
+    runNode,
+    emit: (event: string, payload: unknown) => instance.handlers[event]?.(payload)
+  }
+}
+
 enableAutoUnmount(afterEach)
 
 beforeEach(() => {
@@ -275,5 +328,34 @@ describe('useSigmaSelection', () => {
 
     expect(api.hovered.value).toBeNull()
     expect(api.selected.value).toBeNull()
+  })
+})
+
+describe('useSigmaSelection + useSigmaFilter 联动', () => {
+  it('过滤态节点不响应点击与悬浮', async () => {
+    const { filterApi, selectionApi, emit } = await mountFilteredSelection()
+
+    filterApi.only(['a'])
+    await nextTick()
+
+    emit('clickNode', { node: 'b' })
+    expect(selectionApi.selected.value).toBeNull()
+
+    emit('enterNode', { node: 'b' })
+    expect(selectionApi.hovered.value).toBeNull()
+  })
+
+  it('高亮其他节点时不会把已过滤节点重新点亮', async () => {
+    const { filterApi, select, runNode } = await mountFilteredSelection({ dimColor: '#eee' })
+
+    // far 与 a 不相邻（a-b-far），正常情况下选中 a 会把它淡出（下面这条既有用例
+    // 已覆盖：'有焦点时无关节点被淡出且隐藏标签'）；这里额外把它过滤掉，验证过滤态
+    // 优先于淡出——不然淡出归约会把它的 color 改写成不透明的 dimColor，
+    // 等于把已过滤节点重新画出来，见 use-sigma-filter.ts 顶部注释
+    filterApi.only(['a', 'b'])
+    await nextTick()
+    await select('a')
+
+    expect(runNode('far', { label: 'FAR' })).toMatchObject({ color: 'transparent', opacity: 0 })
   })
 })

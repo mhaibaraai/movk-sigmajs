@@ -46,6 +46,20 @@ export default defineNuxtConfig({
 
 `sigma` 与 `@sigma/*` 在模块顶层就读 `WebGL2RenderingContext`，静态 import 会让 SSR 直接报错。库内一律动态导入，**使用方也不要静态 import 它们**——渲染程序用 `defineSigmaProgram()` 声明延迟加载，见下方 `programs` 用法。
 
+### sigma v4-beta 已知渲染缺陷
+
+sigma v4-beta 把「隐藏元素」处理成整个顶点缓冲清零，但 v4 的几何/颜色已经搬进纹理，清零后节点/边会错读到纹理里第 0 号元素的数据，渲染成它的复制品；边还有第二处独立缺陷，隐藏边会让后续可见边的 dash/gap/曲率行号错位。库自己的 `useSigmaFilter` 已经改用不触发这两处缺陷的实现，不受影响，详见其文档的「只动视图层」一节。
+
+只有当你的代码**脱离 `useSigmaFilter`**、自己产出 `visibility: 'hidden'`（最典型的是 `useSigmaState` 配合 `whenState: 'isHidden'`，详见其文档）时才会踩到——这种情况下，本仓库随包发布了修复这两处缺陷的 `patches/sigma@4.0.0-beta.0.patch`（安装后位于 `node_modules/@movk/sigma/patches/`），复制到自己项目的 `patches/` 目录下，用 [`pnpm patch`](https://pnpm.io/cli/patch) 接上：
+
+```yaml
+# pnpm-workspace.yaml
+patchedDependencies:
+  sigma@4.0.0-beta.0: patches/sigma@4.0.0-beta.0.patch
+```
+
+`patchedDependencies` 只在顶层项目生效，没有「依赖包自带 patch、安装它的项目自动应用」这种传播路径，必须复制一份到自己项目里——直接把 `patchedDependencies` 指向 `node_modules/@movk/sigma/patches/...` 不是受支持的用法，依赖安装顺序不保证该文件此时已经落盘。这份 patch 只对 `sigma@4.0.0-beta.0` 的编译产物精确生效，sigma 升级到其他版本后需要以本仓库发布的新版本为准重新同步。
+
 ## 用法
 
 ```vue
