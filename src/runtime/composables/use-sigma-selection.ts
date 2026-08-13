@@ -59,7 +59,7 @@ export interface UseSigmaSelectionReturn {
 export function useSigmaSelection(options: UseSigmaSelectionOptions = {}): UseSigmaSelectionReturn {
   const { hover = true, click = true, dim = true, dimColor = '#d1d5db', order = 100 } = options
 
-  const { graph, isNodeFilteredOut, isEdgeFilteredOut } = useSigma()
+  const { graph } = useSigma()
   const { setNodesState, setEdgesState } = useSigmaState()
 
   const hovered = shallowRef<string | null>(null)
@@ -112,18 +112,14 @@ export function useSigmaSelection(options: UseSigmaSelectionOptions = {}): UseSi
 
   const { refresh } = useSigmaReducer({
     order,
-    // isNodeFilteredOut 检查：过滤态节点靠透明化（非 visibility:'hidden'，见
-    // use-sigma-filter.ts 顶部注释）表达隐藏，而这里的淡出恰好也是靠 color 表达——
-    // 不跳过的话，只要图上有节点被聚焦，这段无条件覆盖 color 的逻辑就会把已过滤
-    // 节点的透明色改写成不透明的 dimColor，等于把它们重新点亮
     node(key, data, attributes, state, graphState) {
-      if (!dim || !graphState.hasHighlighted || state.isHighlighted || isNodeFilteredOut(key)) {
+      if (!dim || !graphState.hasHighlighted || state.isHighlighted) {
         return data as Partial<NodeDisplayData>
       }
       return { ...data, color: dimColor, labelVisibility: 'hidden', zIndex: 0 } as Partial<NodeDisplayData>
     },
     edge(key, data, attributes, state, graphState) {
-      if (!dim || !graphState.hasHighlighted || state.isHighlighted || isEdgeFilteredOut(key)) {
+      if (!dim || !graphState.hasHighlighted || state.isHighlighted) {
         return data as Partial<EdgeDisplayData>
       }
       return { ...data, color: dimColor, labelVisibility: 'hidden', zIndex: 0 } as Partial<EdgeDisplayData>
@@ -137,12 +133,7 @@ export function useSigmaSelection(options: UseSigmaSelectionOptions = {}): UseSi
 
   if (hover) {
     useSigmaEvents({
-      // 过滤态节点仍会写入拾取缓冲（透明化不等于从渲染管线移除，见
-      // use-sigma-filter.ts 顶部注释），这里拦掉才是真正让它「点不中」的地方
       enterNode: ({ node }) => {
-        if (isNodeFilteredOut(node)) {
-          return
-        }
         hovered.value = node
       },
       leaveNode: () => {
@@ -154,9 +145,6 @@ export function useSigmaSelection(options: UseSigmaSelectionOptions = {}): UseSi
   if (click) {
     useSigmaEvents({
       clickNode: ({ node }) => {
-        if (isNodeFilteredOut(node)) {
-          return
-        }
         selected.value = selected.value === node ? null : node
       },
       clickStage: () => {

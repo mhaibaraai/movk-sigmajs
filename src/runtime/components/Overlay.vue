@@ -26,7 +26,7 @@ const props = withDefaults(defineProps<{
   visible: true
 })
 
-const { sigma, isNodeFilteredOut } = useSigma()
+const { sigma } = useSigma()
 const hidden = shallowRef(true)
 const transform = shallowRef('')
 
@@ -42,10 +42,7 @@ function update() {
 
   if (props.node !== undefined) {
     const display = instance.getNodeDisplayData(props.node)
-    // display.visibility === 'hidden' 服务的是 useSigmaState().setNodeState 那条独立
-    // 隐藏路径；useSigmaFilter 的过滤态节点靠透明化表达，不会让 visibility 变化，
-    // 必须单独查 isNodeFilteredOut，否则过滤后覆盖层会继续锚定在原位置显示
-    if (!display || display.visibility === 'hidden' || isNodeFilteredOut(props.node)) {
+    if (!display || display.visibility === 'hidden') {
       hidden.value = true
       return
     }
