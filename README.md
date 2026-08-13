@@ -50,15 +50,15 @@ export default defineNuxtConfig({
 
 sigma v4-beta 把「隐藏元素」处理成整个顶点缓冲清零，但 v4 的几何/颜色已经搬进纹理、缓冲里只剩纹理行号，清零后行号读回 `0`——而索引 0 是一个真实存在的元素，于是每个被隐藏的节点/边都被画成它的完整副本、并顶掉它的拾取 ID；边还有第二处独立缺陷，隐藏边会让后续可见边的 dash/gap/曲率行号错位。
 
-**凡是会产出 `visibility: 'hidden'` 的路径都会踩到**，包括 `useSigmaFilter`（以及内部复用它的 `SigmaLegend`）、以及 `useSigmaState` 配合 `whenState: 'isHidden'`。症状是 payload 里第一个节点渲染异常且无法交互、实线关系被画成虚线。本仓库随包发布了修复这两处缺陷的 `patches/sigma@4.0.0-beta.0.patch`（安装后位于 `node_modules/@movk/sigma/patches/`），**用到过滤或隐藏功能就必须接入**：复制到自己项目的 `patches/` 目录下，用 [`pnpm patch`](https://pnpm.io/cli/patch) 接上：
+**凡是会产出 `visibility: 'hidden'` 的路径都会踩到**，包括 `useSigmaFilter`（以及内部复用它的 `SigmaLegend`）、以及 `useSigmaState` 配合 `whenState: 'isHidden'`。症状是 payload 里第一个节点渲染异常且无法交互、实线关系被画成虚线。本仓库随包发布了修复这两处缺陷的 `patches/sigma@4.0.0-beta.1.patch`（安装后位于 `node_modules/@movk/sigma/patches/`），**用到过滤或隐藏功能就必须接入**：复制到自己项目的 `patches/` 目录下，用 [`pnpm patch`](https://pnpm.io/cli/patch) 接上：
 
 ```yaml
 # pnpm-workspace.yaml
 patchedDependencies:
-  sigma@4.0.0-beta.0: patches/sigma@4.0.0-beta.0.patch
+  sigma@4.0.0-beta.1: patches/sigma@4.0.0-beta.1.patch
 ```
 
-`patchedDependencies` 只在顶层项目生效，没有「依赖包自带 patch、安装它的项目自动应用」这种传播路径，必须复制一份到自己项目里——直接把 `patchedDependencies` 指向 `node_modules/@movk/sigma/patches/...` 不是受支持的用法，依赖安装顺序不保证该文件此时已经落盘。这份 patch 只对 `sigma@4.0.0-beta.0` 的编译产物精确生效，sigma 升级到其他版本后需要以本仓库发布的新版本为准重新同步。
+`patchedDependencies` 只在顶层项目生效，没有「依赖包自带 patch、安装它的项目自动应用」这种传播路径，必须复制一份到自己项目里——直接把 `patchedDependencies` 指向 `node_modules/@movk/sigma/patches/...` 不是受支持的用法，依赖安装顺序不保证该文件此时已经落盘。这份 patch 只对 `sigma@4.0.0-beta.1` 的编译产物精确生效，sigma 升级到其他版本后需要以本仓库发布的新版本为准重新同步。
 
 ## 用法
 
