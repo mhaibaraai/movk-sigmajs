@@ -9,7 +9,7 @@ overrides:
   typescript: ^6.0.3
 
 patchedDependencies:
-  sigma@4.0.0-beta.1: 2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae
+  sigma@4.0.0-beta.1: 3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b
 
 importers:
 
@@ -23,19 +23,19 @@ importers:
         version: 4.5.2(magic-string@1.1.0)(magicast@0.5.4)(oxc-parser@0.142.0)(rolldown@1.2.3)(unplugin@3.3.0(esbuild@0.28.1)(rolldown@1.2.3)(rollup@4.62.2)(vite@8.2.0(@types/node@26.1.1)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.49.0)(yaml@2.9.0)))
       '@sigma/export-image':
         specifier: '>=4.0.0-alpha.3'
-        version: 4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8))
+        version: 4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8))
       '@sigma/node-border':
         specifier: '>=4.0.0-alpha.3'
-        version: 4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8))
+        version: 4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8))
       '@sigma/node-image':
         specifier: '>=4.0.0-alpha.3'
-        version: 4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8))
+        version: 4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8))
       '@sigma/node-piechart':
         specifier: '>=4.0.0-alpha.3'
-        version: 4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8))
+        version: 4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8))
       '@sigma/utils':
         specifier: '>=4.0.0-alpha.2'
-        version: 4.0.0-alpha.2(sigma@4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8))
+        version: 4.0.0-alpha.2(sigma@4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8))
       '@vueuse/core':
         specifier: ^14.4.0
         version: 14.4.0(vue@3.5.41(typescript@6.0.3))
@@ -105,7 +105,7 @@ importers:
         version: 21.0.2(@types/node@26.1.1)(magicast@0.5.4)(supports-color@10.2.2)
       sigma:
         specifier: 4.0.0-beta.1
-        version: 4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8)
+        version: 4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8)
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -138,13 +138,13 @@ importers:
         version: 4.10.0(d519e8fcbfcb05e5895ccc02d435a943)
       '@sigma/export-image':
         specifier: 4.0.0-alpha.3
-        version: 4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8))
+        version: 4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8))
       '@sigma/node-border':
         specifier: 4.0.0-alpha.3
-        version: 4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8))
+        version: 4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8))
       '@sigma/utils':
         specifier: 4.0.0-alpha.2
-        version: 4.0.0-alpha.2(sigma@4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8))
+        version: 4.0.0-alpha.2(sigma@4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8))
       '@vercel/analytics':
         specifier: ^2.0.1
         version: 2.0.1(nuxt@4.5.2(6881c47c671233bd5c13480851d8c90e))(vue@3.5.41(typescript@6.0.3))
@@ -177,7 +177,7 @@ importers:
         version: 4.5.2(6881c47c671233bd5c13480851d8c90e)
       sigma:
         specifier: 4.0.0-beta.1
-        version: 4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8)
+        version: 4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8)
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
@@ -193,13 +193,13 @@ importers:
         version: link:../..
       '@sigma/export-image':
         specifier: 4.0.0-alpha.3
-        version: 4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8))
+        version: 4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8))
       '@sigma/node-border':
         specifier: 4.0.0-alpha.3
-        version: 4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8))
+        version: 4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8))
       '@sigma/utils':
         specifier: 4.0.0-alpha.2
-        version: 4.0.0-alpha.2(sigma@4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8))
+        version: 4.0.0-alpha.2(sigma@4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8))
       graphology:
         specifier: ^0.26.0
         version: 0.26.0(graphology-types@0.24.8)
@@ -223,7 +223,7 @@ importers:
         version: 4.5.2(275b89eb88acd2de7b015eebb6f409ed)
       sigma:
         specifier: 4.0.0-beta.1
-        version: 4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8)
+        version: 4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8)
     devDependencies:
       graphology-types:
         specifier: ^0.24.8
@@ -251,7 +251,7 @@ importers:
         version: 4.5.2(275b89eb88acd2de7b015eebb6f409ed)
       sigma:
         specifier: 4.0.0-beta.1
-        version: 4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8)
+        version: 4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8)
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
@@ -13157,26 +13157,26 @@ snapshots:
 
   '@shikijs/vscode-textmate@10.0.2': {}
 
-  '@sigma/export-image@4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8))':
+  '@sigma/export-image@4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8))':
     dependencies:
       file-saver: 2.0.5
-      sigma: 4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8)
+      sigma: 4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8)
 
-  '@sigma/node-border@4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8))':
+  '@sigma/node-border@4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8))':
     dependencies:
-      sigma: 4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8)
+      sigma: 4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8)
 
-  '@sigma/node-image@4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8))':
+  '@sigma/node-image@4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8))':
     dependencies:
-      sigma: 4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8)
+      sigma: 4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8)
 
-  '@sigma/node-piechart@4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8))':
+  '@sigma/node-piechart@4.0.0-alpha.3(sigma@4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8))':
     dependencies:
-      sigma: 4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8)
+      sigma: 4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8)
 
-  '@sigma/utils@4.0.0-alpha.2(sigma@4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8))':
+  '@sigma/utils@4.0.0-alpha.2(sigma@4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8))':
     dependencies:
-      sigma: 4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8)
+      sigma: 4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8)
 
   '@simple-git/args-pathspec@1.0.3': {}
 
@@ -19556,7 +19556,7 @@ snapshots:
 
   siginfo@2.0.0: {}
 
-  sigma@4.0.0-beta.1(patch_hash=2d6a57333339dab2dd98d716b327002ba5c1fbdb314427f7da3f12fbd04840ae)(graphology-types@0.24.8):
+  sigma@4.0.0-beta.1(patch_hash=3c3d68d04373256f2dd2b8e0c369e9373c9629dc052f1f5bb1057e50483da58b)(graphology-types@0.24.8):
     dependencies:
       events: 3.3.0
       graphology-utils: 2.5.2(graphology-types@0.24.8)

@@ -13,10 +13,10 @@ index 64efccd36fedfa6750f447765f0f2f83e626fea4..eabf3aa2d7ce81f38f58728198a35d6f
 +    // process()), so its a_nodeIndex/a_edgeIndex reads back as 0. If row 0 held
 +    // a real item, every hidden item would render as a copy of it. Reserving
 +    // row 0 as a permanent empty slot makes that read-back harmless instead.
-+    // Verified still present on sigma 4.0.0-beta.1, which is jacomyal/sigma.js
-+    // `v4` branch HEAD as of 2026-08-13: the beta.0 -> beta.1 range only touched
-+    // the captors, settings and autoRescale, never the texture allocation, so
-+    // upgrading sigma is not what fixes this.
++    // Upstream fixed both defects on the `v4` branch (79752e39 and 5ecdf690),
++    // through a HIDDEN_ITEM_INDEX sentinel rather than a reserved row. The
++    // latest published build, 4.0.0-beta.1, predates both, so this patch stands
++    // in until sigma ships them. Drop it then; do not port the sentinel here.
 +    _defineProperty(this, "nextIndex", 1);
      this.gl = gl;
      this.TEXELS_PER_ITEM = texelsPerItem;
@@ -57,10 +57,10 @@ index ca7b81460a15c64bc38dbd73eb6d5fff290735a9..77dac72da73bf3f84d9a7fc89732ef8e
 +    // process()), so its a_nodeIndex/a_edgeIndex reads back as 0. If row 0 held
 +    // a real item, every hidden item would render as a copy of it. Reserving
 +    // row 0 as a permanent empty slot makes that read-back harmless instead.
-+    // Verified still present on sigma 4.0.0-beta.1, which is jacomyal/sigma.js
-+    // `v4` branch HEAD as of 2026-08-13: the beta.0 -> beta.1 range only touched
-+    // the captors, settings and autoRescale, never the texture allocation, so
-+    // upgrading sigma is not what fixes this.
++    // Upstream fixed both defects on the `v4` branch (79752e39 and 5ecdf690),
++    // through a HIDDEN_ITEM_INDEX sentinel rather than a reserved row. The
++    // latest published build, 4.0.0-beta.1, predates both, so this patch stands
++    // in until sigma ships them. Drop it then; do not port the sentinel here.
 +    loop._defineProperty(this, "nextIndex", 1);
      this.gl = gl;
      this.TEXELS_PER_ITEM = texelsPerItem;
@@ -101,10 +101,10 @@ index 2e14c59601eb46b8dfe547fd10b9dd3f4c6c05de..507c6bd439186f0c60d2b7d54019ec5d
 +    // process()), so its a_nodeIndex/a_edgeIndex reads back as 0. If row 0 held
 +    // a real item, every hidden item would render as a copy of it. Reserving
 +    // row 0 as a permanent empty slot makes that read-back harmless instead.
-+    // Verified still present on sigma 4.0.0-beta.1, which is jacomyal/sigma.js
-+    // `v4` branch HEAD as of 2026-08-13: the beta.0 -> beta.1 range only touched
-+    // the captors, settings and autoRescale, never the texture allocation, so
-+    // upgrading sigma is not what fixes this.
++    // Upstream fixed both defects on the `v4` branch (79752e39 and 5ecdf690),
++    // through a HIDDEN_ITEM_INDEX sentinel rather than a reserved row. The
++    // latest published build, 4.0.0-beta.1, predates both, so this patch stands
++    // in until sigma ships them. Drop it then; do not port the sentinel here.
 +    loop._defineProperty(this, "nextIndex", 1);
      this.gl = gl;
      this.TEXELS_PER_ITEM = texelsPerItem;
