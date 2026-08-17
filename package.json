@@ -62,8 +62,7 @@
   "style": "./dist/runtime/index.css",
   "main": "./dist/module.mjs",
   "files": [
-    "dist",
-    "patches"
+    "dist"
   ],
   "scripts": {
     "prepack": "nuxt-module-build build",
@@ -101,7 +100,7 @@
     "graphology-layout-forceatlas2": ">=0.10.0",
     "graphology-layout-noverlap": ">=0.4.0",
     "graphology-metrics": ">=2.0.0",
-    "sigma": ">=4.0.0-beta.0",
+    "sigma": ">=4.0.0-beta.3",
     "vue": ">=3.5.0"
   },
   "peerDependenciesMeta": {
@@ -151,7 +150,7 @@
     "happy-dom": "^20.11.2",
     "nuxt": "^4.5.2",
     "release-it": "^21.0.2",
-    "sigma": "4.0.0-beta.0",
+    "sigma": "4.0.0-beta.3",
     "typescript": "~6.0.3",
     "vitest": "^4.1.10",
     "vue": "^3.5.41",
