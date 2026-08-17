@@ -1,5 +1,55 @@
 # Changelog
 
+## [0.1.3](https://github.com/mhaibaraai/movk-sigmajs/compare/v0.1.2...v0.1.3) (2026-08-17)
+
+### ⚠ BREAKING CHANGES
+
+* **camera:** peer sigma 下界抬到 >=4.0.0-beta.0。alpha 版没有 zoomIn /
+  zoomOut / reset，继续搭 alpha 会让缩放控件在运行时报错。
+
+### Features
+
+* **controls:** 停靠位补到八向，排布方向补上反向 ([ce418fb](https://github.com/mhaibaraai/movk-sigmajs/commit/ce418fb0283d83faec8470fada2f4519d5f20995))
+
+### Bug Fixes
+
+* **camera:** 跟进 sigma 4.0.0-beta.0 的相机 API ([1c7a80d](https://github.com/mhaibaraai/movk-sigmajs/commit/1c7a80d4549716fba0ae2b8026528c047e13722c))
+* **filter:** useSigmaFilter 改用透明化归约，避免 sigma v4-beta 的 GPU 渲染缺陷 ([2ed882e](https://github.com/mhaibaraai/movk-sigmajs/commit/2ed882e8d2b8637e6af385157214cdad6b120716))
+* **graph:** 修复 SigmaGraph afterTexturesUpload Vue 警告 ([8609ca6](https://github.com/mhaibaraai/movk-sigmajs/commit/8609ca60b0ec7cf901699ce8940012ea652e5521))
+* **graph:** 归约刷新前先 flush 图级状态 ([2b267ab](https://github.com/mhaibaraai/movk-sigmajs/commit/2b267abaed2c1740dcaa31f8c3f44dfe6730298b))
+* **sigma:** 随包发布 sigma@4.0.0-beta.0 补丁，作为次要防御 ([4982466](https://github.com/mhaibaraai/movk-sigmajs/commit/4982466a04f47b074321a69e72eef07ecf76c27e))
+
+### Reverts
+
+* **filter:** useSigmaFilter 回归 visibility，撤回透明化归约 ([4a37bda](https://github.com/mhaibaraai/movk-sigmajs/commit/4a37bdaee31b85bb77792119e3a4d504a3a1d1bb))
+
+### Documentation
+
+* AGENTS.md 记录 sigma 版本下限，移除 patch 退出条件 ([52c631f](https://github.com/mhaibaraai/movk-sigmajs/commit/52c631f69d586a8ae215f92d6715a1b3e62b1312))
+* **controls:** 补齐八向停靠与排布方向的说明与示例 ([d7167f4](https://github.com/mhaibaraai/movk-sigmajs/commit/d7167f4fec1849838235ab50eafd8dfb9935c9b2))
+* **filter:** sigma patch 从「次要防御」升为必需前置 ([901ef32](https://github.com/mhaibaraai/movk-sigmajs/commit/901ef3280cd11583f0c0e0dc8cb8666b4a28059b))
+* **filter:** 同步过滤态渲染语义变更到相关文档 ([400a2f8](https://github.com/mhaibaraai/movk-sigmajs/commit/400a2f8dd3a2f0620c4139d40deaf2f5c0b357ca))
+* 同步 sigma patch 版本号至 4.0.0-beta.1 ([b74dab1](https://github.com/mhaibaraai/movk-sigmajs/commit/b74dab1ff44ed7abb800fc77bd380efc86773f2d))
+* 相机 API 更名后同步示例与说明 ([eeef4d9](https://github.com/mhaibaraai/movk-sigmajs/commit/eeef4d9e3a7bcf1d882bf80456a49f6e5c156db4))
+* 移除 sigma patch 接入说明，改为版本下限要求 ([fc9059c](https://github.com/mhaibaraai/movk-sigmajs/commit/fc9059cfb2115eccdf8f1b42cadb82ed20e02c9e))
+* 补上游修复状态与 patch 退出条件 ([dabf665](https://github.com/mhaibaraai/movk-sigmajs/commit/dabf66552e17b040d639702717095a3c846de9f7))
+
+### Tests
+
+* **controls:** 参数化断言八个停靠位与四种排布方向 ([5531488](https://github.com/mhaibaraai/movk-sigmajs/commit/55314887016afbd577f10a27bb6660ebe915451e))
+
+### Build System
+
+* **deps:** sigma 升级至 4.0.0-beta.1 ([7074d39](https://github.com/mhaibaraai/movk-sigmajs/commit/7074d39d64faeda2179aa92125d503284f0adb1b))
+* **deps:** sigma 升级至 4.0.0-beta.3 并移除 patch ([b479654](https://github.com/mhaibaraai/movk-sigmajs/commit/b4796542c9b8fd9b6f9c1ca1a0ce66f66ce533d1)), references [#1550](https://github.com/mhaibaraai/movk-sigmajs/issues/1550)
+* **patch:** sigma patch 注释改指上游已合入的修复 ([15d268e](https://github.com/mhaibaraai/movk-sigmajs/commit/15d268eae829eedbb488c02b41801fd32afd585e)), references [#1549](https://github.com/mhaibaraai/movk-sigmajs/issues/1549)
+* **patch:** sigma patch 重建至 4.0.0-beta.1 ([3d8aa65](https://github.com/mhaibaraai/movk-sigmajs/commit/3d8aa65f52d40bae4864c1f8feaf181bd24dae53))
+
+### Chores
+
+* **deps:** 升级依赖包版本 ([90cc117](https://github.com/mhaibaraai/movk-sigmajs/commit/90cc117461783e69c354d9dbd2c14ce48470d2d3))
+* 忽略本地 AI 工具目录 ([7f1577e](https://github.com/mhaibaraai/movk-sigmajs/commit/7f1577e32f4c10a6aa49b032447eeedc5cfcaafb))
+
 ## [0.1.2](https://github.com/mhaibaraai/movk-sigmajs/compare/v0.1.1...v0.1.2) (2026-08-06)
 
 ### Bug Fixes
