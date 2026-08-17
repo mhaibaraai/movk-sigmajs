@@ -18,6 +18,3 @@ allowBuilds:
   sharp: true
   unrs-resolver: false
   vue-demi: false
-
-patchedDependencies:
-  sigma@4.0.0-beta.1: patches/sigma@4.0.0-beta.1.patch
