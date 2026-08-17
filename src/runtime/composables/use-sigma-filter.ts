@@ -45,14 +45,11 @@ export interface UseSigmaFilterReturn {
  * 渲染层，而图标层的可见性只认 `data.image`、写死成字符串的层颜色会编译成 uniform
  * 根本盖不住，永远做不完整。
  *
- * **依赖 sigma patch**：sigma v4-beta 对 `visibility: 'hidden'` 走的是 v3 遗留的
+ * **要求 sigma >= 4.0.0-beta.3**：更早的版本对 `visibility: 'hidden'` 走的是 v3 遗留的
  * 「整个顶点缓冲清零」分支，而 v4 的几何/颜色已搬进纹理、缓冲里只剩纹理行号，
  * 清零后行号读回 0——索引 0 是真实存在的第一个 item，于是每个隐藏元素都被画成它的
- * 副本、并顶掉它的拾取 ID。本包随附 `patches/sigma@4.0.0-beta.1.patch` 修掉这一点，
- * 未接入时首个节点会渲染异常且点不中，边的 dash/gap 也会错位。详见该 patch 与文档。
- *
- * 上游已在 `v4` 分支合入等效修复（`79752e39` 与 `5ecdf690`），但 npm 上最新的
- * `4.0.0-beta.1` 早于两者，patch 仍是必需的。sigma 发布含修复的版本后本 patch 移除。
+ * 副本、并顶掉它的拾取 ID，边的 dash/gap 也会错位。上游在 `4.0.0-beta.3` 修掉了这两处，
+ * 降级不会报错、只会静默渲染错误。
  *
  * 不改动图数据本身：过滤是视图层的事，被隐藏的节点仍在 graphology 里，邻域计算与
  * 检索照常能看到它们。与 `useSigmaState().setNodeState(key, { isHidden })` 的分工是——
