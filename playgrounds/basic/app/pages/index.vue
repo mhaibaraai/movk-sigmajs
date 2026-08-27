@@ -35,7 +35,6 @@ const groups = [
       { api: 'useSigmaDrag', to: '/interaction', examples: ['UseSigmaDrag'] },
       { api: 'useSigmaSearch', to: '/interaction', examples: ['UseSigmaSearch'] },
       { api: 'useSigmaFilter', to: '/interaction', examples: ['UseSigmaFilter'] },
-      { api: 'useSigmaReducer', to: '/interaction', examples: ['UseSigmaReducer'] },
       { api: 'useSigmaCamera', to: '/interaction', examples: ['UseSigmaCamera'] },
       { api: 'useSigmaLayout', to: '/analysis', examples: ['UseSigmaLayout', 'UseSigmaLayoutWorker'] },
       { api: 'useSigmaMetrics', to: '/analysis', examples: ['UseSigmaMetrics'] },
@@ -47,7 +46,7 @@ const groups = [
     to: '/utils',
     items: [
       { api: 'applyGraphDiff', to: '/utils', examples: ['ApplyGraphDiff'] },
-      { api: 'chainReducers', to: '/utils', examples: ['ChainReducers'] },
+      { api: 'composeStyles', to: '/utils', examples: ['ComposeStyles'] },
       { api: 'sampleGraph', to: '/utils', examples: ['SampleGraph'] },
       { api: 'defineSigmaPrimitives', to: '/graph', examples: ['GraphPrimitives'] }
     ]
