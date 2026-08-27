@@ -4,7 +4,7 @@ defineOptions({ name: 'SigmaControls', inheritAttrs: false })
 withDefaults(defineProps<{
   /**
    * 停靠位，语序为「纵向-横向」，四角之外还有四条边的中点
-   * @defaultValue 'bottom-right'
+   * @defaultValue 'top-left'
    */
   position?:
     | 'top-left' | 'top-center' | 'top-right'
@@ -16,7 +16,7 @@ withDefaults(defineProps<{
    */
   direction?: 'vertical' | 'vertical-reverse' | 'horizontal' | 'horizontal-reverse'
 }>(), {
-  position: 'bottom-right',
+  position: 'top-left',
   direction: 'vertical'
 })
 </script>

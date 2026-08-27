@@ -139,11 +139,11 @@ describe('SigmaControls', () => {
     expect(el.attributes('data-direction')).toBe('horizontal')
   })
 
-  it('默认停靠右下且纵向排布', async () => {
+  it('默认停靠左上且纵向排布', async () => {
     const { wrapper } = await mountControl(() => h(SigmaControls, null, () => 'x'))
 
     const el = wrapper.find('.sigma-controls')
-    expect(el.attributes('data-position')).toBe('bottom-right')
+    expect(el.attributes('data-position')).toBe('top-left')
     expect(el.attributes('data-direction')).toBe('vertical')
   })
 

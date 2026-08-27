@@ -17,7 +17,7 @@ const data = {
 
 <template>
   <SigmaGraph :data="data">
-    <SigmaControls position="top-left" direction="vertical">
+    <SigmaControls direction="vertical">
       <SigmaZoomControl :reset="false" />
       <SigmaFullscreenControl />
     </SigmaControls>
