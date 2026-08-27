@@ -3,7 +3,7 @@ const data = demoGraph({ nodes: 40, extraEdges: 1 })
 </script>
 
 <template>
-  <SigmaGraph :data="data" :settings="{ itemSizesReference: 'screen' }">
+  <SigmaGraph :styles="demoStyles" :data="data" :settings="{ itemSizesReference: 'screen' }">
     <!-- 模拟真实应用的侧栏：浮在舞台上、不挤压画布，正是 fit 看不见的那部分遮挡 -->
     <div class="demo-inset-panel">
       侧栏 240px

@@ -13,11 +13,11 @@ graph.import(demoGraph({ nodes: 18, extraEdges: 1 }))
 const derived = shallowRef(false)
 
 const styles: StylesDeclaration = {
-  nodes: {
+  nodes: [demoNodeStyle, {
     labelPosition: { attribute: 'labelPlacement', defaultValue: 'below' },
     labelSize: 12,
     labelColor: '#1e293b'
-  }
+  }]
 }
 
 function apply(next: boolean) {

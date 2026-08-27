@@ -4,7 +4,7 @@ const data = demoGraph({ nodes: 5, extraEdges: 0 })
 </script>
 
 <template>
-  <SigmaGraph :data="data">
+  <SigmaGraph :styles="demoStyles" :data="data">
     <UseSigmaNeighborhoodExpandPanel />
     <SigmaTooltip />
   </SigmaGraph>

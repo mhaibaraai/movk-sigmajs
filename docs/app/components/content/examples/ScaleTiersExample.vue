@@ -12,6 +12,7 @@ const TIERS = [1000, 5000, 20000] as const
 
 // styles 只在构造时读取，提到顶层保持引用稳定，避免父组件重渲染时重建实例
 const styles: StylesDeclaration = {
+  nodes: demoNodeStyle,
   edges: { color: '#e2e8f0' }
 }
 

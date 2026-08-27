@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { shallowRef } from 'vue'
-import type { NodeDisplayData } from 'sigma/types'
 
 /**
  * 度数、中心性与社区划分。
@@ -11,38 +10,29 @@ import type { NodeDisplayData } from 'sigma/types'
 const { graph } = useSigma()
 const { degrees, maxDegree, centrality, communities } = useSigmaMetrics()
 
-/** 分类配色，社区编号超出长度时循环取用 */
-const PALETTE = ['#f43f5e', '#3b82f6', '#22c55e', '#a855f7', '#f59e0b', '#14b8a6']
-
 const mode = shallowRef<'none' | 'degree' | 'betweenness' | 'closeness' | 'community'>('none')
 const summary = shallowRef('')
 const error = shallowRef('')
 
-const scores = shallowRef<Record<string, number>>({})
-const colors = shallowRef<Record<string, string>>({})
-
-const { refresh } = useSigmaReducer({
-  order: 300,
-  node: (key): Partial<NodeDisplayData> => {
-    if (mode.value === 'community') {
-      return colors.value[key] ? { color: colors.value[key] } : {}
-    }
-    const score = scores.value[key]
-    return score === undefined ? {} : { size: 4 + score * 22 }
+/** 结果写回节点属性，视觉换算交给外壳的 styles 绑定 */
+function writeAttribute(name: string, values: Record<string, number>) {
+  for (const [node, value] of Object.entries(values)) {
+    graph.value.setNodeAttribute(node, name, value)
   }
-})
+}
 
 async function rank(kind: 'degree' | 'betweenness' | 'closeness') {
   error.value = ''
   try {
     const result = await centrality(kind)
     const max = Math.max(...Object.values(result), 1)
-    scores.value = Object.fromEntries(Object.entries(result).map(([key, value]) => [key, value / max]))
+    writeAttribute('metric', Object.fromEntries(
+      Object.entries(result).map(([key, value]) => [key, value / max])
+    ))
 
     const top = Object.entries(result).sort((a, b) => b[1] - a[1])[0]
     mode.value = kind
     summary.value = `最高 ${top?.[0] ?? '—'}（${top?.[1].toFixed(2) ?? '0'}）`
-    refresh()
   }
   catch (cause) {
     error.value = cause instanceof Error ? cause.message : String(cause)
@@ -53,27 +43,23 @@ async function detectCommunities() {
   error.value = ''
   try {
     const partition = await communities()
-    colors.value = Object.fromEntries(
-      Object.entries(partition).map(([node, community]) => [node, PALETTE[community % PALETTE.length]!])
-    )
+    writeAttribute('community', partition)
     mode.value = 'community'
     summary.value = `社区数 ${new Set(Object.values(partition)).size}`
-    refresh()
   }
   catch (cause) {
     error.value = cause instanceof Error ? cause.message : String(cause)
   }
 }
 
-/** 半径 ∝ sqrt(度数)，面积才正比于度数 */
+/** 度数归一化后同样走 metric 绑定，半径 ∝ sqrt(度数) 才让面积正比于度数 */
 function applyDegreeSize() {
   const max = Math.max(maxDegree.value, 1)
-  for (const [node, degree] of Object.entries(degrees.value)) {
-    graph.value.setNodeAttribute(node, 'size', 4 + Math.sqrt(degree / max) * 20)
-  }
-  mode.value = 'none'
-  summary.value = `度数直接写回属性，最大度 ${maxDegree.value}`
-  refresh()
+  writeAttribute('metric', Object.fromEntries(
+    Object.entries(degrees.value).map(([node, degree]) => [node, Math.sqrt(degree / max)])
+  ))
+  mode.value = 'degree'
+  summary.value = `度数映射尺寸，最大度 ${maxDegree.value}`
 }
 </script>
 

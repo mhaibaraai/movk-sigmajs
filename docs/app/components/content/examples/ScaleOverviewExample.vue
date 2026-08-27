@@ -25,7 +25,7 @@ function load() {
 
 <template>
   <div class="wrap">
-    <SigmaGraph v-if="overview" :data="overview" :settings="{ hideEdgesOnMove: true, labelRenderedSizeThreshold: 4 }">
+    <SigmaGraph v-if="overview" :styles="demoStyles" :data="overview" :settings="{ hideEdgesOnMove: true, labelRenderedSizeThreshold: 4 }">
       <ScaleOverviewPanel :full="full" />
       <SigmaTooltip />
     </SigmaGraph>

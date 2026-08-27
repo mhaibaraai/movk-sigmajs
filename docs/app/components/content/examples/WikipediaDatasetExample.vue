@@ -1,18 +1,31 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue'
-import type { SerializedGraph } from 'graphology-types'
+import { computed, shallowRef } from 'vue'
+import type { StylesDeclaration } from 'sigma/types'
 
 /**
  * 加载 sigma 官方的 wikipedia 数据集：2085 个节点、5409 条边、24 个社区。
  *
- * 换算逻辑全在 loadWikipediaGraph() 里：原始数据不带 color 也不带 size，
- * 颜色取自所属社区、size 由 score 放大，坐标与 size 一起按同一比例归一化。
+ * 原始数据不带 color 也不带 size，节点只存 cluster 与 score 两个语义属性，
+ * 换算成颜色与尺寸全在下面的 styles 里。
  */
-const data = shallowRef<SerializedGraph | null>(null)
-const communities = shallowRef(0)
+const dataset = shallowRef<Awaited<ReturnType<typeof loadWikipediaGraph>> | null>(null)
 const loadMs = shallowRef(0)
 const error = shallowRef('')
 const loading = shallowRef(false)
+
+const styles = computed<StylesDeclaration>(() => ({
+  nodes: {
+    label: { attribute: 'label' },
+    color: { attribute: 'cluster', dict: dataset.value?.clusterColors ?? {}, defaultValue: '#94a3b8' },
+    size: {
+      attribute: 'score',
+      min: 3,
+      max: 18,
+      minValue: dataset.value?.scoreExtent[0],
+      maxValue: dataset.value?.scoreExtent[1]
+    }
+  }
+}))
 
 async function load() {
   loading.value = true
@@ -20,10 +33,9 @@ async function load() {
   const t0 = performance.now()
 
   try {
-    const graph = await loadWikipediaGraph()
-    communities.value = new Set(graph.nodes.map(node => node.attributes?.category)).size
+    const result = await loadWikipediaGraph()
     loadMs.value = performance.now() - t0
-    data.value = graph
+    dataset.value = result
   }
   catch (cause) {
     error.value = cause instanceof Error ? cause.message : String(cause)
@@ -37,21 +49,22 @@ async function load() {
 <template>
   <div class="wrap">
     <SigmaGraph
-      v-if="data"
-      :data="data"
+      v-if="dataset"
+      :graph="dataset.graph"
+      :styles="styles"
       :settings="{ hideEdgesOnMove: true, labelRenderedSizeThreshold: 8 }"
     >
       <SigmaControls position="top-right">
         <!-- 检索的是真实词条名，不是生成出来的编号 -->
-        <SigmaSearchControl :fields="['label', 'category']" :limit="6" placeholder="试试「graph」" />
+        <SigmaSearchControl :fields="['label']" :limit="6" placeholder="试试「graph」" />
         <SigmaZoomControl />
       </SigmaControls>
 
       <SigmaTooltip />
 
       <div class="demo-panel" data-at="bottom-left">
-        <span class="demo-tag">{{ data.nodes.length }} 节点 · {{ data.edges.length }} 边 · {{ communities }} 个社区</span>
-        <span class="demo-tag">加载并换算耗时 {{ loadMs.toFixed(0) }} ms</span>
+        <span class="demo-tag">{{ dataset.graph.order }} 节点 · {{ dataset.graph.size }} 边 · {{ Object.keys(dataset.clusterColors).length }} 个社区</span>
+        <span class="demo-tag">加载并建图耗时 {{ loadMs.toFixed(0) }} ms</span>
       </div>
     </SigmaGraph>
 

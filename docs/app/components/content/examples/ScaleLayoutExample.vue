@@ -21,6 +21,7 @@ function load() {
          v4 默认 size 是图坐标单位，不切到 screen 语义节点尺寸会跟着乱跳 -->
     <SigmaGraph
       v-if="data"
+      :styles="demoStyles"
       :data="data"
       :settings="{ hideEdgesOnMove: true, labelRenderedSizeThreshold: 10, itemSizesReference: 'screen' }"
     >

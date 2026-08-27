@@ -36,7 +36,7 @@ const data = demoGraph()
       <span class="demo-tag">注册表：{{ ids.join('、') || '空' }} · 节点 {{ order }}</span>
     </div>
 
-    <SigmaGraph id="by-id-demo" :data="data" class="stage" />
+    <SigmaGraph id="by-id-demo" :styles="demoStyles" :data="data" class="stage" />
   </div>
 </template>
 

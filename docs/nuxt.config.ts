@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import pkg from '../package.json'
 
 export default defineNuxtConfig({
@@ -28,6 +29,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: { version: pkg.version }
   },
+
+  alias: { '#corpus': fileURLToPath(new URL('./app/utils', import.meta.url)) },
 
   routeRules: {
     '/docs': { redirect: '/docs/getting-started', prerender: false },

@@ -38,10 +38,10 @@ const primitives = defineSigmaPrimitives(async () => {
 })
 
 const styles: StylesDeclaration = {
-  nodes: {
+  nodes: [demoNodeStyle, {
     shape: { attribute: 'shape', defaultValue: 'circle' },
     size: 14
-  }
+  }]
 }
 </script>
 

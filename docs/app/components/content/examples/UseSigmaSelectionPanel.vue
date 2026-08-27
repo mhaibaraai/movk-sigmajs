@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /**
- * hover / selected / focused 状态机，内建高亮与淡出的归约。
+ * hover / selected / focused 状态机，内建高亮与淡出。
  *
- * 焦点节点及其直接邻居保持原样，其余淡出且隐藏标签。归约经 reducer 链登记，
+ * 焦点节点及其直接邻居保持原样，其余由库内 styles 规则淡出且隐藏标签。
  * 与过滤、图例显隐等共存而不互相覆盖。
  */
 const { hovered, selected, focused, highlighted, select, clear } = useSigmaSelection({

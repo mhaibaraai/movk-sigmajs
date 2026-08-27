@@ -33,7 +33,7 @@ function load() {
 
 <template>
   <div class="wrap">
-    <SigmaGraph v-if="data" :data="data" :settings="settings">
+    <SigmaGraph v-if="data" :styles="demoStyles" :data="data" :settings="settings">
       <ScaleStatsPanel
         :build-ms="buildMs"
         :started-at="startedAt"

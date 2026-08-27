@@ -5,7 +5,7 @@ const data = demoGraph()
 </script>
 
 <template>
-  <SigmaGraph :data="data">
+  <SigmaGraph :styles="demoStyles" :data="data">
     <UseSigmaPanel />
   </SigmaGraph>
 </template>

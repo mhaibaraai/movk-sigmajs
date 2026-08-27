@@ -15,10 +15,10 @@ for (const [node, tier] of Object.entries(tiers)) {
 }
 
 const styles: StylesDeclaration = {
-  nodes: {
+  nodes: [demoNodeStyle, {
     labelSize: { attribute: 'labelTier', dict: { 0: 14, 1: 12, 2: 11 }, defaultValue: 12 },
     labelColor: { attribute: 'labelTier', dict: { 0: '#0f172a', 1: '#1e293b', 2: '#64748b' }, defaultValue: '#1e293b' }
-  }
+  }]
 }
 </script>
 

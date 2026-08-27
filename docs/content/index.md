@@ -117,10 +117,10 @@ transition: { duration: 0.6, delay: 0.1 }
   icon: i-lucide-layers
   ---
   #title
-  reducer 链
+  styles 合成
 
   #description
-  自带的 `nodeReducer` / `edgeReducer` 位于链首，不会被库的高亮、过滤吞掉。
+  用户规则与 `DEFAULT_STYLES` 按序合成，不会互相顶掉，坐标绑定与悬浮反馈都还在。
   :::
 
   :::u-page-feature

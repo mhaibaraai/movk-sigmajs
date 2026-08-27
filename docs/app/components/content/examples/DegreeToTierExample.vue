@@ -13,12 +13,12 @@ graph.import(demoGraph({ nodes: 24, extraEdges: 1 }))
 const ratios = shallowRef<number[]>([0.15, 0.5])
 
 const styles: StylesDeclaration = {
-  nodes: {
+  nodes: [demoNodeStyle, {
     labelSize: { attribute: 'labelTier', dict: { 0: 14, 1: 12, 2: 11 }, defaultValue: 12 },
     labelColor: { attribute: 'labelTier', dict: { 0: '#0f172a', 1: '#1e293b', 2: '#64748b' }, defaultValue: '#1e293b' },
     // 0 档避无可避时仍强行绘制，其余让标签网格决定
     labelVisibility: { whenData: { labelTier: 0 }, then: 'visible', else: 'auto' }
-  }
+  }]
 }
 
 function apply(next: number[]) {

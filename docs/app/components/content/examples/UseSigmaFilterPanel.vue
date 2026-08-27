@@ -2,7 +2,7 @@
 import { shallowRef } from 'vue'
 
 /**
- * 声明式过滤，经 reducer 链落到显示数据的 hidden 上。
+ * 声明式过滤，落到 sigma 的 isHidden 状态上。
  *
  * 不改动图数据本身：被隐藏的节点仍在 graphology 里，邻域计算与检索照常能看到它们。
  */

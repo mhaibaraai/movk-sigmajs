@@ -1,5 +1,8 @@
 import type { SerializedGraph } from 'graphology-types'
+import type { StylesDeclaration } from 'sigma/types'
 import subset from '../data/wikipedia-subset.json'
+import { toWikipediaGraph } from './wikipedia'
+import type { WikipediaDataset, WikipediaGraph } from './wikipedia'
 
 /**
  * 示例数据源。
@@ -40,6 +43,24 @@ for (const [source, target] of EDGES) {
   NEIGHBORS.get(source)!.push(target)
   NEIGHBORS.get(target)!.push(source)
 }
+
+/** 分类到颜色，喂给 styles 的 `color: { attribute: 'category', dict }` */
+export const CATEGORY_COLORS: Record<string, string> = Object.fromEntries(
+  NODES.map(node => [node.category, node.color])
+)
+
+/**
+ * 示例通用的视觉映射。
+ *
+ * `demoGraph()` 与 `createScaleGraph()` 只产语义属性，颜色与尺寸在这里由
+ * attribute 绑定算出来——这正是 v4 推荐的分工。
+ */
+export const demoNodeStyle = {
+  color: { attribute: 'category', dict: CATEGORY_COLORS, defaultValue: '#94a3b8' },
+  size: { attribute: 'degree', min: 6, max: 18, minValue: 0, maxValue: 10 }
+} satisfies NonNullable<StylesDeclaration['nodes']>
+
+export const demoStyles: StylesDeclaration = { nodes: demoNodeStyle }
 
 /** 子集里度数最高的节点。取样一律从它出发，于是 `n0` 恒为整张图的枢纽 */
 const HUB = NODES.reduce((best, node) => (node.degree > best.degree ? node : best), NODES[0]!).key
@@ -98,10 +119,9 @@ export function demoGraph(options: DemoGraphOptions = {}): SerializedGraph {
       attributes: {
         label: node.label,
         category: node.category,
+        degree: degrees.get(key)!,
         x: positions[position]!.x,
-        y: positions[position]!.y,
-        size: 6 + Math.min(10, Math.sqrt(degrees.get(key)!) * 3),
-        color: node.color
+        y: positions[position]!.y
       }
     }
   })
@@ -151,17 +171,16 @@ export function createScaleGraph(nodeCount: number, edgeRatio = 3): SerializedGr
     // 越早插入的节点度数越高，把它们摆在靠中心的位置，幂律结构才看得出来；
     // 均匀撒点会得到一团看不出任何结构的圆斑
     const radius = (Math.sqrt(index / nodeCount) * 0.85 + random() * 0.15) * (SPAN / 2)
-    const [category, color] = palette[index % palette.length]!
+    const [category] = palette[index % palette.length]!
 
     nodes.push({
       key: `n${index}`,
       attributes: {
         label: `节点 ${index}`,
         category,
+        degree: 0,
         x: Math.cos(angle) * radius,
-        y: Math.sin(angle) * radius,
-        size: 2,
-        color
+        y: Math.sin(angle) * radius
       }
     })
 
@@ -186,14 +205,14 @@ export function createScaleGraph(nodeCount: number, edgeRatio = 3): SerializedGr
     }
   }
 
-  // 度数决定视觉尺寸，否则万级节点全是同一个点，看不出结构
+  // 度数只作为语义属性写回，换算成尺寸是 styles 的事
   const degree = new Map<string, number>()
   for (const edge of edges) {
     degree.set(String(edge.source), (degree.get(String(edge.source)) ?? 0) + 1)
     degree.set(String(edge.target), (degree.get(String(edge.target)) ?? 0) + 1)
   }
   for (const node of nodes) {
-    node.attributes!.size = 1.5 + Math.min(8, Math.sqrt(degree.get(String(node.key)) ?? 0))
+    node.attributes!.degree = degree.get(String(node.key)) ?? 0
   }
 
   return {
@@ -202,68 +221,21 @@ export function createScaleGraph(nodeCount: number, edgeRatio = 3): SerializedGr
     nodes,
     edges
   }
-}
-
-/** `wikipedia.json` 的原始形状，与 graphology 的序列化格式并不一致 */
-interface WikipediaDataset {
-  nodes: { key: string, label: string, tag: string, cluster: string, x: number, y: number, score: number }[]
-  edges: [source: string, target: string][]
-  clusters: { key: string, color: string, clusterLabel: string }[]
 }
 
 /**
  * 加载完整的官方数据集：2085 个节点、5409 条边、24 个社区。
  *
- * 三处换算按上游示例的规则来：颜色取自所属社区（节点自身不带 color），`size` 由
- * `score` 放大而来（节点自身不带 size），`tag` 有一多半是 `"unknown"`、做不了分类字段。
- *
- * 原始坐标跨度 2860 个单位，与本站 360 单位的约定不一致。这里连同 size 一起等比缩放，
- * 视觉比例与上游保持一致——只缩坐标不缩 size，节点会随跨度收缩成倍胀大。
+ * 只负责取回原始文件，转换交给 `toWikipediaGraph()`——节点存语义属性，
+ * 颜色与尺寸由 styles 的 attribute 绑定在渲染期算。
  */
-export async function loadWikipediaGraph(): Promise<SerializedGraph> {
+export async function loadWikipediaGraph(): Promise<WikipediaGraph> {
   const response = await fetch('/data/wikipedia.json')
   if (!response.ok) {
     throw new Error(`加载 /data/wikipedia.json 失败：HTTP ${response.status}`)
   }
 
-  const dataset = await response.json() as WikipediaDataset
-  const clusters = new Map(dataset.clusters.map(cluster => [cluster.key, cluster]))
-  const { positions, ratio } = normalize(dataset.nodes)
-
-  const nodes = dataset.nodes.map((node, position) => {
-    const cluster = clusters.get(node.cluster)
-
-    return {
-      key: node.key,
-      attributes: {
-        label: node.label,
-        category: cluster?.clusterLabel ?? '未分类',
-        x: positions[position]!.x,
-        y: positions[position]!.y,
-        size: (10 + node.score * 1000) * ratio,
-        color: cluster?.color ?? '#94a3b8'
-      }
-    }
-  })
-
-  // 原数据集里同一对端点会重复出现，非多重图上必须去重
-  const seen = new Set<string>()
-  const edges: SerializedGraph['edges'] = []
-  for (const [source, target] of dataset.edges) {
-    const pair = pairKey(source, target)
-    if (seen.has(pair)) {
-      continue
-    }
-    seen.add(pair)
-    edges.push({ source, target })
-  }
-
-  return {
-    attributes: {},
-    options: { type: 'mixed', multi: false, allowSelfLoops: false },
-    nodes,
-    edges
-  }
+  return toWikipediaGraph(await response.json() as WikipediaDataset)
 }
 
 function pairKey(source: string, target: string): string {
@@ -352,7 +324,7 @@ function selectEdges(picked: string[], extraEdges: number): [string, string][] {
  */
 function normalize<T extends { x: number, y: number }>(
   nodes: T[]
-): { positions: { x: number, y: number }[], ratio: number } {
+): { positions: { x: number, y: number }[] } {
   const xs = nodes.map(node => node.x)
   const ys = nodes.map(node => node.y)
   const minX = Math.min(...xs)
@@ -366,7 +338,6 @@ function normalize<T extends { x: number, y: number }>(
   const centerY = (minY + maxY) / 2
 
   return {
-    ratio,
     positions: nodes.map(node => ({
       x: (node.x - centerX) * ratio,
       y: (node.y - centerY) * ratio

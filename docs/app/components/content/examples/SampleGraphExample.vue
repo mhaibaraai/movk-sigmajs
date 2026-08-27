@@ -17,7 +17,7 @@ const sampled = computed(() => sampleGraph(full, size.value))
 </script>
 
 <template>
-  <SigmaGraph :data="sampled" :settings="{ labelRenderedSizeThreshold: 6 }">
+  <SigmaGraph :styles="demoStyles" :data="sampled" :settings="{ labelRenderedSizeThreshold: 6 }">
     <div class="demo-panel" data-at="top-left">
       <div class="demo-row">
         <span class="demo-label">抽样</span>

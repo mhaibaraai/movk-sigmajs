@@ -58,7 +58,7 @@ function restore() {
 </script>
 
 <template>
-  <SigmaGraph :graph="graph">
+  <SigmaGraph :styles="demoStyles" :graph="graph">
     <div class="demo-panel" data-at="top-left">
       <div class="demo-row">
         <button type="button" @click="shuffle">
