@@ -38,21 +38,15 @@ const props = withDefaults(defineProps<{
    * @defaultValue true
    */
   toggleable?: boolean
-  /**
-   * reducer 链内次序，需高于选中高亮才能压过其配色
-   * @defaultValue 200
-   */
-  order?: number
 }>(), {
   field: 'type',
   colorField: 'color',
   fallback: '未分类',
-  toggleable: true,
-  order: 200
+  toggleable: true
 })
 
 const { graph, version } = useSigmaGraph()
-const { nodeFilter } = useSigmaFilter({ order: props.order })
+const { nodeFilter } = useSigmaFilter()
 
 const hidden = shallowRef<ReadonlySet<string>>(new Set())
 

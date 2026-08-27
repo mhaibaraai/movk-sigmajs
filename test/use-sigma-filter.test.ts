@@ -6,18 +6,46 @@ import SigmaGraph from '../src/runtime/components/Graph.vue'
 import { useSigmaFilter } from '../src/runtime/composables/use-sigma-filter'
 import type { UseSigmaFilterOptions, UseSigmaFilterReturn } from '../src/runtime/composables/use-sigma-filter'
 
+interface ItemState { isHidden?: boolean }
+
 const state = vi.hoisted(() => ({
-  instances: [] as Array<{ options: Record<string, unknown>, settings: Record<string, unknown> }>
+  instances: [] as Array<{
+    nodeStates: Map<string, ItemState>
+    edgeStates: Map<string, ItemState>
+  }>
 }))
 
 vi.mock('sigma', () => {
   class MockSigma {
     options: Record<string, unknown>
     settings: Record<string, unknown>
+    nodeStates = new Map<string, ItemState>()
+    edgeStates = new Map<string, ItemState>()
+
     constructor(_graph: unknown, _container: unknown, options: { settings: Record<string, unknown> }) {
       this.options = options
       this.settings = options.settings
       state.instances.push(this)
+    }
+
+    setNodesState(keys: string[], patch: ItemState) {
+      for (const key of keys) {
+        this.nodeStates.set(key, { ...this.nodeStates.get(key), ...patch })
+      }
+    }
+
+    setNodeState(key: string, patch: ItemState) {
+      this.setNodesState([key], patch)
+    }
+
+    setEdgesState(keys: string[], patch: ItemState) {
+      for (const key of keys) {
+        this.edgeStates.set(key, { ...this.edgeStates.get(key), ...patch })
+      }
+    }
+
+    setEdgeState(key: string, patch: ItemState) {
+      this.setEdgesState([key], patch)
     }
 
     on() {}
@@ -41,8 +69,6 @@ vi.mock('sigma', () => {
 
   return { default: MockSigma }
 })
-
-type Reducer = (...args: unknown[]) => Record<string, unknown>
 
 function seeded() {
   const graph = new Graph()
@@ -80,14 +106,8 @@ async function mountFilter(options: UseSigmaFilterOptions = {}) {
   return {
     api,
     graph,
-    nodeReducer: () => {
-      const reducer = instance.options.nodeReducer as Reducer
-      return (key: string, data: Record<string, unknown> = {}) => reducer(key, data, {}, {}, {}, {})
-    },
-    edgeReducer: () => {
-      const reducer = instance.options.edgeReducer as Reducer
-      return (key: string, data: Record<string, unknown> = {}) => reducer(key, data, {}, {}, {}, {})
-    }
+    isNodeHidden: (key: string) => instance.nodeStates.get(key)?.isHidden === true,
+    isEdgeHidden: (key: string) => instance.edgeStates.get(key)?.isHidden === true
   }
 }
 
@@ -99,65 +119,65 @@ beforeEach(() => {
 
 describe('useSigmaFilter', () => {
   it('无过滤时不隐藏任何节点', async () => {
-    const { api, nodeReducer } = await mountFilter()
+    const { api, isNodeHidden } = await mountFilter()
 
     expect(api.hiddenCount.value).toBe(0)
-    expect(nodeReducer()('drop', { size: 1 })).not.toMatchObject({ visibility: 'hidden' })
+    expect(isNodeHidden('drop')).toBe(false)
   })
 
-  it('节点谓词返回 false 的被隐藏', async () => {
-    const { api, nodeReducer } = await mountFilter()
+  it('节点谓词返回 false 的写入 isHidden 状态', async () => {
+    const { api, isNodeHidden } = await mountFilter()
 
     api.nodeFilter.value = (_key, attributes) => attributes.group === 'a'
     await nextTick()
 
-    expect(nodeReducer()('keep', {})).not.toMatchObject({ visibility: 'hidden' })
-    expect(nodeReducer()('drop', {})).toMatchObject({ visibility: 'hidden' })
+    expect(isNodeHidden('keep')).toBe(false)
+    expect(isNodeHidden('drop')).toBe(true)
     expect(api.hiddenCount.value).toBe(1)
   })
 
   it('only 只保留给定节点', async () => {
-    const { api, nodeReducer } = await mountFilter()
+    const { api, isNodeHidden } = await mountFilter()
 
     api.only(['keep'])
     await nextTick()
 
-    expect(nodeReducer()('keep', {})).not.toMatchObject({ visibility: 'hidden' })
-    expect(nodeReducer()('other', {})).toMatchObject({ visibility: 'hidden' })
+    expect(isNodeHidden('keep')).toBe(false)
+    expect(isNodeHidden('other')).toBe(true)
     expect(api.hiddenCount.value).toBe(2)
   })
 
   it('端点被隐藏时边一并隐藏', async () => {
-    const { api, graph, edgeReducer } = await mountFilter()
+    const { api, graph, isEdgeHidden } = await mountFilter()
 
     api.only(['keep', 'other'])
     await nextTick()
 
-    expect(edgeReducer()(graph.edge('keep', 'other')!, {})).not.toMatchObject({ visibility: 'hidden' })
-    expect(edgeReducer()(graph.edge('keep', 'drop')!, {})).toMatchObject({ visibility: 'hidden' })
+    expect(isEdgeHidden(graph.edge('keep', 'other')!)).toBe(false)
+    expect(isEdgeHidden(graph.edge('keep', 'drop')!)).toBe(true)
   })
 
   it('hideDanglingEdges 关闭后边不随端点隐藏', async () => {
-    const { api, graph, edgeReducer } = await mountFilter({ hideDanglingEdges: false })
+    const { api, graph, isEdgeHidden } = await mountFilter({ hideDanglingEdges: false })
 
     api.only(['keep'])
     await nextTick()
 
-    expect(edgeReducer()(graph.edge('keep', 'drop')!, {})).not.toMatchObject({ visibility: 'hidden' })
+    expect(isEdgeHidden(graph.edge('keep', 'drop')!)).toBe(false)
   })
 
   it('边谓词独立生效', async () => {
-    const { api, graph, edgeReducer } = await mountFilter()
+    const { api, graph, isEdgeHidden } = await mountFilter()
 
     api.edgeFilter.value = (_key, attributes) => attributes.kind === 'x'
     await nextTick()
 
-    expect(edgeReducer()(graph.edge('keep', 'other')!, {})).not.toMatchObject({ visibility: 'hidden' })
-    expect(edgeReducer()(graph.edge('keep', 'drop')!, {})).toMatchObject({ visibility: 'hidden' })
+    expect(isEdgeHidden(graph.edge('keep', 'other')!)).toBe(false)
+    expect(isEdgeHidden(graph.edge('keep', 'drop')!)).toBe(true)
   })
 
-  it('reset 清空全部过滤', async () => {
-    const { api, nodeReducer } = await mountFilter()
+  it('reset 清空全部过滤并撤回 isHidden', async () => {
+    const { api, isNodeHidden } = await mountFilter()
 
     api.only(['keep'])
     await nextTick()
@@ -165,7 +185,7 @@ describe('useSigmaFilter', () => {
     await nextTick()
 
     expect(api.hiddenCount.value).toBe(0)
-    expect(nodeReducer()('drop', {})).not.toMatchObject({ visibility: 'hidden' })
+    expect(isNodeHidden('drop')).toBe(false)
   })
 
   it('过滤只作用于视图，不改动图数据', async () => {

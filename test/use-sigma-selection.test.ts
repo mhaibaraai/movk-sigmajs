@@ -7,7 +7,31 @@ import { useSigmaSelection } from '../src/runtime/composables/use-sigma-selectio
 import type { UseSigmaSelectionOptions, UseSigmaSelectionReturn } from '../src/runtime/composables/use-sigma-selection'
 
 type ItemState = { isHighlighted?: boolean }
-type Reducer = (...args: unknown[]) => Record<string, unknown>
+const BASE_NODE_STATE = {
+  isHovered: false,
+  isLabelHovered: false,
+  isHidden: false,
+  isHighlighted: false,
+  isDragged: false
+}
+
+const BASE_EDGE_STATE = {
+  isHovered: false,
+  isLabelHovered: false,
+  isHidden: false,
+  isHighlighted: false,
+  parallelIndex: 0,
+  parallelCount: 1
+}
+
+const BASE_GRAPH_STATE = {
+  isIdle: true,
+  isPanning: false,
+  isZooming: false,
+  isDragging: false,
+  hasHovered: false,
+  hasHighlighted: false
+}
 
 /**
  * v4 把交互状态存在 sigma 内部，reducer 每次调用时收到对应条目的 state 与图级
@@ -114,15 +138,23 @@ async function mountSelection(options: UseSigmaSelectionOptions = {}) {
 
   const instance = state.instances[0]!
 
-  /** 按 sigma 的调用方式跑一次归约：带上该条目当前的 state 与图级状态 */
-  function runNode(key: string, data: Record<string, unknown> = {}) {
-    const reducer = instance.options.nodeReducer as Reducer
-    return reducer(key, data, {}, instance.nodeStates.get(key) ?? {}, instance.getGraphState(), graph)
+  /** 按 sigma 的方式跑一次真实的 styles 求值：带上该条目当前的 state 与图级状态 */
+  async function runNode(key: string, attributes: Record<string, unknown> = {}) {
+    const { evaluateNodeStyle } = await import('sigma/types')
+    const styles = instance.options.styles as { nodes: Record<string, unknown>[] }
+    const itemState = { ...BASE_NODE_STATE, ...instance.nodeStates.get(key) }
+    return evaluateNodeStyle(styles.nodes, { x: 0, y: 0, ...attributes }, itemState, graphState(), graph)
   }
 
-  function runEdge(key: string, data: Record<string, unknown> = {}) {
-    const reducer = instance.options.edgeReducer as Reducer
-    return reducer(key, data, {}, instance.edgeStates.get(key) ?? {}, instance.getGraphState(), graph)
+  async function runEdge(key: string, attributes: Record<string, unknown> = {}) {
+    const { evaluateEdgeStyle } = await import('sigma/types')
+    const styles = instance.options.styles as { edges: Record<string, unknown>[] }
+    const itemState = { ...BASE_EDGE_STATE, ...instance.edgeStates.get(key) }
+    return evaluateEdgeStyle(styles.edges, attributes, itemState, graphState(), graph)
+  }
+
+  function graphState() {
+    return { ...BASE_GRAPH_STATE, ...instance.getGraphState() }
   }
 
   /** 焦点变化经 watch 落到状态，断言前要等一拍 */
@@ -215,10 +247,10 @@ describe('useSigmaSelection', () => {
     expect(instance.nodeStates.get('far')).toMatchObject({ isHighlighted: true })
   })
 
-  it('无焦点时归约不改动任何节点', async () => {
+  it('无焦点时 styles 不改动任何节点', async () => {
     const { runNode } = await mountSelection()
 
-    expect(runNode('far', { label: 'FAR', color: '#111' }))
+    expect(await runNode('far', { label: 'FAR', color: '#111' }))
       .toMatchObject({ label: 'FAR', color: '#111' })
   })
 
@@ -227,8 +259,8 @@ describe('useSigmaSelection', () => {
 
     await select('a')
 
-    expect(runNode('b', { label: 'B' })).toMatchObject({ label: 'B' })
-    expect(runNode('far', { label: 'FAR' }))
+    expect(await runNode('b', { label: 'B' })).toMatchObject({ label: 'B' })
+    expect(await runNode('far', { label: 'FAR' }))
       .toMatchObject({ color: '#eee', labelVisibility: 'hidden' })
   })
 
@@ -237,7 +269,7 @@ describe('useSigmaSelection', () => {
 
     await select('a')
 
-    expect(runNode('far', { label: 'FAR', color: '#111' }))
+    expect(await runNode('far', { label: 'FAR', color: '#111' }))
       .toMatchObject({ color: '#111', label: 'FAR' })
     expect(instance.nodeStates.get('a')).toMatchObject({ isHighlighted: true })
   })
@@ -250,8 +282,8 @@ describe('useSigmaSelection', () => {
     const incident = graph.edge('a', 'b')!
     const remote = graph.edge('b', 'far')!
 
-    expect(runEdge(incident, { label: 'e' })).toMatchObject({ label: 'e' })
-    expect(runEdge(remote, { label: 'e' }))
+    expect(await runEdge(incident, { label: 'e' })).toMatchObject({ label: 'e' })
+    expect(await runEdge(remote, { label: 'e' }))
       .toMatchObject({ color: '#eee', labelVisibility: 'hidden' })
   })
 

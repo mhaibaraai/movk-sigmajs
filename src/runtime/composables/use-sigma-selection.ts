@@ -1,9 +1,7 @@
-import { computed, readonly, shallowRef, watch } from 'vue'
+import { computed, onScopeDispose, readonly, shallowRef, watch } from 'vue'
 import type { ComputedRef, Ref } from 'vue'
-import type { EdgeDisplayData, NodeDisplayData } from 'sigma/types'
 import { useSigma } from './use-sigma'
 import { useSigmaEvents } from './use-sigma-events'
-import { useSigmaReducer } from './use-sigma-reducer'
 import { useSigmaState } from './use-sigma-state'
 
 export interface UseSigmaSelectionOptions {
@@ -28,11 +26,6 @@ export interface UseSigmaSelectionOptions {
    * @defaultValue '#d1d5db'
    */
   dimColor?: string
-  /**
-   * reducer 链内次序
-   * @defaultValue 100
-   */
-  order?: number
 }
 
 export interface UseSigmaSelectionReturn {
@@ -53,14 +46,19 @@ export interface UseSigmaSelectionReturn {
 /**
  * 悬浮与选中的状态机，把焦点及其邻居写进 sigma 的 `isHighlighted` 状态。
  *
- * 状态与外观分离：本 composable 只负责「谁被高亮」，`dim` 打开时附带一条淡出归约
- * 保证开箱可用，需要自定义外观时关掉它并在 styles 里写 `whenState: 'isHighlighted'`。
+ * 状态与外观分离：本 composable 只负责「谁被高亮」，`dim` 打开时由库内规则把无关元素
+ * 淡出，需要自定义外观时关掉它并在 styles 里写 `whenState: 'isHighlighted'`。
  */
 export function useSigmaSelection(options: UseSigmaSelectionOptions = {}): UseSigmaSelectionReturn {
-  const { hover = true, click = true, dim = true, dimColor = '#d1d5db', order = 100 } = options
+  const { hover = true, click = true, dim = true, dimColor = '#d1d5db' } = options
 
-  const { graph } = useSigma()
+  const { graph, styleOptions } = useSigma()
   const { setNodesState, setEdgesState } = useSigmaState()
+
+  styleOptions.dimColor.value = dim ? dimColor : null
+  onScopeDispose(() => {
+    styleOptions.dimColor.value = null
+  })
 
   const hovered = shallowRef<string | null>(null)
   const selected = shallowRef<string | null>(null)
@@ -110,26 +108,7 @@ export function useSigmaSelection(options: UseSigmaSelectionOptions = {}): UseSi
     previousEdges = nextEdges
   }
 
-  const { refresh } = useSigmaReducer({
-    order,
-    node(key, data, attributes, state, graphState) {
-      if (!dim || !graphState.hasHighlighted || state.isHighlighted) {
-        return data as Partial<NodeDisplayData>
-      }
-      return { ...data, color: dimColor, labelVisibility: 'hidden', zIndex: 0 } as Partial<NodeDisplayData>
-    },
-    edge(key, data, attributes, state, graphState) {
-      if (!dim || !graphState.hasHighlighted || state.isHighlighted) {
-        return data as Partial<EdgeDisplayData>
-      }
-      return { ...data, color: dimColor, labelVisibility: 'hidden', zIndex: 0 } as Partial<EdgeDisplayData>
-    }
-  })
-
-  watch(focused, () => {
-    syncState()
-    refresh()
-  })
+  watch(focused, syncState)
 
   if (hover) {
     useSigmaEvents({

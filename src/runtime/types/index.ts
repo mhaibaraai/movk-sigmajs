@@ -1,48 +1,8 @@
 import type Graph from 'graphology'
-import type { Attributes } from 'graphology-types'
 import type Sigma from 'sigma'
 import type { PrimitivesDeclaration } from 'sigma/primitives'
-import type {
-  BaseEdgeState,
-  BaseGraphState,
-  BaseNodeState,
-  EdgeDisplayData,
-  EdgeReducer,
-  NodeDisplayData,
-  NodeReducer,
-  SigmaEventType
-} from 'sigma/types'
+import type { SigmaEventType, StylesDeclaration } from 'sigma/types'
 import type { InjectionKey, Ref, ShallowRef } from 'vue'
-
-/**
- * 归约函数的通用形状，参数与 v4 的 `NodeReducer` / `EdgeReducer` 对齐。
- * 与官方的区别只在返回值语义：链内每条返回的是补丁，由链负责合并成完整显示数据
- */
-export type SigmaReducer<D, S> = (
-  key: string,
-  data: D,
-  attributes: Attributes,
-  state: S,
-  graphState: BaseGraphState,
-  graph: Graph
-) => Partial<D>
-
-/** 节点归约函数，v4 直接导出，无需从 Settings 派生 */
-export type SigmaNodeReducer = NodeReducer
-
-/** 边归约函数 */
-export type SigmaEdgeReducer = EdgeReducer
-
-/** reducer 链中的一条登记 */
-export interface SigmaReducerEntry {
-  node?: SigmaReducer<NodeDisplayData, BaseNodeState>
-  edge?: SigmaReducer<EdgeDisplayData, BaseEdgeState>
-  /**
-   * 链内执行次序，升序执行，后者的返回值覆盖前者的同名字段
-   * @defaultValue 0
-   */
-  order?: number
-}
 
 /** 内置布局算法名 */
 export type SigmaLayoutName = 'forceatlas2' | 'noverlap' | 'circular' | 'circlepack' | 'random'
@@ -56,6 +16,38 @@ export interface SigmaLazyPrimitives {
 export type SigmaPrimitivesSource = PrimitivesDeclaration | SigmaLazyPrimitives
 
 /**
+ * styles 声明，自定义状态键放宽为任意字符串。
+ *
+ * 上游把 `NS` / `ES` / `GS` 默认成 `{}`，`matchState` 只认内置状态；组件不是泛型的，
+ * 用了 `customNodeState` 的规则否则写不出来
+ */
+export type SigmaStyles = StylesDeclaration<
+  Record<string, unknown>,
+  Record<string, unknown>,
+  Record<string, unknown>,
+  Record<string, unknown>,
+  Record<string, unknown>
+>
+
+/** 与 `DEFAULT_STYLES` 的合成方式，`'none'` 表示只用用户给的规则 */
+export type SigmaStylesBase = 'default' | 'depthless' | 'none'
+
+/**
+ * 库内 styles 规则读取的运行时选项。
+ *
+ * v4 的 styles 只在构造时读取，没有 `setStyles()`。规则形状因此固定在构造期，
+ * 可变的部分放进这些 ref，由规则的闭包在每次求值时读。
+ */
+export interface SigmaStyleOptions {
+  /** 高亮时无关元素的淡出色，`null` 表示不淡出 */
+  dimColor: Ref<string | null>
+  /** 允许显示标签的最低档位，节点档位高于它则隐藏标签 */
+  labelTier: Ref<number>
+  /** 读取节点档位的属性名 */
+  labelTierAttribute: Ref<string>
+}
+
+/**
  * 根组件下发的上下文。`sigma` 与 `graph` 都是原生实例，不做任何代理或包装。
  */
 export interface SigmaContext {
@@ -67,13 +59,13 @@ export interface SigmaContext {
   isReady: Readonly<Ref<boolean>>
   /** 等待实例就绪，已就绪时立即兑现 */
   whenReady: () => Promise<Sigma>
+  /** 库内规则的运行时选项，写入后需调用 `refresh()` */
+  styleOptions: SigmaStyleOptions
   /**
-   * 往 reducer 链登记一条，返回注销函数。
-   * 由 `useSigmaReducer()` 调用，通常不必直接使用
+   * 重新求值 styles 并重绘。
+   * 纯视觉变更传 `skipIndexation`，改动可见性或标签时不要传
    */
-  registerReducer: (entry: SigmaReducerEntry) => () => void
-  /** 让 sigma 重跑归约并重绘 */
-  refreshReducers: () => void
+  refresh: (options?: { skipIndexation?: boolean }) => void
 }
 
 export const SIGMA_CONTEXT_KEY: InjectionKey<SigmaContext> = Symbol('movk-sigma')

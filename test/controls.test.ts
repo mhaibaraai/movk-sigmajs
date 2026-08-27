@@ -14,6 +14,7 @@ const state = vi.hoisted(() => ({
     settings: Record<string, unknown>
     handlers: Record<string, (payload: unknown) => void>
     camera: { zoomIn: number, zoomOut: number, reset: number, animated: unknown[] }
+    nodeStates: Map<string, { isHidden?: boolean }>
   }>
 }))
 
@@ -23,6 +24,7 @@ vi.mock('sigma', () => {
     settings: Record<string, unknown> = {}
     handlers: Record<string, (payload: unknown) => void> = {}
     camera = { zoomIn: 0, zoomOut: 0, reset: 0, animated: [] as unknown[] }
+    nodeStates = new Map<string, { isHidden?: boolean }>()
     graph: Graph
 
     constructor(graph: Graph, _container: unknown, options: { settings: Record<string, unknown> }) {
@@ -61,6 +63,19 @@ vi.mock('sigma', () => {
     on(event: string, handler: (payload: unknown) => void) {
       this.handlers[event] = handler
     }
+
+    setNodesState(keys: string[], patch: { isHidden?: boolean }) {
+      for (const key of keys) {
+        this.nodeStates.set(key, { ...this.nodeStates.get(key), ...patch })
+      }
+    }
+
+    setNodeState(key: string, patch: { isHidden?: boolean }) {
+      this.setNodesState([key], patch)
+    }
+
+    setEdgesState() {}
+    setEdgeState() {}
 
     off() {}
     resize() {}
@@ -417,14 +432,13 @@ describe('SigmaLegend', () => {
     expect(wrapper.find('.sigma-legend-item').text()).toContain('未分类')
   })
 
-  it('点击条目切换该组显隐并落到 reducer 的 visibility', async () => {
+  it('点击条目切换该组显隐并落到 isHidden 状态', async () => {
     const { wrapper, instance } = await mountControl(() => h(SigmaLegend, { field: 'type' }))
 
     await wrapper.findAll('.sigma-legend-item')[0]!.trigger('click')
 
-    const reducer = instance.options.nodeReducer as (...args: unknown[]) => { visibility?: string }
-    expect(reducer('a', {}, {}, {}, {}, {}).visibility).toBe('hidden')
-    expect(reducer('c', {}, {}, {}, {}, {}).visibility).toBeUndefined()
+    expect(instance.nodeStates.get('a')?.isHidden).toBe(true)
+    expect(instance.nodeStates.get('c')?.isHidden).not.toBe(true)
     expect(wrapper.findAll('.sigma-legend-item')[0]!.attributes('aria-pressed')).toBe('false')
   })
 
@@ -435,10 +449,8 @@ describe('SigmaLegend', () => {
     await item.trigger('click')
     await item.trigger('click')
 
-    // 过滤归约常驻链上，清空后不再隐藏任何节点
-    const reducer = instance.options.nodeReducer as (...args: unknown[]) => { visibility?: string }
-    expect(reducer('a', {}, {}, {}, {}, {}).visibility).toBeUndefined()
-    expect(reducer('c', {}, {}, {}, {}, {}).visibility).toBeUndefined()
+    expect(instance.nodeStates.get('a')?.isHidden).toBe(false)
+    expect(instance.nodeStates.get('c')?.isHidden).not.toBe(true)
     expect(item.attributes('aria-pressed')).toBe('true')
   })
 

@@ -10,7 +10,6 @@ export type { SigmaLabelTierBreakpoint, UseSigmaLabelTiersOptions, UseSigmaLabel
 export type { SigmaLayoutComponentOptions, UseSigmaLayoutOptions, UseSigmaLayoutReturn } from '../composables/use-sigma-layout'
 export type { SigmaCentralityKind, UseSigmaMetricsReturn } from '../composables/use-sigma-metrics'
 export type { UseSigmaNeighborhoodOptions, UseSigmaNeighborhoodReturn } from '../composables/use-sigma-neighborhood'
-export type { UseSigmaReducerReturn } from '../composables/use-sigma-reducer'
 export type { SigmaSearchResult, UseSigmaSearchOptions, UseSigmaSearchReturn } from '../composables/use-sigma-search'
 export type { UseSigmaSelectionOptions, UseSigmaSelectionReturn } from '../composables/use-sigma-selection'
 export type { UseSigmaStateReturn } from '../composables/use-sigma-state'
