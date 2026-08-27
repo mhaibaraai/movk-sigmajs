@@ -1,8 +1,6 @@
 import type { SerializedGraph } from 'graphology-types'
 import type { StylesDeclaration } from 'sigma/types'
 import subset from '../data/wikipedia-subset.json'
-import { toWikipediaGraph } from './wikipedia'
-import type { WikipediaDataset, WikipediaGraph } from './wikipedia'
 
 /**
  * 示例数据源。
@@ -221,21 +219,6 @@ export function createScaleGraph(nodeCount: number, edgeRatio = 3): SerializedGr
     nodes,
     edges
   }
-}
-
-/**
- * 加载完整的官方数据集：2085 个节点、5409 条边、24 个社区。
- *
- * 只负责取回原始文件，转换交给 `toWikipediaGraph()`——节点存语义属性，
- * 颜色与尺寸由 styles 的 attribute 绑定在渲染期算。
- */
-export async function loadWikipediaGraph(): Promise<WikipediaGraph> {
-  const response = await fetch('/data/wikipedia.json')
-  if (!response.ok) {
-    throw new Error(`加载 /data/wikipedia.json 失败：HTTP ${response.status}`)
-  }
-
-  return toWikipediaGraph(await response.json() as WikipediaDataset)
 }
 
 function pairKey(source: string, target: string): string {

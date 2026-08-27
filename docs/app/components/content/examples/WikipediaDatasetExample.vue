@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { computed, shallowRef } from 'vue'
 import type { StylesDeclaration } from 'sigma/types'
+import type { WikipediaPayload } from '../../../../server/api/wikipedia.json.get'
 
 /**
  * 加载 sigma 官方的 wikipedia 数据集：2085 个节点、5409 条边、24 个社区。
  *
- * 原始数据不带 color 也不带 size，节点只存 cluster 与 score 两个语义属性，
- * 换算成颜色与尺寸全在下面的 styles 里。
+ * 原始数据不带 color 也不带 size，服务端只把它转成带 cluster 与 score 两个语义属性的
+ * SerializedGraph，换算成颜色与尺寸全在下面的 styles 里。
  */
-const dataset = shallowRef<Awaited<ReturnType<typeof loadWikipediaGraph>> | null>(null)
+const dataset = shallowRef<WikipediaPayload | null>(null)
 const loadMs = shallowRef(0)
 const error = shallowRef('')
 const loading = shallowRef(false)
@@ -33,7 +34,7 @@ async function load() {
   const t0 = performance.now()
 
   try {
-    const result = await loadWikipediaGraph()
+    const result = await $fetch<WikipediaPayload>('/api/wikipedia.json')
     loadMs.value = performance.now() - t0
     dataset.value = result
   }
@@ -50,7 +51,7 @@ async function load() {
   <div class="wrap">
     <SigmaGraph
       v-if="dataset"
-      :graph="dataset.graph"
+      :data="dataset.data"
       :styles="styles"
       :settings="{ hideEdgesOnMove: true, labelRenderedSizeThreshold: 8 }"
     >
@@ -63,14 +64,14 @@ async function load() {
       <SigmaTooltip />
 
       <div class="demo-panel" data-at="bottom-left">
-        <span class="demo-tag">{{ dataset.graph.order }} 节点 · {{ dataset.graph.size }} 边 · {{ Object.keys(dataset.clusterColors).length }} 个社区</span>
-        <span class="demo-tag">加载并建图耗时 {{ loadMs.toFixed(0) }} ms</span>
+        <span class="demo-tag">{{ dataset.data.nodes.length }} 节点 · {{ dataset.data.edges.length }} 边 · {{ Object.keys(dataset.clusterColors).length }} 个社区</span>
+        <span class="demo-tag">取数耗时 {{ loadMs.toFixed(0) }} ms</span>
       </div>
     </SigmaGraph>
 
     <p v-else class="idle">
       <button type="button" :disabled="loading" @click="load">
-        {{ loading ? '加载中…' : '加载官方数据集（886 KB）' }}
+        {{ loading ? '加载中…' : '加载官方数据集（648 KB）' }}
       </button>
       <span v-if="error" class="demo-tag">{{ error }}</span>
     </p>
