@@ -2,7 +2,7 @@
   "name": "@movk/sigma",
   "type": "module",
   "version": "0.1.3",
-  "packageManager": "pnpm@11.23.0",
+  "packageManager": "pnpm@11.24.0",
   "description": "基于 sigma v4 的知识图谱可视化 Nuxt 模块：SigmaGraph 等声明式组件与 composables，覆盖渲染、交互、布局、分析与 DOM 覆盖层，面向 1000+ 节点的大规模图谱。",
   "author": "YiXuan <mhaibaraai@gmail.com>",
   "license": "MIT",
@@ -89,7 +89,7 @@
     "defu": "^6.1.7"
   },
   "peerDependencies": {
-    "@sigma/export-image": ">=4.0.0-alpha.3",
+    "@sigma/export-image": ">=4.0.0-beta.0",
     "@sigma/node-border": ">=4.0.0-alpha.3",
     "@sigma/node-image": ">=4.0.0-alpha.3",
     "@sigma/node-piechart": ">=4.0.0-alpha.3",
@@ -100,7 +100,7 @@
     "graphology-layout-forceatlas2": ">=0.10.0",
     "graphology-layout-noverlap": ">=0.4.0",
     "graphology-metrics": ">=2.0.0",
-    "sigma": ">=4.0.0-beta.3",
+    "sigma": ">=4.0.0-beta.5",
     "vue": ">=3.5.0"
   },
   "peerDependenciesMeta": {
@@ -144,16 +144,16 @@
     "@types/node": "latest",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vue/test-utils": "^2.4.11",
-    "eslint": "^10.9.0",
+    "eslint": "^10.9.1",
     "graphology": "^0.26.0",
     "graphology-types": "^0.24.8",
-    "happy-dom": "^20.11.6",
+    "happy-dom": "^20.11.8",
     "nuxt": "^4.5.2",
     "release-it": "^21.0.2",
-    "sigma": "4.0.0-beta.3",
+    "sigma": "4.0.0-beta.5",
     "typescript": "~6.0.3",
     "vitest": "^4.1.11",
-    "vue": "^3.5.41",
+    "vue": "^3.5.42",
     "vue-tsc": "^3.3.11"
   }
 }
