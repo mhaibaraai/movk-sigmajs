@@ -61,5 +61,14 @@ export default defineNuxtConfig({
   mcp: {
     name: 'Movk Sigma',
     browserRedirect: '/docs/getting-started/ai/mcp'
+  },
+
+  sigma: {
+    settings: {
+      gestureTarget: 'shared',
+      sharedGestureWheelMessage: '按住 Ctrl 滚动可缩放图谱',
+      sharedGestureAppleWheelMessage: '按住 ⌘ 滚动可缩放图谱',
+      sharedGestureTouchMessage: '双指拖动可操作图谱'
+    }
   }
 })

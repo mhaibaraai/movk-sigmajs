@@ -1,4 +1,10 @@
 export default defineAppConfig({
+  ui: {
+    colors: {
+      primary: 'rose',
+      neutral: 'mist'
+    }
+  },
   aside: {
     filter: {
       enabled: true
