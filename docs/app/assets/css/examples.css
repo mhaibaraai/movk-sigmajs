@@ -1,37 +1,5 @@
-.example-stage {
+.sigma-root {
   height: 420px;
-}
-
-.demo-panel {
-  position: absolute;
-  z-index: 5;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-width: calc(100% - 16px);
-  padding: 8px 10px;
-  border: 1px solid var(--sigma-color-border);
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--sigma-color-bg) 92%, transparent);
-  color: var(--sigma-color-fg);
-  font-size: 13px;
-  line-height: 1.5;
-}
-
-.demo-panel[data-at="top-left"] {
-  inset: 8px auto auto 8px;
-}
-
-.demo-panel[data-at="top-right"] {
-  inset: 8px 8px auto auto;
-}
-
-.demo-panel[data-at="bottom-left"] {
-  inset: auto auto 8px 8px;
-}
-
-.demo-panel[data-at="bottom-right"] {
-  inset: auto 8px 8px auto;
 }
 
 .demo-row {

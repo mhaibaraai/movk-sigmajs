@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import type { SerializedGraph } from 'graphology-types'
 
-// data 通道：库经 applyGraphDiff 把 SerializedGraph 增量同步到内部 graphology 实例，
-// 换掉整个 data 也只重建差异部分，不走 clear() + import()
 const data = ref<SerializedGraph>({
   attributes: {},
   options: { type: 'mixed', multi: false, allowSelfLoops: true },
@@ -49,16 +46,9 @@ function remove() {
 
 <template>
   <SigmaGraph :data="data" :settings="{ renderEdgeLabels: true }">
-    <div class="demo-panel" data-at="top-left">
-      <div class="demo-row">
-        <button type="button" @click="add">
-          新增节点
-        </button>
-        <button type="button" :disabled="seq === 0" @click="remove">
-          移除最后一个
-        </button>
-      </div>
-      <span class="demo-tag">增删只影响差异部分，其余节点不重建、相机不跳</span>
-    </div>
+    <SigmaControls>
+      <UButton label="新增节点" @click="add" />
+      <UButton :disabled="seq === 0" label="移除最后一个" @click="remove" />
+    </SigmaControls>
   </SigmaGraph>
 </template>

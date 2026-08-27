@@ -1,11 +1,6 @@
 <script setup lang="ts">
 import type { StylesDeclaration } from 'sigma/types'
 
-/**
- * primitives 声明「有哪些形状与路径可用」，styles 决定「谁用哪个」。
- * 内置的工厂函数来自 sigma/rendering，那个模块顶层就读 WebGL 全局，
- * 必须包在 defineSigmaPrimitives 里延迟到客户端。
- */
 const primitives = defineSigmaPrimitives(async () => {
   const { sdfCircle, layerFill, pathLine, pathCurved, pathLoop, extremityArrow } = await import('sigma/rendering')
 
@@ -58,11 +53,5 @@ const data = {
     :data="data"
     :primitives="primitives"
     :styles="styles"
-    :settings="{ renderEdgeLabels: true }"
-  >
-    <div class="demo-panel" data-at="top-left">
-      <span class="demo-tag">三条平行边经 parallelPath 自动分散，自环走 loop 路径</span>
-      <span class="demo-tag">六边形来自本库的 sdfPolygon，圆形与路径来自 sigma 内置</span>
-    </div>
-  </SigmaGraph>
+  />
 </template>

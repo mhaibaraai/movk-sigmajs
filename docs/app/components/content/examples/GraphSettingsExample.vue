@@ -2,12 +2,6 @@
 import { shallowRef } from 'vue'
 import type Sigma from 'sigma'
 
-/**
- * settings 整体透传，不做键白名单。
- *
- * `futureUnknownSetting` 是本库完全不认识的键，仍会原样进 sigma 并能读回，
- * 意味着 sigma 新增的配置项不必等本库升级即可使用。
- */
 const settings = {
   renderEdgeLabels: true,
   labelRenderedSizeThreshold: 0,
@@ -34,9 +28,10 @@ const data = {
 
 <template>
   <SigmaGraph :data="data" :settings="settings" @ready="onReady">
-    <div class="demo-panel" data-at="top-left">
-      <span class="demo-tag">sigma.getSettings().futureUnknownSetting</span>
-      <code>{{ readBack || '读取中…' }}</code>
-    </div>
+    <SigmaControls>
+      <UCard>
+        {{ readBack }}
+      </UCard>
+    </SigmaControls>
   </SigmaGraph>
 </template>
