@@ -205,6 +205,10 @@ const emit = defineEmits<{
   'afterRender': []
   /** 每帧纹理上传完成后 */
   'afterTexturesUpload': []
+  /** 浏览器回收了 WebGL 上下文，画布此刻是空的 */
+  'webglContextLost': []
+  /** 上下文已恢复，sigma 重建了渲染资源并自动重绘 */
+  'webglContextRestored': []
   /** 容器尺寸变化、画布已重新适配 */
   'resize': []
   /** 实例被销毁 */
