@@ -70,6 +70,13 @@ export interface UseSigmaCameraReturn {
    * 那套坐标已被 sigma 归一化，走这里会错位
    */
   toViewport: (point: Coordinates) => Coordinates | null
+  /** 原始图坐标转 framed 归一化坐标，未就绪时为 `null` */
+  toFramedGraph: (point: Coordinates) => Coordinates | null
+  /**
+   * framed 归一化坐标转原始图坐标，未就绪时为 `null`。
+   * `getNodeDisplayData()` 给的就是 framed 坐标，把拖拽后的位置写回业务数据要经过这里
+   */
+  fromFramedGraph: (point: Coordinates) => Coordinates | null
 }
 
 /**
@@ -212,6 +219,14 @@ export function useSigmaCamera(): UseSigmaCameraReturn {
 
     toViewport(point) {
       return sigma.value?.graphToViewport(point) ?? null
+    },
+
+    toFramedGraph(point) {
+      return sigma.value?.graphToFramedGraph(point) ?? null
+    },
+
+    fromFramedGraph(point) {
+      return sigma.value?.framedGraphToGraph(point) ?? null
     }
   }
 }
