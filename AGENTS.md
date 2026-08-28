@@ -11,6 +11,14 @@
 - props 与 options 的 JSDoc 按规范标注 `@defaultValue` 与 `@see`：默认值不写进描述文本，字符串加引号、数字与布尔裸写、数组与对象用反引号包裹；纯描述保持单行，带标签则展开为多行块
 - 中文描述使用全角标点，代码标识符、数字、单位、URL 保持半角，中英文之间加空格
 
+## 组件文档页
+
+- 骨架：`## 用法`（开篇 + 一 prop 一 `###` 小节，顺序照 `defineProps`）→ `## 示例`（插槽、expose 方法等非 prop 能力，一节一项）→ `## API`
+- 每个小节配一个可跑示例 `:component-example{name="XxxExample"}`；prop 变体由 MDC `options` 选择条驱动，示例内不写切换按钮
+- `### Slots` 只放 `:component-slots`，作用域说明写在 `## 示例` 的插槽小节；`### Expose` 用 `| Name | Type |` 两列表格
+- 示例的读数与按钮放进 `<SigmaControls>`，用 Nuxt UI 与工具类，不用 `.demo-*` 面板类
+- 样板：`docs/content/docs/2.components/1.graph.md`
+
 ## 提交规范
 
 遵循 Conventional Commits，`description`、`body`、`footer` 一律用中文。
