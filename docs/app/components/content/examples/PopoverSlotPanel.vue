@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
-
 // useSigmaSelection 与 SigmaPopover 都要在 SigmaGraph 子树内，
 // 所以这一层是独立组件而不是写在示例外壳里
 const { selected } = useSigmaSelection()
@@ -32,18 +30,12 @@ watch(selected, (key) => {
         <div class="detail">
           <header>
             <strong>{{ attributes.label ?? node }}</strong>
-            <button
-              type="button"
-              @click="close"
-            >
+            <button type="button" @click="close">
               ×
             </button>
           </header>
           <ul v-if="details[node]">
-            <li
-              v-for="line in details[node]"
-              :key="line"
-            >
+            <li v-for="line in details[node]" :key="line">
               {{ line }}
             </li>
           </ul>
@@ -54,9 +46,11 @@ watch(selected, (key) => {
       </template>
     </SigmaPopover>
 
-    <div class="demo-panel" data-at="top-left">
-      <span class="demo-tag">点击节点打开常驻浮层，详情在打开后才请求</span>
-    </div>
+    <SigmaControls>
+      <div class="bg-accented p-2 text-muted text-xs">
+        点击节点打开常驻浮层，详情在打开后才请求；浮层内可以点，关闭按钮走作用域里的 close()
+      </div>
+    </SigmaControls>
   </div>
 </template>
 

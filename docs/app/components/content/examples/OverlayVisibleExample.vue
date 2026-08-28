@@ -1,7 +1,17 @@
 <script setup lang="ts">
-// 锚到节点：组件内部走 framedGraphToViewport，因为 getNodeDisplayData
-// 返回的是 sigma 归一化后的 framed 坐标
-withDefaults(defineProps<{ node?: string }>(), { node: 'a' })
+import { defineComponent, h } from 'vue'
+
+// 挂载时刻记在组件内部：时间不变说明这一次「显示」没有重新挂载，
+// 即隐藏期间插槽内容一直活着
+const Badge = defineComponent({
+  props: { label: { type: String, required: true } },
+  setup(props) {
+    const since = new Date().toLocaleTimeString()
+    return () => h('div', { class: 'badge' }, `${props.label} · 挂载于 ${since}`)
+  }
+})
+
+const visible = shallowRef(true)
 
 const data = {
   attributes: {},
@@ -20,15 +30,18 @@ const data = {
 
 <template>
   <SigmaGraph :data="data">
-    <SigmaOverlay :node="node" :offset="[0, -24]">
-      <div class="badge">
-        锚定在 {{ node }}
-      </div>
+    <SigmaOverlay node="b" :offset="[0, -24]" :visible="visible">
+      <Badge label="没有 v-if" />
+    </SigmaOverlay>
+
+    <SigmaOverlay node="c" :offset="[0, -24]" :visible="visible">
+      <Badge v-if="visible" label="加了 v-if" />
     </SigmaOverlay>
 
     <SigmaControls>
+      <UButton :label="visible ? '隐藏' : '显示'" @click="visible = !visible" />
       <div class="bg-accented p-2 text-muted text-xs">
-        缩放平移时覆盖层跟随，节点被隐藏或移除则自动隐藏
+        再次显示后，左侧时间不变（一直挂着），右侧刷新（真的重建过）
       </div>
     </SigmaControls>
   </SigmaGraph>

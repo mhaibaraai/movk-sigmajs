@@ -20,8 +20,8 @@ const { data } = await useFetch('/api/data.json')
   >
     <SigmaControls>
       <div class="bg-accented p-2">
-        <span class="demo-tag">最近 5 条事件</span>
-        <ul class="demo-log">
+        <span class="text-muted text-xs">最近 5 条事件</span>
+        <ul class="list-none text-muted text-xs font-mono">
           <li v-for="(line, index) in log" :key="`${line}-${index}`">
             {{ line }}
           </li>

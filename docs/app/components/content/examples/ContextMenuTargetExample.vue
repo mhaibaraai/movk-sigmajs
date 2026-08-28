@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue'
-
-const last = shallowRef('')
+// target 决定右键哪里会弹菜单。stage 命中没有节点可锚，组件把视口坐标
+// 转成图坐标交给 SigmaOverlay 的 position 通道
+withDefaults(defineProps<{ target?: Array<'node' | 'edge' | 'stage'> }>(), {
+  target: () => ['node']
+})
 
 const data = {
   attributes: {},
@@ -16,51 +18,22 @@ const data = {
 
 <template>
   <SigmaGraph :data="data" :settings="{ enableEdgeEvents: true }">
-    <!-- target 决定右键哪里会弹菜单，stage 命中时 id 为 null、锚点走图坐标 -->
-    <SigmaContextMenu :target="['node', 'edge', 'stage']">
-      <template #default="{ type, id, attributes, close }">
-        <div class="menu">
-          <span class="head">{{ type }} {{ id ?? '（空白处）' }}</span>
-          <button type="button" @click="last = `${type} ${id ?? '-'}`; close()">
-            {{ attributes.label ? `操作「${attributes.label}」` : '在此处新建' }}
-          </button>
-        </div>
+    <SigmaContextMenu :target="target">
+      <template #default="{ type, id }">
+        <span class="item">{{ type }} {{ id ?? '（空白处）' }}</span>
       </template>
     </SigmaContextMenu>
 
-    <div class="demo-panel" data-at="top-left">
-      <span class="demo-tag">在节点、边、空白处分别右键</span>
-      <span class="demo-tag">最近一次：{{ last || '—' }}</span>
-    </div>
+    <SigmaControls>
+      <div class="bg-accented p-2 text-muted text-xs">
+        当前接管 {{ target.join(' / ') }}；未接管的目标上右键仍弹浏览器自己的菜单
+      </div>
+    </SigmaControls>
   </SigmaGraph>
 </template>
 
 <style scoped>
-.menu {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 140px;
-}
-
-.head {
-  opacity: 0.6;
+.item {
   font-size: 12px;
-}
-
-.menu button {
-  padding: 4px 8px;
-  border: 1px solid var(--sigma-color-border);
-  border-radius: 4px;
-  background: none;
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-  font-size: 12px;
-  text-align: left;
-}
-
-.menu button:hover {
-  background: var(--sigma-color-hover);
 }
 </style>

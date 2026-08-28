@@ -37,9 +37,11 @@ const data = {
       </div>
     </SigmaOverlay>
 
-    <div class="demo-panel" data-at="top-left">
-      <span class="demo-tag">两个标记锚在同一个点，缩放平移后应始终重合</span>
-    </div>
+    <SigmaControls>
+      <div class="bg-accented p-2 text-muted text-xs">
+        两个标记锚在同一个点，缩放平移后应始终重合
+      </div>
+    </SigmaControls>
   </SigmaGraph>
 </template>
 

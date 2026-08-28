@@ -1,6 +1,7 @@
 <script setup lang="ts">
-// node 为空时浮层不显示，open 的值不受影响
-const node = shallowRef<string | null>('a')
+// 边没有单一锚点，组件退化到 graph.source(edge) 定位，
+// 提示层贴在边的源节点上而不是鼠标位置
+withDefaults(defineProps<{ target?: 'node' | 'edge' | 'both' }>(), { target: 'node' })
 
 const data = {
   attributes: {},
@@ -11,27 +12,19 @@ const data = {
     { key: 'c', attributes: { label: '制度 C', x: 160, y: -220, size: 12, color: '#22c55e' } }
   ],
   edges: [
-    { source: 'a', target: 'b' },
-    { source: 'a', target: 'c' }
+    { source: 'a', target: 'b', attributes: { label: '引用' } },
+    { source: 'a', target: 'c', attributes: { label: '替代' } }
   ]
 }
 </script>
 
 <template>
-  <SigmaGraph
-    :data="data"
-    @click-node="({ node: key }) => (node = key)"
-    @click-stage="() => (node = null)"
-  >
-    <SigmaPopover :node="node">
-      <template #default="{ attributes }">
-        <strong>{{ attributes.label }}</strong>
-      </template>
-    </SigmaPopover>
+  <SigmaGraph :data="data" :settings="{ enableEdgeEvents: true }">
+    <SigmaTooltip :target="target" />
 
     <SigmaControls>
       <div class="bg-accented p-2 text-muted text-xs">
-        node = {{ node ?? 'null' }} · 点节点换锚点，点画布空白处置空
+        两条边都从制度 A 出发，悬浮任意一条，提示层都停在 A 上
       </div>
     </SigmaControls>
   </SigmaGraph>

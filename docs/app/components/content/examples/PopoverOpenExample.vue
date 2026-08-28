@@ -1,6 +1,14 @@
 <script setup lang="ts">
-// node 为空时浮层不显示，open 的值不受影响
+// 显示需要 open 为真且 node 非空。node 绑选中项、open 绑用户的关闭动作，
+// 换节点时把 open 置回 true，否则上一次的关闭会一直生效
 const node = shallowRef<string | null>('a')
+const open = ref(true)
+
+watch(node, (key) => {
+  if (key) {
+    open.value = true
+  }
+})
 
 const data = {
   attributes: {},
@@ -23,15 +31,17 @@ const data = {
     @click-node="({ node: key }) => (node = key)"
     @click-stage="() => (node = null)"
   >
-    <SigmaPopover :node="node">
-      <template #default="{ attributes }">
+    <SigmaPopover v-model:open="open" :node="node">
+      <template #default="{ attributes, close }">
         <strong>{{ attributes.label }}</strong>
+        <UButton size="xs" variant="ghost" label="关闭" @click="close" />
       </template>
     </SigmaPopover>
 
     <SigmaControls>
+      <UButton :label="open ? '关闭浮层' : '打开浮层'" @click="open = !open" />
       <div class="bg-accented p-2 text-muted text-xs">
-        node = {{ node ?? 'null' }} · 点节点换锚点，点画布空白处置空
+        open = {{ open }} · node = {{ node ?? 'null' }} · 可见 = {{ open && Boolean(node) }}
       </div>
     </SigmaControls>
   </SigmaGraph>
