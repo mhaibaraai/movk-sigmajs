@@ -4,9 +4,11 @@ import type { SigmaStyles } from '@movk/sigma'
 const data = demoGraph({ nodes: 24, extraEdges: 1 })
 
 // 自定义状态标志位，键名不能与 BaseNodeState 冲突
-const customNodeState = { reach: 'out' }
+interface NodeState { reach: string }
 
-const styles: SigmaStyles = {
+const customNodeState: NodeState = { reach: 'out' }
+
+const styles: SigmaStyles<NodeState> = {
   nodes: [demoNodeStyle, {
     matchState: 'reach',
     cases: {

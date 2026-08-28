@@ -19,14 +19,14 @@ const { data } = await useFetch('/api/data.json')
     @ready="() => push('ready')"
   >
     <SigmaControls>
-      <UCard>
+      <div class="bg-accented p-2">
         <span class="demo-tag">最近 5 条事件</span>
         <ul class="demo-log">
           <li v-for="(line, index) in log" :key="`${line}-${index}`">
             {{ line }}
           </li>
         </ul>
-      </UCard>
+      </div>
     </SigmaControls>
   </SigmaGraph>
 </template>

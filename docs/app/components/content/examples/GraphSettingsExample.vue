@@ -1,6 +1,28 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue'
 import type Sigma from 'sigma'
+import Graph from 'graphology'
+
+const graph = new Graph()
+
+// Grid layout with varying sizes
+const COLS = 8
+const ROWS = 6
+const SPACING = 100
+const COLORS = ['#e22653', '#277da1', '#33cc33', '#ff9900', '#9b59b6', '#1abc9c']
+
+for (let row = 0; row < ROWS; row++) {
+  for (let col = 0; col < COLS; col++) {
+    const id = `${row}-${col}`
+    graph.addNode(id, {
+      x: (col - (COLS - 1) / 2) * SPACING,
+      y: ((ROWS - 1) / 2 - row) * SPACING,
+      color: COLORS[(row + col) % COLORS.length]
+    })
+
+    if (col > 0) graph.addEdge(`${row}-${col - 1}`, id)
+    if (row > 0) graph.addEdge(`${row - 1}-${col}`, id)
+  }
+}
 
 const settings = {
   renderEdgeLabels: true,
@@ -14,24 +36,14 @@ function onReady(instance: Sigma) {
   const all = instance.getSettings() as unknown as Record<string, unknown>
   readBack.value = String(all.futureUnknownSetting)
 }
-
-const data = {
-  attributes: {},
-  options: { type: 'mixed' as const, multi: false, allowSelfLoops: true },
-  nodes: [
-    { key: 'a', attributes: { label: '节点 A', x: 0, y: 0, size: 14, color: '#f43f5e' } },
-    { key: 'b', attributes: { label: '节点 B', x: 340, y: 300, size: 12, color: '#3b82f6' } }
-  ],
-  edges: [{ source: 'a', target: 'b', attributes: { label: '关联' } }]
-}
 </script>
 
 <template>
-  <SigmaGraph :data="data" :settings="settings" @ready="onReady">
+  <SigmaGraph :graph="graph" :settings="settings" @ready="onReady">
     <SigmaControls>
-      <UCard>
-        {{ readBack }}
-      </UCard>
+      <div class="bg-accented p-2">
+        futureUnknownSetting: {{ readBack }}
+      </div>
     </SigmaControls>
   </SigmaGraph>
 </template>
