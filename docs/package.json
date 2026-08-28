@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.126",
-    "@movk/nuxt-docs": "^2.2.1",
+    "@movk/nuxt-docs": "^2.2.2",
     "@movk/sigma": "workspace:*",
     "@nuxt/content": "^3.15.2",
     "@nuxt/ui": "^4.11.0",

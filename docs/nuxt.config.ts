@@ -42,6 +42,16 @@ export default defineNuxtConfig({
 
   compatibilityDate: '2026-06-30',
 
+  vite: {
+    optimizeDeps: {
+      include: [
+        '@unhead/schema-org/vue',
+        '@movk/core',
+        'sigma/types'
+      ]
+    }
+  },
+
   aiChat: {
     model: 'alibaba/glm-5.1',
     models: [
