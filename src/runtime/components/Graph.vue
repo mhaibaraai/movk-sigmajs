@@ -1,9 +1,10 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="NS = object, ES = object, GS = object">
 import Graph from 'graphology'
 import { useResizeObserver } from '@vueuse/core'
 import { defu } from 'defu'
 import { useRuntimeConfig } from '#app'
 import { computed, onBeforeUnmount, onMounted, provide, readonly, shallowRef, toRaw, watch } from 'vue'
+import type { ShallowRef } from 'vue'
 import type Sigma from 'sigma'
 import type { Attributes, SerializedGraph } from 'graphology-types'
 import type { Settings } from 'sigma/settings'
@@ -50,7 +51,7 @@ const props = defineProps<{
    * sigma 只在构造时读取，变更会重建实例
    * @see https://v4.sigmajs.org/get-started/style-the-graph/
    */
-  styles?: SigmaStyles
+  styles?: SigmaStyles<NoInfer<NS>, NoInfer<ES>, NoInfer<GS>>
   /**
    * 与哪一套基础规则合成。sigma 拿到 `styles.nodes` 时是整体替换而非合并，
    * 不合成就会丢掉标签绑定、`isHidden` 可见性与悬浮反馈
@@ -76,11 +77,11 @@ const props = defineProps<{
   /** 边侧的同名逃生舱 */
   edgeReducer?: EdgeReducer
   /** 自定义节点状态标志位的默认值，键名不能与 `BaseNodeState` 冲突 */
-  customNodeState?: ForbidBaseKeys<BaseNodeState, Record<string, unknown>>
+  customNodeState?: ForbidBaseKeys<BaseNodeState, NS>
   /** 自定义边状态标志位的默认值 */
-  customEdgeState?: ForbidBaseKeys<BaseEdgeState, Record<string, unknown>>
+  customEdgeState?: ForbidBaseKeys<BaseEdgeState, ES>
   /** 自定义图级状态标志位的默认值 */
-  customGraphState?: ForbidBaseKeys<BaseGraphState, Record<string, unknown>>
+  customGraphState?: ForbidBaseKeys<BaseGraphState, GS>
   /**
    * 节点标签 SDF 字形图集的源字号，不是标签显示字号（后者在 `styles` 的 `labelSize`）。
    *
@@ -352,15 +353,17 @@ function destroyInstance() {
  * 不显式合成就会丢掉标签绑定、`isHidden` 可见性与悬浮反馈
  */
 async function resolveStyles(): Promise<SigmaStyles> {
+  // 组件的泛型到这里为止：composeStyles 只按序拼接规则数组，不看状态形状
+  const userStyles = toRaw(props.styles) as SigmaStyles | undefined
   const base = props.stylesBase ?? 'default'
   if (base === 'none') {
-    return composeStyles(toRaw(props.styles), libraryStyles)
+    return composeStyles(userStyles, libraryStyles)
   }
 
   const { DEFAULT_STYLES, DEPTHLESS_STYLES } = await import('sigma/types')
   const preset = base === 'depthless' ? DEPTHLESS_STYLES : DEFAULT_STYLES
 
-  return composeStyles(preset as SigmaStyles, toRaw(props.styles), libraryStyles)
+  return composeStyles(preset as SigmaStyles, userStyles, libraryStyles)
 }
 
 async function createInstance() {
@@ -456,7 +459,10 @@ onBeforeUnmount(() => {
   destroyInstance()
 })
 
-defineExpose({ sigma, graph })
+defineExpose({
+  sigma: sigma as ShallowRef<Sigma<Attributes, Attributes, Attributes, NS, ES, GS> | null>,
+  graph
+})
 </script>
 
 <template>

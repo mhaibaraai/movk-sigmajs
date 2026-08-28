@@ -16,17 +16,18 @@ export interface SigmaLazyPrimitives {
 export type SigmaPrimitivesSource = PrimitivesDeclaration | SigmaLazyPrimitives
 
 /**
- * styles 声明，自定义状态键放宽为任意字符串。
+ * styles 声明，三个泛型对应 `SigmaGraph` 的 `customNodeState` / `customEdgeState` /
+ * `customGraphState`，与 `useSigmaState()` 同序。
  *
- * 上游把 `NS` / `ES` / `GS` 默认成 `{}`，`matchState` 只认内置状态；组件不是泛型的，
- * 用了 `customNodeState` 的规则否则写不出来
+ * 上游把 `NS` / `ES` / `GS` 默认成 `{}`，`whenState` 与 `matchState` 只认内置状态；
+ * 声明了自定义状态就把形状传进来，规则里读到的 `state` 才是精确类型
  */
-export type SigmaStyles = StylesDeclaration<
+export type SigmaStyles<NS = object, ES = object, GS = object> = StylesDeclaration<
   Record<string, unknown>,
   Record<string, unknown>,
-  Record<string, unknown>,
-  Record<string, unknown>,
-  Record<string, unknown>
+  NS,
+  ES,
+  GS
 >
 
 /** 与 `DEFAULT_STYLES` 的合成方式，`'none'` 表示只用用户给的规则 */
@@ -124,11 +125,8 @@ const SIGMA_EVENT_FLAGS: Record<SigmaEventType, true> = {
   afterProcess: true,
   beforeRender: true,
   afterRender: true,
-  // 纹理上传完毕，供外部 GPU 数据写入方接管（如 @sigma/layout-fa2-gpu）
   afterTexturesUpload: true,
-  // 浏览器回收了 WebGL 上下文，画布此刻是空的
   webglContextLost: true,
-  // 上下文已恢复，sigma 重建了渲染资源并自动重绘
   webglContextRestored: true,
   resize: true,
   kill: true,
