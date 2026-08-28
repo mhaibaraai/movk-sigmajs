@@ -1,47 +1,17 @@
 <script setup lang="ts">
-// 锚到节点：组件内部走 framedGraphToViewport，因为 getNodeDisplayData
-// 返回的是 sigma 归一化后的 framed 坐标
-withDefaults(defineProps<{ node?: string }>(), { node: 'a' })
+const props = withDefaults(defineProps<{ node?: string }>(), { node: '11.0' })
 
-const data = {
-  attributes: {},
-  options: { type: 'mixed' as const, multi: false, allowSelfLoops: true },
-  nodes: [
-    { key: 'a', attributes: { label: '节点 A', x: 0, y: 0, size: 14, color: '#f43f5e' } },
-    { key: 'b', attributes: { label: '节点 B', x: 320, y: 140, size: 12, color: '#3b82f6' } },
-    { key: 'c', attributes: { label: '节点 C', x: 160, y: -220, size: 12, color: '#22c55e' } }
-  ],
-  edges: [
-    { source: 'a', target: 'b' },
-    { source: 'a', target: 'c' }
-  ]
-}
+const { data } = await useFetch('/api/small.json')
+
+const label = computed(() => data.value?.nodes.find(item => item.key === props.node)?.attributes.label)
 </script>
 
 <template>
   <SigmaGraph :data="data">
     <SigmaOverlay :node="node" :offset="[0, -24]">
-      <div class="badge">
-        锚定在 {{ node }}
-      </div>
+      <UBadge color="neutral" variant="solid" class="-translate-x-1/2 -translate-y-full whitespace-nowrap">
+        锚定在 {{ label }}
+      </UBadge>
     </SigmaOverlay>
-
-    <SigmaControls>
-      <div class="bg-accented p-2 text-muted text-xs">
-        缩放平移时覆盖层跟随，节点被隐藏或移除则自动隐藏
-      </div>
-    </SigmaControls>
   </SigmaGraph>
 </template>
-
-<style scoped>
-.badge {
-  translate: -50% -100%;
-  padding: 4px 8px;
-  border-radius: 6px;
-  background: #1f2328;
-  color: #fff;
-  font-size: 12px;
-  white-space: nowrap;
-}
-</style>

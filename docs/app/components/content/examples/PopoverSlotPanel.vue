@@ -1,9 +1,7 @@
 <script setup lang="ts">
-// useSigmaSelection 与 SigmaPopover 都要在 SigmaGraph 子树内，
-// 所以这一层是独立组件而不是写在示例外壳里
+// useSigmaSelection 与 SigmaPopover 都要在 SigmaGraph 子树内，所以这一层是独立组件
 const { selected } = useSigmaSelection()
 
-// 详情按需加载，不随图数据一起下发：图上只带渲染必需的字段
 const details = ref<Record<string, string[]>>({})
 const open = ref(true)
 
@@ -12,7 +10,7 @@ async function loadDetail(key: string) {
     return
   }
   await new Promise(resolve => setTimeout(resolve, 200))
-  details.value = { ...details.value, [key]: [`${key} 第一条`, `${key} 第二条`, `${key} 第三条`] }
+  details.value = { ...details.value, [key]: ['出场章节 12', '关联人物 8', '社区 3'] }
 }
 
 watch(selected, (key) => {
@@ -27,19 +25,17 @@ watch(selected, (key) => {
   <div>
     <SigmaPopover v-model:open="open" :node="selected">
       <template #default="{ node, attributes, close }">
-        <div class="detail">
-          <header>
+        <div class="min-w-40">
+          <header class="flex items-center justify-between gap-3">
             <strong>{{ attributes.label ?? node }}</strong>
-            <button type="button" @click="close">
-              ×
-            </button>
+            <UButton size="xs" variant="ghost" color="neutral" icon="i-lucide-x" @click="close" />
           </header>
-          <ul v-if="details[node]">
+          <ul v-if="details[node]" class="mt-1.5 list-disc pl-4.5">
             <li v-for="line in details[node]" :key="line">
               {{ line }}
             </li>
           </ul>
-          <p v-else>
+          <p v-else class="mt-1.5 text-muted">
             加载中…
           </p>
         </div>
@@ -53,34 +49,3 @@ watch(selected, (key) => {
     </SigmaControls>
   </div>
 </template>
-
-<style scoped>
-.detail {
-  min-width: 160px;
-}
-
-.detail header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-}
-
-.detail header button {
-  border: 0;
-  background: none;
-  color: inherit;
-  cursor: pointer;
-  font-size: 15px;
-}
-
-.detail ul {
-  margin: 6px 0 0;
-  padding-left: 18px;
-}
-
-.detail p {
-  margin: 6px 0 0;
-  opacity: 0.6;
-}
-</style>

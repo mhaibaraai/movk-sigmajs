@@ -1,20 +1,7 @@
 <script setup lang="ts">
-// 不给插槽时展示节点或边的 label，缺失则退回图元的 key
-withDefaults(defineProps<{ trigger?: 'hover' | 'click' }>(), { trigger: 'hover' })
+defineProps<{ trigger?: 'hover' | 'click' }>()
 
-const data = {
-  attributes: {},
-  options: { type: 'mixed' as const, multi: false, allowSelfLoops: true },
-  nodes: [
-    { key: 'a', attributes: { label: '制度 A', x: 0, y: 0, size: 14, color: '#f43f5e' } },
-    { key: 'b', attributes: { label: '制度 B', x: 320, y: 140, size: 12, color: '#3b82f6' } },
-    { key: 'c', attributes: { x: 160, y: -220, size: 12, color: '#22c55e' } }
-  ],
-  edges: [
-    { source: 'a', target: 'b' },
-    { source: 'a', target: 'c' }
-  ]
-}
+const { data } = await useFetch('/api/data.json')
 </script>
 
 <template>
@@ -23,7 +10,7 @@ const data = {
 
     <SigmaControls>
       <div class="bg-accented p-2 text-muted text-xs">
-        hover 跟着指针进出；click 点节点打开、点画布空白处关闭。节点 c 没有 label，显示的是 key
+        hover 跟着指针进出；click 点节点打开、点画布空白处关闭。没有插槽时展示的是节点的 label
       </div>
     </SigmaControls>
   </SigmaGraph>

@@ -1,20 +1,7 @@
 <script setup lang="ts">
-// node 为空时浮层不显示，open 的值不受影响
-const node = shallowRef<string | null>('a')
+const node = shallowRef<string | null>('11.0')
 
-const data = {
-  attributes: {},
-  options: { type: 'mixed' as const, multi: false, allowSelfLoops: true },
-  nodes: [
-    { key: 'a', attributes: { label: '制度 A', x: 0, y: 0, size: 14, color: '#f43f5e' } },
-    { key: 'b', attributes: { label: '制度 B', x: 320, y: 140, size: 12, color: '#3b82f6' } },
-    { key: 'c', attributes: { label: '制度 C', x: 160, y: -220, size: 12, color: '#22c55e' } }
-  ],
-  edges: [
-    { source: 'a', target: 'b' },
-    { source: 'a', target: 'c' }
-  ]
-}
+const { data } = await useFetch('/api/data.json')
 </script>
 
 <template>
