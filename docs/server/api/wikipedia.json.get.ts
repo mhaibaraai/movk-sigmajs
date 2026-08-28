@@ -1,34 +1,6 @@
 import type { SerializedEdge, SerializedGraph, SerializedNode } from 'graphology-types'
 import dataset from '../../public/data/wikipedia.json'
 
-/** 数据集节点，坐标由上游预先跑好，节点自身不带 color 与 size */
-interface WikipediaNode {
-  key: string
-  label: string
-  /** 词条类型，一多半是 `"unknown"`，做不了分类 */
-  tag: string
-  /** 所属社区的 key，分类一律用它 */
-  cluster: string
-  URL: string
-  x: number
-  y: number
-  /** 上游算好的重要度，styles 里换算成节点 size */
-  score: number
-}
-
-interface WikipediaCluster {
-  key: string
-  color: string
-  clusterLabel: string
-}
-
-interface WikipediaDataset {
-  nodes: WikipediaNode[]
-  edges: [source: string, target: string][]
-  clusters: WikipediaCluster[]
-  tags: { key: string, image: string }[]
-}
-
 export interface WikipediaPayload {
   /** 只带语义属性的图，视觉映射交给 styles */
   data: SerializedGraph
@@ -40,7 +12,7 @@ export interface WikipediaPayload {
   scoreExtent: [min: number, max: number]
 }
 
-const { nodes, edges, clusters } = dataset as unknown as WikipediaDataset
+const { nodes, edges, clusters } = dataset
 
 const clusterColors: Record<string, string> = {}
 const clusterLabels: Record<string, string> = {}
@@ -68,6 +40,9 @@ const serializedEdges: SerializedEdge[] = []
 // 端点必须在图里，同一条有向端点对只保留一次。
 // 边不给 key：非多重图上 applyGraphDiff 按端点匹配，自动生成的 key 只会白占体积
 for (const [source, target] of edges) {
+  if (source === undefined || target === undefined) {
+    continue
+  }
   const pair = JSON.stringify([source, target])
   if (!nodeKeys.has(source) || !nodeKeys.has(target) || seen.has(pair)) {
     continue
@@ -78,7 +53,6 @@ for (const [source, target] of edges) {
 
 const scores = nodes.map(node => node.score)
 
-// 模块只求值一次，转换随之只跑一次，请求到来时直接吐现成结果
 const payload: WikipediaPayload = {
   data: {
     attributes: {},

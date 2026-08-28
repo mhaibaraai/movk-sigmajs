@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import type { StylesDeclaration } from 'sigma/types'
-import type { WikipediaPayload } from '../../../../server/api/wikipedia.json.get'
 
-const { data: dataset } = await useFetch<WikipediaPayload>('/api/wikipedia.json')
+const { data: dataset } = await useFetch('/api/wikipedia.json')
 
 const styles = computed<StylesDeclaration>(() => ({
   nodes: {
