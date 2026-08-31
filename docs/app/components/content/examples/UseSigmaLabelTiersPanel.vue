@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { SigmaLabelTierBreakpoint } from '@movk/sigma'
 
-const { tier } = useSigmaLabelTiers({ breakpoints: [[2.6, 0], [1.3, 1]] })
+const props = defineProps<{ breakpoints: readonly SigmaLabelTierBreakpoint[] }>()
+
+// breakpoints 按 ratio 降序，ratio 越大视野越广、显示的标签越少
+const { tier } = useSigmaLabelTiers({ breakpoints: props.breakpoints })
 const { zoomIn, zoomOut, reset } = useSigmaCamera()
 
 const label = computed(() =>
@@ -10,19 +14,15 @@ const label = computed(() =>
 </script>
 
 <template>
-  <div class="demo-panel" data-at="top-left">
-    <div class="demo-row">
-      <span class="demo-label">缩放</span>
-      <button type="button" @click="zoomOut()">
-        拉远
-      </button>
-      <button type="button" @click="zoomIn()">
-        拉近
-      </button>
-      <button type="button" @click="reset()">
-        复位
-      </button>
+  <SigmaControls>
+    <div class="flex gap-1">
+      <UButton size="xs" color="neutral" label="拉远" @click="zoomOut()" />
+      <UButton size="xs" color="neutral" label="拉近" @click="zoomIn()" />
+      <UButton size="xs" color="neutral" label="复位" @click="reset()" />
     </div>
-    <span class="demo-tag">{{ label }} —— 拉远两级依次掉最低档与中间档</span>
-  </div>
+
+    <div class="bg-accented p-2 text-muted text-xs">
+      {{ label }} —— 拉远两级依次掉最低档与中间档
+    </div>
+  </SigmaControls>
 </template>

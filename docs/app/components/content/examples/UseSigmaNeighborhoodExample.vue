@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type { SigmaStyles } from '@movk/sigma'
 
+// depth 只在 setup 时读一次，切换时用 key 强制重挂载面板
+defineProps<{ depth: number }>()
+
 const data = demoGraph({ nodes: 24, extraEdges: 1 })
 
 // 自定义状态标志位，键名不能与 BaseNodeState 冲突
@@ -22,6 +25,6 @@ const styles: SigmaStyles<NodeState> = {
 
 <template>
   <SigmaGraph :data="data" :styles="styles" :custom-node-state="customNodeState">
-    <UseSigmaNeighborhoodPanel />
+    <UseSigmaNeighborhoodPanel :key="depth" :depth="Number(depth)" />
   </SigmaGraph>
 </template>

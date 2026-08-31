@@ -41,25 +41,17 @@ function clearAll() {
 </script>
 
 <template>
-  <div class="demo-panel" data-at="top-left">
-    <div class="demo-row">
-      <span class="demo-label">按</span>
-      <button type="button" :aria-pressed="mode === 'category'" @click="byCategory">
-        分类
-      </button>
-      <button type="button" :aria-pressed="mode === 'degree'" @click="byDegree">
-        度数 ≥ 2
-      </button>
-      <button type="button" :aria-pressed="mode === 'edge'" @click="byEdgeLabel">
-        边类型
-      </button>
-      <button type="button" :aria-pressed="mode === 'hubs'" @click="hubsOnly">
-        只看枢纽
-      </button>
-      <button type="button" @click="clearAll">
-        取消
-      </button>
+  <SigmaControls>
+    <div class="flex gap-1">
+      <UButton size="xs" label="分类" :color="mode === 'category' ? 'primary' : 'neutral'" @click="byCategory" />
+      <UButton size="xs" label="度数 ≥ 2" :color="mode === 'degree' ? 'primary' : 'neutral'" @click="byDegree" />
+      <UButton size="xs" label="边类型" :color="mode === 'edge' ? 'primary' : 'neutral'" @click="byEdgeLabel" />
+      <UButton size="xs" label="只看枢纽" :color="mode === 'hubs' ? 'primary' : 'neutral'" @click="hubsOnly" />
+      <UButton size="xs" color="neutral" variant="ghost" label="取消" @click="clearAll" />
     </div>
-    <span class="demo-tag">已隐藏 {{ hiddenCount }} 个节点 · 最大度 {{ maxDegree }}</span>
-  </div>
+
+    <div class="bg-accented p-2 text-muted text-xs">
+      已隐藏 {{ hiddenCount }} 个节点 · 最大度 {{ maxDegree }}
+    </div>
+  </SigmaControls>
 </template>

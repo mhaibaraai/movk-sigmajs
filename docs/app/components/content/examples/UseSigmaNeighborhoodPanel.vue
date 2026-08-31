@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { computed, shallowRef, watch } from 'vue'
+import { computed, watch } from 'vue'
+
+const props = defineProps<{ depth: number }>()
 
 /**
  * N 度邻域 BFS。
@@ -8,13 +10,14 @@ import { computed, shallowRef, watch } from 'vue'
  * 正是图谱浏览要的可达性语义，因此不引入 graphology-traversal 这个可选 peer。
  */
 const { graph } = useSigma()
-const { neighborhood } = useSigmaNeighborhood()
+const { neighborhood } = useSigmaNeighborhood({ depth: props.depth })
 const { selected } = useSigmaSelection({ dim: false })
 const { setNodesState } = useSigmaState<{ reach: string }>()
 
-const depth = shallowRef(2)
 const center = computed(() => selected.value ?? 'n0')
-const reachable = computed(() => neighborhood(center.value, depth.value))
+
+// 不传 depth，取的就是 composable 的默认深度
+const reachable = computed(() => neighborhood(center.value))
 
 // 结果写进自定义状态，外观由外壳的 styles 按 matchState 决定
 watch(reachable, () => {
@@ -33,13 +36,9 @@ watch(reachable, () => {
 </script>
 
 <template>
-  <div class="demo-panel" data-at="top-left">
-    <div class="demo-row">
-      <span class="demo-label">深度</span>
-      <button v-for="value in [1, 2, 3]" :key="value" type="button" :aria-pressed="depth === value" @click="depth = value">
-        {{ value }}
-      </button>
+  <SigmaControls>
+    <div class="bg-accented p-2 text-muted text-xs">
+      中心 {{ center }}（点节点可换）· {{ depth }} 度可达 {{ reachable.size }} 个
     </div>
-    <span class="demo-tag">中心 {{ center }}（点节点可换）· {{ depth }} 度可达 {{ reachable.size }} 个</span>
-  </div>
+  </SigmaControls>
 </template>

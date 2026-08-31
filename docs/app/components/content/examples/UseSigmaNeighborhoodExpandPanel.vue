@@ -40,13 +40,18 @@ async function loadNeighbors(key: string): Promise<SerializedGraph> {
 </script>
 
 <template>
-  <div class="demo-panel" data-at="top-left">
-    <div class="demo-row">
-      <button type="button" :disabled="!selected || isExpanding" @click="expand(selected!, loadNeighbors)">
-        {{ isExpanding ? '拉取中…' : `展开 ${selected ?? '（先点一个节点）'}` }}
-      </button>
+  <SigmaControls>
+    <UButton
+      size="xs"
+      color="neutral"
+      :disabled="!selected || isExpanding"
+      :label="isExpanding ? '拉取中…' : `展开 ${selected ?? '（先点一个节点）'}`"
+      @click="expand(selected!, loadNeighbors)"
+    />
+
+    <div class="bg-accented p-2 text-muted text-xs">
+      <p>节点 {{ order }} · 边 {{ size }} · 已展开 {{ expanded.size }} 个</p>
+      <p>已有节点的坐标不变，只有新节点需要摆位</p>
     </div>
-    <span class="demo-tag">节点 {{ order }} · 边 {{ size }} · 已展开 {{ expanded.size }} 个</span>
-    <span class="demo-tag">已有节点的坐标不变，只有新节点需要摆位</span>
-  </div>
+  </SigmaControls>
 </template>
