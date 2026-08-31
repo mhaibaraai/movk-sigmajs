@@ -102,7 +102,7 @@ onBeforeUnmount(() => {
       name="MiniMapExample"
       description="缩略图与视口框，全程使用 framed 坐标。"
     >
-      <MiniMapExample />
+      <MiniMapExample :node-radius="1.5" :padding="6" />
     </ExampleCard>
 
     <ExampleCard

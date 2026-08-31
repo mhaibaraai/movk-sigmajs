@@ -11,7 +11,7 @@
       name="UseSigmaSelectionExample"
       description="hover / selected / focused 状态机，内建高亮与淡出。核心交互原语。"
     >
-      <UseSigmaSelectionExample />
+      <UseSigmaSelectionExample :dim="true" />
     </ExampleCard>
 
     <ExampleCard
@@ -19,7 +19,7 @@
       name="UseSigmaNeighborhoodExample"
       description="N 度邻域计算，切换深度看可达范围的变化。"
     >
-      <UseSigmaNeighborhoodExample />
+      <UseSigmaNeighborhoodExample :depth="2" />
     </ExampleCard>
 
     <ExampleCard
@@ -35,7 +35,7 @@
       name="UseSigmaDragExample"
       description="拖拽移动节点。与迭代型布局互斥，示例里可开关布局对照。"
     >
-      <UseSigmaDragExample />
+      <UseSigmaDragExample :enabled="true" />
     </ExampleCard>
 
     <ExampleCard
