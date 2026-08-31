@@ -26,16 +26,14 @@ async function run(mode: 'whole' | 'packed') {
 </script>
 
 <template>
-  <div class="demo-panel" data-at="top-left">
-    <div class="demo-row">
-      <span class="demo-label">布局</span>
-      <button type="button" :aria-pressed="current === 'whole'" @click="run('whole')">
-        整图一次
-      </button>
-      <button type="button" :aria-pressed="current === 'packed'" @click="run('packed')">
-        按分量
-      </button>
+  <SigmaControls>
+    <div class="flex gap-1">
+      <UButton size="xs" label="整图一次" :color="current === 'whole' ? 'primary' : 'neutral'" @click="run('whole')" />
+      <UButton size="xs" label="按分量" :color="current === 'packed' ? 'primary' : 'neutral'" @click="run('packed')" />
     </div>
-    <span class="demo-tag">{{ error || '整图一次会把互不相连的分量推满整个平面，按分量则各自成团' }}</span>
-  </div>
+
+    <div class="bg-accented p-2 text-muted text-xs w-72">
+      {{ error || '整图一次会把互不相连的分量推满整个平面，按分量则各自成团' }}
+    </div>
+  </SigmaControls>
 </template>

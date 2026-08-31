@@ -31,16 +31,26 @@ async function toggle() {
 </script>
 
 <template>
-  <div class="demo-panel" data-at="top-left">
-    <div class="demo-row">
-      <button type="button" @click="toggle">
-        {{ forceAtlas2.isRunning.value ? '停止' : '启动 ForceAtlas2' }}
-      </button>
-      <button type="button" :disabled="forceAtlas2.isRunning.value" @click="noverlap.assign()">
-        消重叠
-      </button>
-      <span class="demo-tag">{{ forceAtlas2.isRunning.value ? 'worker 迭代中' : '未运行' }}</span>
+  <SigmaControls>
+    <div class="flex gap-1">
+      <UButton
+        size="xs"
+        color="neutral"
+        :label="forceAtlas2.isRunning.value ? '停止' : '启动 ForceAtlas2'"
+        @click="toggle"
+      />
+      <UButton
+        size="xs"
+        color="neutral"
+        label="消重叠"
+        :disabled="forceAtlas2.isRunning.value"
+        @click="noverlap.assign()"
+      />
     </div>
-    <span class="demo-tag">{{ error || 'isSupervised 为 true 才有 start / stop，一次性布局上 start 等价于 assign' }}</span>
-  </div>
+
+    <div class="bg-accented p-2 text-muted text-xs w-72">
+      <p>{{ forceAtlas2.isRunning.value ? 'worker 迭代中' : '未运行' }}</p>
+      <p>{{ error || 'isSupervised 为 true 才有 start / stop，一次性布局上 start 等价于 assign' }}</p>
+    </div>
+  </SigmaControls>
 </template>

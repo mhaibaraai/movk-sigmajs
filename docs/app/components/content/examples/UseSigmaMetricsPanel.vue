@@ -64,29 +64,21 @@ function applyDegreeSize() {
 </script>
 
 <template>
-  <div class="demo-panel" data-at="top-left">
-    <div class="demo-row">
-      <span class="demo-label">中心性</span>
-      <button type="button" :aria-pressed="mode === 'degree'" @click="rank('degree')">
-        degree
-      </button>
-      <button type="button" :aria-pressed="mode === 'betweenness'" @click="rank('betweenness')">
-        betweenness
-      </button>
-      <button type="button" :aria-pressed="mode === 'closeness'" @click="rank('closeness')">
-        closeness
-      </button>
+  <SigmaControls>
+    <div class="flex gap-1">
+      <UButton size="xs" label="degree" :color="mode === 'degree' ? 'primary' : 'neutral'" @click="rank('degree')" />
+      <UButton size="xs" label="betweenness" :color="mode === 'betweenness' ? 'primary' : 'neutral'" @click="rank('betweenness')" />
+      <UButton size="xs" label="closeness" :color="mode === 'closeness' ? 'primary' : 'neutral'" @click="rank('closeness')" />
     </div>
-    <div class="demo-row">
-      <span class="demo-label">其他</span>
-      <button type="button" :aria-pressed="mode === 'community'" @click="detectCommunities">
-        Louvain 社区着色
-      </button>
-      <button type="button" @click="applyDegreeSize">
-        度数映射尺寸
-      </button>
+
+    <div class="flex gap-1">
+      <UButton size="xs" label="Louvain 社区着色" :color="mode === 'community' ? 'primary' : 'neutral'" @click="detectCommunities" />
+      <UButton size="xs" color="neutral" variant="ghost" label="度数映射尺寸" @click="applyDegreeSize" />
     </div>
-    <span class="demo-tag">{{ error || summary || '点一个指标看视觉映射' }}</span>
-    <span class="demo-tag">graphology-metrics@2.4.0 的 betweenness 在分叉节点上偏低、首个插入的节点恒为 0，依赖它做判断前请自行核对</span>
-  </div>
+
+    <div class="bg-accented p-2 text-muted text-xs w-72">
+      <p>{{ error || summary || '点一个指标看视觉映射' }}</p>
+      <p>graphology-metrics@2.4.0 的 betweenness 在分叉节点上偏低、首个插入的节点恒为 0，依赖它做判断前请自行核对</p>
+    </div>
+  </SigmaControls>
 </template>

@@ -36,16 +36,14 @@ async function save() {
 </script>
 
 <template>
-  <div class="demo-panel" data-at="top-left">
-    <div class="demo-row">
-      <button type="button" :disabled="isExporting" @click="measure">
-        toBlob
-      </button>
-      <button type="button" :disabled="isExporting" @click="save">
-        download
-      </button>
-      <span class="demo-tag">{{ isExporting ? '导出中…' : '' }}</span>
+  <SigmaControls>
+    <div class="flex gap-1">
+      <UButton size="xs" color="neutral" label="toBlob" :disabled="isExporting" @click="measure" />
+      <UButton size="xs" color="neutral" label="download" :disabled="isExporting" @click="save" />
     </div>
-    <span class="demo-tag">{{ error || info || '导出不做成组件，加一个自己的按钮即可' }}</span>
-  </div>
+
+    <div class="bg-accented p-2 text-muted text-xs w-64">
+      {{ error || info || (isExporting ? '导出中…' : '导出不做成组件，加一个自己的按钮即可') }}
+    </div>
+  </SigmaControls>
 </template>
