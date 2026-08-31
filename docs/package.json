@@ -8,10 +8,10 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
-    "@iconify-json/lucide": "^1.2.126",
+    "@iconify-json/lucide": "^1.2.127",
     "@movk/nuxt-docs": "^2.2.2",
     "@movk/sigma": "workspace:*",
-    "@nuxt/content": "^3.15.2",
+    "@nuxt/content": "^3.16.0",
     "@nuxt/ui": "^4.11.0",
     "@sigma/export-image": "4.0.0-beta.0",
     "@sigma/node-border": "4.0.0-alpha.3",
