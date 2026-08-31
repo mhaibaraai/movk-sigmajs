@@ -7,6 +7,7 @@ import SigmaControls from '../src/runtime/components/controls/Controls.vue'
 import SigmaZoomControl from '../src/runtime/components/controls/ZoomControl.vue'
 import SigmaSearchControl from '../src/runtime/components/controls/SearchControl.vue'
 import SigmaLegend from '../src/runtime/components/controls/Legend.vue'
+import SigmaMiniMap from '../src/runtime/components/controls/MiniMap.vue'
 
 const state = vi.hoisted(() => ({
   instances: [] as Array<{
@@ -58,6 +59,18 @@ vi.mock('sigma', () => {
 
     getNodeDisplayData(key: string) {
       return this.graph.hasNode(key) ? { x: 0, y: 0, visibility: 'visible' } : undefined
+    }
+
+    getDimensions() {
+      return { width: 800, height: 600 }
+    }
+
+    getGraphDimensions() {
+      return { width: 1, height: 1 }
+    }
+
+    viewportToFramedGraph(coordinates: { x: number, y: number }) {
+      return { x: coordinates.x / 800, y: 1 - coordinates.y / 600 }
     }
 
     on(event: string, handler: (payload: unknown) => void) {
@@ -472,5 +485,62 @@ describe('SigmaLegend', () => {
 
     expect(wrapper.text()).toBe('管理:2技术:1')
     expect(wrapper.find('.sigma-legend-item').exists()).toBe(false)
+  })
+})
+
+describe('SigmaMiniMap', () => {
+  // happy-dom 不排版，缩略图的 CSS 尺寸得手动给，否则投影除零
+  beforeEach(() => {
+    for (const prop of ['clientWidth', 'clientHeight']) {
+      Object.defineProperty(HTMLCanvasElement.prototype, prop, { value: 140, configurable: true })
+    }
+  })
+
+  afterEach(() => {
+    for (const prop of ['clientWidth', 'clientHeight']) {
+      Reflect.deleteProperty(HTMLCanvasElement.prototype, prop)
+    }
+  })
+
+  async function mountMiniMap(props?: Record<string, unknown>) {
+    const mounted = await mountControl(() => h(SigmaMiniMap, props))
+
+    // 等 sigma/utils 动态导入完成并跑完一帧
+    await vi.waitFor(() => {
+      if (!mounted.wrapper.find('canvas').exists()) {
+        throw new Error('缩略图尚未挂载')
+      }
+    })
+    await new Promise(resolve => requestAnimationFrame(() => resolve(null)))
+    await nextTick()
+
+    return mounted
+  }
+
+  it('点缩略图上半区，相机去的是 framed 空间的上半区', async () => {
+    const { wrapper, instance } = await mountMiniMap()
+
+    await wrapper.find('.sigma-minimap').trigger('click', { clientX: 70, clientY: 20 })
+
+    const target = instance.camera.animated.at(-1) as { x: number, y: number }
+    expect(target.y).toBeGreaterThan(0.5)
+    expect(target.x).toBeCloseTo(0.5, 1)
+  })
+
+  it('点缩略图下半区，相机去的是 framed 空间的下半区', async () => {
+    const { wrapper, instance } = await mountMiniMap()
+
+    await wrapper.find('.sigma-minimap').trigger('click', { clientX: 70, clientY: 120 })
+
+    const target = instance.camera.animated.at(-1) as { x: number, y: number }
+    expect(target.y).toBeLessThan(0.5)
+  })
+
+  it('clickToMove 为 false 时不动相机', async () => {
+    const { wrapper, instance } = await mountMiniMap({ clickToMove: false })
+
+    await wrapper.find('.sigma-minimap').trigger('click', { clientX: 70, clientY: 20 })
+
+    expect(instance.camera.animated).toHaveLength(0)
   })
 })
