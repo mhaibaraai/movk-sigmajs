@@ -1,7 +1,7 @@
 <script setup lang="ts">
-const node = shallowRef<string | null>('11.0')
+const node = shallowRef<string | null>('b')
 
-const { data } = await useFetch('/api/data.json')
+const { data } = await useFetch('/api/small.json')
 </script>
 
 <template>
@@ -15,11 +15,5 @@ const { data } = await useFetch('/api/data.json')
         <strong>{{ attributes.label }}</strong>
       </template>
     </SigmaPopover>
-
-    <SigmaControls>
-      <div class="bg-accented p-2 text-muted text-xs">
-        node = {{ node ?? 'null' }} · 点节点换锚点，点画布空白处置空
-      </div>
-    </SigmaControls>
   </SigmaGraph>
 </template>

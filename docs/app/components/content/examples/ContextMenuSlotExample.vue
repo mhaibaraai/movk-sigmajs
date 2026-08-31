@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const last = shallowRef('')
 
-const { data } = await useFetch('/api/data.json')
+const { data } = await useFetch('/api/small.json')
 
 function run(action: string, close: () => void) {
   last.value = action
@@ -34,11 +34,5 @@ function run(action: string, close: () => void) {
         </div>
       </template>
     </SigmaContextMenu>
-
-    <SigmaControls>
-      <div class="bg-accented p-2 text-muted text-xs">
-        在节点、边、空白处分别右键 · 最近一次：{{ last || '—' }}
-      </div>
-    </SigmaControls>
   </SigmaGraph>
 </template>

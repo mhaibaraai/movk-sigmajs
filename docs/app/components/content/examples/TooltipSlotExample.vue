@@ -29,11 +29,5 @@ const styles = computed<StylesDeclaration>(() => ({
         </span>
       </template>
     </SigmaTooltip>
-
-    <SigmaControls>
-      <div class="bg-accented p-2 text-muted text-xs">
-        节点显示所属社区，边显示「关系」，同一套插槽按 type 分支
-      </div>
-    </SigmaControls>
   </SigmaGraph>
 </template>

@@ -9,7 +9,7 @@ const props = withDefaults(defineProps<{
 
 const offset = computed<[number, number]>(() => [Number(props.offsetX), Number(props.offsetY)])
 
-const { data } = await useFetch('/api/data.json')
+const { data } = await useFetch('/api/small.json')
 </script>
 
 <template>
@@ -19,11 +19,5 @@ const { data } = await useFetch('/api/data.json')
         <span class="text-xs">{{ attributes.label }} 的菜单</span>
       </template>
     </SigmaContextMenu>
-
-    <SigmaControls>
-      <div class="bg-accented p-2 text-muted text-xs">
-        offset [{{ offset[0] }}, {{ offset[1] }}] · 在节点上右键，菜单从锚点右下方展开
-      </div>
-    </SigmaControls>
   </SigmaGraph>
 </template>
