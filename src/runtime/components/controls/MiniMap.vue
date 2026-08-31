@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useResizeObserver } from '@vueuse/core'
-import { onMounted, shallowRef, useTemplateRef } from 'vue'
+import { onMounted, shallowRef, useTemplateRef, watch } from 'vue'
 import { useSigma } from '../../composables/use-sigma'
 import { useSigmaEvents } from '../../composables/use-sigma-events'
 
@@ -186,6 +186,8 @@ function scheduleDraw() {
 useSigmaEvents({ afterRender: scheduleDraw })
 
 useResizeObserver(rootRef, scheduleDraw)
+// 绘制参数只在 draw 里读，改了不重绘就看不到变化
+watch(() => [props.nodeRadius, props.padding], scheduleDraw)
 onMounted(scheduleDraw)
 
 function moveTo(event: MouseEvent) {
