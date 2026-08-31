@@ -31,7 +31,8 @@ import { applyGraphDiff } from '../utils/apply-graph-diff'
 import type { ApplyGraphDiffOptions } from '../utils/apply-graph-diff'
 import { composeStyles } from '../utils/compose-styles'
 import { isLazySigmaPrimitives } from '../utils/define-sigma-primitives'
-import { DEFAULT_NODE_LABEL_ATLAS_FONT_SIZE, applyNodeLabelAtlasFontSize } from '../utils/node-label-atlas'
+import { applyNodeLabelAtlas, watchNodeLabelAtlasOverflow } from '../utils/node-label-atlas'
+import type { SigmaLabelAtlasOptions } from '../utils/node-label-atlas'
 
 defineOptions({ name: 'SigmaGraph', inheritAttrs: false })
 
@@ -83,14 +84,14 @@ const props = defineProps<{
   /** 自定义图级状态标志位的默认值 */
   customGraphState?: ForbidBaseKeys<BaseGraphState, GS>
   /**
-   * 节点标签 SDF 字形图集的源字号，不是标签显示字号（后者在 `styles` 的 `labelSize`）。
+   * 节点标签 SDF 字形图集的参数，调的是烘进纹理的源字形，不是标签显示字号（后者在 `styles` 的 `labelSize`）。
    *
    * 上游按 `64 × devicePixelRatio` 生成字形，2 倍屏上 2048² 的图集一页只装得下约 190 个，
-   * 中文字形集溢出后节点标签会整体消失，故这里压回 64。Latin 字形集不受此限，
-   * 想在大字号下更锐利可以调高
-   * @defaultValue 64
+   * 中文字形集溢出后节点标签会整体消失，故 `fontSize` 压回 64；字形集更大时再调 `maxTextureSize`。
+   * 与 `primitives` 一样只在构造时读取，挂载后改不生效
+   * @see https://github.com/jacomyal/sigma.js/issues/1552
    */
-  labelAtlasFontSize?: number
+  labelAtlas?: SigmaLabelAtlasOptions
   /** 实例 id，登记后可经 `useSigmaById(id)` 在组件树之外访问 */
   id?: string
   /** `applyGraphDiff` 的行为选项 */
@@ -338,8 +339,11 @@ useResizeObserver(containerRef, () => {
 })
 
 let disposed = false
+let stopAtlasWatch: (() => void) | undefined
 
 function destroyInstance() {
+  stopAtlasWatch?.()
+  stopAtlasWatch = undefined
   sigma.value?.kill()
   sigma.value = null
   isReady.value = false
@@ -397,11 +401,12 @@ async function createInstance() {
   })
 
   // 必须赶在首帧之前：此刻图集里还没有任何字形，换掉整个 manager 不丢数据
-  applyNodeLabelAtlasFontSize(
-    instance,
-    props.labelAtlasFontSize ?? DEFAULT_NODE_LABEL_ATLAS_FONT_SIZE,
-    primitives?.nodes?.label?.font
-  )
+  applyNodeLabelAtlas(instance, toRaw(props.labelAtlas), primitives?.nodes?.label?.font)
+
+  // 挂在换过图集之后，否则监听的是那个已经被丢弃的 manager
+  if (import.meta.dev) {
+    stopAtlasWatch = watchNodeLabelAtlasOverflow(instance)
+  }
 
   for (const event of SIGMA_EVENTS) {
     instance.on(event as SigmaEventType, (payload: unknown) => {

@@ -16,4 +16,5 @@ export type { UseSigmaStateReturn } from '../composables/use-sigma-state'
 
 export type { ApplyGraphDiffOptions } from '../utils/apply-graph-diff'
 export type { DegreeToTierOptions, LabelPlacementsOptions } from '../utils/graph-visual'
+export type { SigmaLabelAtlasOptions } from '../utils/node-label-atlas'
 export type { SdfPolygonOptions, SdfStarOptions } from '../utils/node-shape'
