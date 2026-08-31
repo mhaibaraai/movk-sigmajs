@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// 作用域除 groups 外还给了 toggle 与 reset，接管外观不会丢掉显隐切换
 const { data } = await useFetch('/api/data.json')
 </script>
 
@@ -20,7 +19,7 @@ const { data } = await useFetch('/api/data.json')
               <span class="size-2 rounded-full" :style="{ background: group.color }" />
               {{ group.value }} · {{ group.count }}
             </UButton>
-            <UButton size="xs" variant="link" color="neutral" label="全部显示" @click="reset" />
+            <UButton size="xs" variant="outline" color="neutral" label="全部显示" @click="reset" />
           </div>
         </template>
       </SigmaLegend>

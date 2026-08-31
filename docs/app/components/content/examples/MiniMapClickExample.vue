@@ -1,9 +1,5 @@
 <script setup lang="ts">
-// 点击只调 animate({ x, y })，不动 ratio：缩放级别归 SigmaZoomControl 管
-withDefaults(defineProps<{ clickToMove?: boolean, duration?: number }>(), {
-  clickToMove: true,
-  duration: 300
-})
+defineProps<{ clickToMove: boolean, duration: number }>()
 
 const { data } = await useFetch('/api/data.json')
 </script>

@@ -1,9 +1,5 @@
 <script setup lang="ts">
-// nodeRadius 是缩略图上的点半径，padding 是图内容与缩略图边缘的留白
-withDefaults(defineProps<{ nodeRadius?: number, padding?: number }>(), {
-  nodeRadius: 1.5,
-  padding: 6
-})
+defineProps<{ nodeRadius: number, padding: number }>()
 
 const { data } = await useFetch('/api/data.json')
 </script>

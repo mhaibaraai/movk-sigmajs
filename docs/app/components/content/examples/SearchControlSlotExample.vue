@@ -1,6 +1,4 @@
 <script setup lang="ts">
-// #input 换输入框、#option 换单条结果、#empty 换无结果提示，
-// 作用域连行为一起给：onKeydown 一次绑完上下键、回车与 Esc
 const { data } = await useFetch('/api/data.json')
 </script>
 

@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// 容器不碰 sigma 上下文，装什么都行，一张图上也可以放多个各停一角
 const { data } = await useFetch('/api/small.json')
 
 const starred = shallowRef<string[]>([])
@@ -13,7 +12,7 @@ function star(key: string) {
 
 <template>
   <SigmaGraph :data="data">
-    <SigmaControls position="top-left" direction="horizontal">
+    <SigmaControls direction="horizontal">
       <UButton
         v-for="node in data?.nodes"
         :key="node.key"

@@ -11,7 +11,6 @@ const styles: StylesDeclaration = {
 }
 
 const settings: Partial<Settings> = {
-  renderLabels: false,
   renderEdgeLabels: true,
   itemSizesReference: 'positions',
   autoRescale: true

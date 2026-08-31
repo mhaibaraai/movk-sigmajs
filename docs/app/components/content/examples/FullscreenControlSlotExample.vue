@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// 默认插槽以 { isFullscreen } 暴露当前状态，供图标随状态切换
 const { data } = await useFetch('/api/small.json')
 </script>
 

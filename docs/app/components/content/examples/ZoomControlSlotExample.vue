@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// 三个具名插槽只负责图标，点击行为、type、aria-label、title 仍由库提供
 const { data } = await useFetch('/api/small.json')
 </script>
 
@@ -8,13 +7,13 @@ const { data } = await useFetch('/api/small.json')
     <SigmaControls position="top-right">
       <SigmaZoomControl :labels="['放大', '缩小', '回到全图']">
         <template #zoom-in>
-          <UIcon name="i-lucide-plus" />
+          <UIcon name="i-lucide-zoom-in" />
         </template>
         <template #zoom-out>
-          <UIcon name="i-lucide-minus" />
+          <UIcon name="i-lucide-zoom-out" />
         </template>
         <template #reset>
-          <UIcon name="i-lucide-locate-fixed" />
+          <UIcon name="i-lucide-square-mouse-pointer" />
         </template>
       </SigmaZoomControl>
     </SigmaControls>

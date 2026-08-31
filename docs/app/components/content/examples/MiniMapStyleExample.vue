@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// 缩略图绘制时经 getComputedStyle 读变量，改色与改尺寸只有 CSS 变量这一条通道
 const { data } = await useFetch('/api/data.json')
 
 const style = {

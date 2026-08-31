@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { SigmaSearchResult } from '@movk/sigma'
 
-// select 在相机动画结束后才抛出，携带完整的结果对象
 const picked = shallowRef<SigmaSearchResult | null>(null)
 
 const { data } = await useFetch('/api/data.json')

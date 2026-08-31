@@ -1,6 +1,4 @@
 <script setup lang="ts">
-// 接管 #results 后 #option 与 #empty 不再渲染，
-// .sigma-search-results 的绝对定位、滚动上限与向上展开规则也得自己补
 const { data } = await useFetch('/api/data.json')
 </script>
 
