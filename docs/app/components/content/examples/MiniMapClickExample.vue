@@ -1,8 +1,8 @@
 <script setup lang="ts">
-// nodeRadius 是缩略图上的点半径，padding 是图内容与缩略图边缘的留白
-withDefaults(defineProps<{ nodeRadius?: number, padding?: number }>(), {
-  nodeRadius: 1.5,
-  padding: 6
+// 点击只调 animate({ x, y })，不动 ratio：缩放级别归 SigmaZoomControl 管
+withDefaults(defineProps<{ clickToMove?: boolean, duration?: number }>(), {
+  clickToMove: true,
+  duration: 300
 })
 
 const { data } = await useFetch('/api/data.json')
@@ -11,7 +11,7 @@ const { data } = await useFetch('/api/data.json')
 <template>
   <SigmaGraph :data="data">
     <SigmaControls position="bottom-left">
-      <SigmaMiniMap :node-radius="Number(nodeRadius)" :padding="Number(padding)" />
+      <SigmaMiniMap :click-to-move="clickToMove" :duration="Number(duration)" />
     </SigmaControls>
 
     <SigmaControls position="top-right">
