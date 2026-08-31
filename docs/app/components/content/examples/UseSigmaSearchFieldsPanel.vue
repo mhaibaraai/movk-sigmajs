@@ -1,7 +1,6 @@
 <script setup lang="ts">
 const props = defineProps<{ fields: string[], edges: boolean }>()
 
-// fields 按顺序取第一个命中的字段作展示，结果里的 label 与 field 都来自它
 const { query, results } = useSigmaSearch({
   fields: props.fields,
   edges: props.edges,
@@ -11,7 +10,7 @@ const { query, results } = useSigmaSearch({
 
 <template>
   <SigmaControls>
-    <UInput v-model="query" size="xs" placeholder="试试 network，或开边检索后搜「同类」" />
+    <UInput v-model="query" size="xs" placeholder="试试 Valjean，或搜「核心」看分类字段" />
 
     <div class="bg-accented p-2 text-muted text-xs">
       <ul class="list-none font-mono">

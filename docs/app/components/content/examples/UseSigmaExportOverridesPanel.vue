@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { onScopeDispose, shallowRef } from 'vue'
-
 const props = defineProps<{ backgroundColor: string, sigmaOverrides: boolean }>()
 
 const { toBlob, isExporting } = useSigmaExport()
@@ -21,10 +19,6 @@ onScopeDispose(() => {
   }
 })
 
-/**
- * backgroundColor 传 'omit' 表示整个键都不传，得到透明背景的 PNG；
- * sigmaOverrides 只对这次导出生效，用来导一套与屏幕不同的外观。
- */
 async function run() {
   error.value = ''
   try {

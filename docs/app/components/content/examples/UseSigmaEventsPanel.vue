@@ -1,12 +1,4 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue'
-
-/**
- * 声明式绑定 sigma 事件，卸载自动解绑。
- *
- * 接受任意事件名，组件 emits 未覆盖的（如 beforeRender / afterRender / resize）
- * 也能绑；再往下 sigma.on() 始终可用，三条通道并存。
- */
 const log = shallowRef<string[]>([])
 const frames = shallowRef(0)
 

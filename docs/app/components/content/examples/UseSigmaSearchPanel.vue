@@ -1,10 +1,4 @@
 <script setup lang="ts">
-/**
- * 按属性检索节点与边。
- *
- * 子串匹配、大小写不敏感，不做模糊匹配。匹配在内存里做，不额外建索引：
- * forEachNode 遍历万级节点是毫秒量级，而维护索引要处理图变更的同步，得不偿失。
- */
 const { query, results, focus } = useSigmaSearch({ limit: 8 })
 </script>
 

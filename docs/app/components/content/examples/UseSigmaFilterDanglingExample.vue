@@ -1,12 +1,11 @@
 <script setup lang="ts">
-// hideDanglingEdges 只在 setup 时读一次，切换时用 key 强制重挂载面板
 defineProps<{ hideDanglingEdges: boolean }>()
 
-const data = demoGraph({ nodes: 18, extraEdges: 1 })
+const { data } = await useFetch('/api/data.json')
 </script>
 
 <template>
-  <SigmaGraph :styles="demoStyles" :data="data">
+  <SigmaGraph :data="data">
     <UseSigmaFilterDanglingPanel
       :key="String(hideDanglingEdges)"
       :hide-dangling-edges="hideDanglingEdges"

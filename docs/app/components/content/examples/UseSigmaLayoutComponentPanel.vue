@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue'
-
 const settings = { gravity: 1, scalingRatio: 20, adjustSizes: true, strongGravityMode: false }
 
-// 同一套 ForceAtlas2 参数，只差 byComponent 一项
 const whole = useSigmaLayout('forceatlas2', { worker: false, iterations: 200, settings })
 const packed = useSigmaLayout('forceatlas2', { worker: false, iterations: 200, byComponent: true, settings })
 

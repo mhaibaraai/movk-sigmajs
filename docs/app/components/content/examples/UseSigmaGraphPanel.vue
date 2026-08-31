@@ -1,11 +1,4 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue'
-
-/**
- * graphology 的 Graph 是纯可变对象，Vue 的响应式系统抓不到它的变更。
- * useSigmaGraph 订阅图事件并把变更桥接成 version / order / size，
- * 下游用常规的 computed 与 watch 即可响应。
- */
 const { graph, version, order, size, onGraphUpdate } = useSigmaGraph()
 
 const updates = shallowRef(0)
@@ -18,12 +11,18 @@ let seq = 0
 function addNode() {
   seq += 1
   const key = `extra-${seq}`
-  graph.value.addNode(key, { label: key, x: Math.cos(seq) * 220, y: Math.sin(seq) * 220, size: 8, color: '#f59e0b' })
-  graph.value.addEdge('n0', key)
+  graph.value.addNode(key, {
+    label: key,
+    x: 200 + Math.cos(seq) * 220,
+    y: -250 + Math.sin(seq) * 220,
+    size: 20,
+    color: '#f59e0b'
+  })
+  graph.value.addEdge('a', key)
 }
 
 function recolor() {
-  graph.value.setNodeAttribute('n0', 'color', `hsl(${(seq += 40) % 360} 70% 55%)`)
+  graph.value.setNodeAttribute('a', 'color', `hsl(${(seq += 40) % 360} 70% 55%)`)
 }
 </script>
 

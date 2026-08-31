@@ -1,15 +1,6 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue'
-
 const props = defineProps<{ enabled: boolean }>()
 
-/**
- * 拖拽移动节点。
- *
- * enabled 是响应式的，传 getter 即可，改了立刻生效，不必等下一次按下。
- * 与迭代型布局互斥：ForceAtlas2 之类的 worker 在跑时会持续回写坐标，
- * 拖拽结果会被立刻覆盖。这里的按钮用来对照这个现象。
- */
 const moved = shallowRef(0)
 const { dragged, isDragging } = useSigmaDrag({
   enabled: () => props.enabled,

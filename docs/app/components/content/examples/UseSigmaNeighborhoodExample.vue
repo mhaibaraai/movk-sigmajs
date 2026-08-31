@@ -1,18 +1,16 @@
 <script setup lang="ts">
 import type { SigmaStyles } from '@movk/sigma'
 
-// depth 只在 setup 时读一次，切换时用 key 强制重挂载面板
 defineProps<{ depth: number }>()
 
-const data = demoGraph({ nodes: 24, extraEdges: 1 })
+const { data } = await useFetch('/api/data.json')
 
-// 自定义状态标志位，键名不能与 BaseNodeState 冲突
 interface NodeState { reach: string }
 
 const customNodeState: NodeState = { reach: 'out' }
 
 const styles: SigmaStyles<NodeState> = {
-  nodes: [demoNodeStyle, {
+  nodes: [{
     matchState: 'reach',
     cases: {
       center: { color: '#f43f5e', zIndex: 2 },

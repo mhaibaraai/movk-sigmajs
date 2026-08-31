@@ -1,10 +1,9 @@
 <script setup lang="ts">
-// 首屏只给概览数据，其余按需拉取
-const data = demoGraph({ nodes: 5, extraEdges: 0 })
+const { data } = await useFetch('/api/small.json')
 </script>
 
 <template>
-  <SigmaGraph :styles="demoStyles" :data="data">
+  <SigmaGraph :data="data">
     <UseSigmaNeighborhoodExpandPanel />
     <SigmaTooltip />
   </SigmaGraph>

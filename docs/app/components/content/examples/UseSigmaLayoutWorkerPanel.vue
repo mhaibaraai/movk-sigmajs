@@ -1,12 +1,4 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue'
-
-/**
- * 迭代型布局的 worker 生命周期。
- *
- * ForceAtlas2 与 Noverlap 的 worker 会持续占用线程，组件卸载或 HMR 时不 kill 就泄漏。
- * useSigmaLayout 统一在作用域销毁时释放，滚出视口让示例卸载即可验证。
- */
 const forceAtlas2 = useSigmaLayout('forceatlas2', {
   settings: { gravity: 1, scalingRatio: 8 }
 })

@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { SerializedGraph } from 'graphology-types'
 
-// 数据形状本身就是演示内容：六个互不相连的小分量，正是全图布局会推散的那种图
 const PALETTE = ['#f43f5e', '#3b82f6', '#22c55e', '#a855f7', '#f59e0b', '#14b8a6']
 
 const data: SerializedGraph = {
@@ -27,7 +26,6 @@ const data: SerializedGraph = {
 </script>
 
 <template>
-  <!-- ForceAtlas2 收敛到几十个单位，v4 默认 size 是图坐标单位，不切到 screen 语义节点会铺满画布 -->
   <SigmaGraph :data="data" :settings="{ itemSizesReference: 'screen' }">
     <UseSigmaLayoutComponentPanel />
   </SigmaGraph>

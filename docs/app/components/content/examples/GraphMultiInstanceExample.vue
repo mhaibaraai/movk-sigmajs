@@ -1,48 +1,20 @@
 <script setup lang="ts">
-// 一个页面可以有任意多个实例，各自独立。给了 id 就会登记进全局注册表，
-// 供组件树之外的代码经 useSigmaById(id) 取用
-function makeData(color: string, label: string) {
-  return {
-    attributes: {},
-    options: { type: 'mixed' as const, multi: false, allowSelfLoops: true },
-    nodes: [
-      { key: 'a', attributes: { label: `${label} A`, x: 0, y: 0, size: 14, color } },
-      { key: 'b', attributes: { label: `${label} B`, x: 320, y: 140, size: 11, color } },
-      { key: 'c', attributes: { label: `${label} C`, x: 160, y: -220, size: 11, color } }
-    ],
-    edges: [
-      { source: 'a', target: 'b' },
-      { source: 'a', target: 'c' }
-    ]
-  }
-}
-
-const left = makeData('#f43f5e', '左')
-const right = makeData('#3b82f6', '右')
+const { data: left } = await useFetch('/api/small.json')
+const { data: right } = await useFetch('/api/data.json')
 </script>
 
 <template>
-  <div class="pair">
+  <div class="flex-1 min-h-0 grid grid-cols-2 gap-2">
     <SigmaGraph id="multi-left" :data="left">
-      <SigmaControls position="top-right">
+      <SigmaControls>
         <SigmaZoomControl />
       </SigmaControls>
     </SigmaGraph>
 
     <SigmaGraph id="multi-right" :data="right">
-      <SigmaControls position="top-right">
+      <SigmaControls>
         <SigmaZoomControl />
       </SigmaControls>
     </SigmaGraph>
   </div>
 </template>
-
-<style scoped>
-.pair {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  height: 100%;
-  background: var(--sigma-color-border);
-}
-</style>

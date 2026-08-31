@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import type { SigmaLabelTierBreakpoint } from '@movk/sigma'
 
 const props = defineProps<{ breakpoints: readonly SigmaLabelTierBreakpoint[] }>()
 
-// breakpoints 按 ratio 降序，ratio 越大视野越广、显示的标签越少
 const { tier } = useSigmaLabelTiers({ breakpoints: props.breakpoints })
 const { zoomIn, zoomOut, reset } = useSigmaCamera()
 

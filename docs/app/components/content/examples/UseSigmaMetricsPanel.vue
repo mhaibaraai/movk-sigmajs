@@ -1,12 +1,4 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue'
-
-/**
- * 度数、中心性与社区划分。
- *
- * 度数直接用核心 graphology 算；中心性与 Louvain 社区依赖可选 peer，
- * 用到时才动态导入，并按图版本缓存，同一版本重复调用不重算。
- */
 const { graph } = useSigma()
 const { degrees, maxDegree, centrality, communities } = useSigmaMetrics()
 
@@ -14,7 +6,6 @@ const mode = shallowRef<'none' | 'degree' | 'betweenness' | 'closeness' | 'commu
 const summary = shallowRef('')
 const error = shallowRef('')
 
-/** 结果写回节点属性，视觉换算交给外壳的 styles 绑定 */
 function writeAttribute(name: string, values: Record<string, number>) {
   for (const [node, value] of Object.entries(values)) {
     graph.value.setNodeAttribute(node, name, value)
@@ -52,7 +43,6 @@ async function detectCommunities() {
   }
 }
 
-/** 度数归一化后同样走 metric 绑定，半径 ∝ sqrt(度数) 才让面积正比于度数 */
 function applyDegreeSize() {
   const max = Math.max(maxDegree.value, 1)
   writeAttribute('metric', Object.fromEntries(

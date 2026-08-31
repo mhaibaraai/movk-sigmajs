@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { computed, shallowRef } from 'vue'
-
-// 响应式 settings：源变化即 setSettings，无需手动调用
 const labels = shallowRef(true)
 const edgeLabels = shallowRef(false)
 const density = shallowRef(1)

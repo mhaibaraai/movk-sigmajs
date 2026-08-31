@@ -1,12 +1,11 @@
 <script setup lang="ts">
-// dim 只在 setup 时读一次，切换时用 key 强制重挂载面板
 defineProps<{ dim: boolean }>()
 
-const data = demoGraph({ nodes: 14, extraEdges: 1 })
+const { data } = await useFetch('/api/data.json')
 </script>
 
 <template>
-  <SigmaGraph :styles="demoStyles" :data="data">
+  <SigmaGraph :data="data">
     <UseSigmaSelectionPanel :key="String(dim)" :dim="dim" />
     <SigmaTooltip />
   </SigmaGraph>
