@@ -10,15 +10,15 @@ const smallData = {
     { key: 'f', attributes: { label: 'F', x: 400, y: -500, size: 20, color: '#e253d5' } }
   ],
   edges: [
-    { source: 'a', target: 'b', attributes: { size: 10 } },
-    { source: 'b', target: 'c', attributes: { size: 10 } },
-    { source: 'b', target: 'd', attributes: { size: 10 } },
-    { source: 'c', target: 'b', attributes: { size: 10 } },
-    { source: 'c', target: 'e', attributes: { size: 10 } },
-    { source: 'd', target: 'c', attributes: { size: 10 } },
-    { source: 'd', target: 'e', attributes: { size: 10 } },
-    { source: 'e', target: 'd', attributes: { size: 10 } },
-    { source: 'f', target: 'e', attributes: { size: 10 } }
+    { source: 'a', target: 'b', attributes: { size: 10, label: 'A-B' } },
+    { source: 'b', target: 'c', attributes: { size: 10, label: 'B-C' } },
+    { source: 'b', target: 'd', attributes: { size: 10, label: 'B-D' } },
+    { source: 'c', target: 'b', attributes: { size: 10, label: 'C-B' } },
+    { source: 'c', target: 'e', attributes: { size: 10, label: 'C-E' } },
+    { source: 'd', target: 'c', attributes: { size: 10, label: 'D-C' } },
+    { source: 'd', target: 'e', attributes: { size: 10, label: 'D-E' } },
+    { source: 'e', target: 'd', attributes: { size: 10, label: 'E-D' } },
+    { source: 'f', target: 'e', attributes: { size: 10, label: 'F-E' } }
   ]
 }
 
