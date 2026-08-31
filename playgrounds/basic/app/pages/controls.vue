@@ -78,7 +78,7 @@ onBeforeUnmount(() => {
       name="FullscreenControlExample"
       description="对 .sigma-root 取全屏目标，覆盖层与其他控件一起进入。"
     >
-      <FullscreenControlExample />
+      <FullscreenControlExample enter-label="进入全屏" exit-label="退出全屏" />
     </ExampleCard>
 
     <ExampleCard
