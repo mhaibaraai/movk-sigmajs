@@ -26,12 +26,14 @@ useSigmaEvents({
 </script>
 
 <template>
-  <div class="demo-panel" data-at="top-left">
-    <span class="demo-tag">已渲染 {{ frames }} 帧（afterRender 不在 emits 里，只能走这条）</span>
-    <ul class="demo-log">
-      <li v-for="(line, index) in log" :key="`${line}-${index}`">
-        {{ line }}
-      </li>
-    </ul>
-  </div>
+  <SigmaControls>
+    <div class="bg-accented p-2">
+      <span class="text-muted text-xs">已渲染 {{ frames }} 帧（afterRender 不在 emits 里，只能走这条）</span>
+      <ul class="list-none text-muted text-xs font-mono">
+        <li v-for="(line, index) in log" :key="`${line}-${index}`">
+          {{ line }}
+        </li>
+      </ul>
+    </div>
+  </SigmaControls>
 </template>

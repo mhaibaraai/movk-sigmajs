@@ -25,53 +25,14 @@ const data = demoGraph()
 </script>
 
 <template>
-  <div class="wrap">
-    <div class="outside">
-      <button type="button" :disabled="!context" @click="zoomFromOutside">
-        树外放大
-      </button>
-      <button type="button" :disabled="!context" @click="paintFromOutside">
-        树外改色
-      </button>
-      <span class="demo-tag">注册表：{{ ids.join('、') || '空' }} · 节点 {{ order }}</span>
+  <!-- .example-stage 是 flex 行容器，不给宽度会缩成内容宽 -->
+  <div class="flex flex-col w-full h-full">
+    <div class="flex items-center flex-wrap gap-2 p-2 border-b border-default">
+      <UButton size="xs" color="neutral" label="树外放大" :disabled="!context" @click="zoomFromOutside" />
+      <UButton size="xs" color="neutral" label="树外改色" :disabled="!context" @click="paintFromOutside" />
+      <span class="text-muted text-xs">注册表：{{ ids.join('、') || '空' }} · 节点 {{ order }}</span>
     </div>
 
-    <SigmaGraph id="by-id-demo" :styles="demoStyles" :data="data" class="stage" />
+    <SigmaGraph id="by-id-demo" :styles="demoStyles" :data="data" class="flex-1 min-h-0" />
   </div>
 </template>
-
-<style scoped>
-.wrap {
-  display: flex;
-  flex-direction: column;
-  /* .example-stage 是 flex 行容器，不给宽度会缩成内容宽 */
-  width: 100%;
-  height: 100%;
-}
-
-.outside {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--sigma-color-border);
-  font-size: 13px;
-}
-
-.outside button {
-  padding: 3px 8px;
-  border: 1px solid var(--sigma-color-border);
-  border-radius: 4px;
-  background: none;
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-  font-size: 12px;
-}
-
-.stage {
-  flex: 1;
-  min-height: 0;
-}
-</style>

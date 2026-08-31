@@ -23,13 +23,12 @@ async function callNative() {
 </script>
 
 <template>
-  <div class="demo-panel" data-at="top-left">
-    <div class="demo-row">
-      <button type="button" @click="callNative">
-        直接调原生 API
-      </button>
-      <span class="demo-tag">{{ isReady ? '已就绪' : '等待实例…' }}</span>
+  <SigmaControls>
+    <UButton size="xs" color="neutral" label="直接调原生 API" @click="callNative" />
+
+    <div class="bg-accented p-2 text-muted text-xs">
+      <p>{{ isReady ? '已就绪' : '等待实例…' }}</p>
+      <p>{{ info || `sigma 实例：${sigma ? '原生对象' : 'null（SSR 或未挂载）'}` }}</p>
     </div>
-    <span class="demo-tag">{{ info || `sigma 实例：${sigma ? '原生对象' : 'null（SSR 或未挂载）'}` }}</span>
-  </div>
+  </SigmaControls>
 </template>

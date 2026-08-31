@@ -28,15 +28,14 @@ function recolor() {
 </script>
 
 <template>
-  <div class="demo-panel" data-at="top-left">
-    <div class="demo-row">
-      <button type="button" @click="addNode">
-        addNode
-      </button>
-      <button type="button" @click="recolor">
-        改属性
-      </button>
+  <SigmaControls>
+    <div class="flex gap-1">
+      <UButton size="xs" color="neutral" label="addNode" @click="addNode" />
+      <UButton size="xs" color="neutral" label="改属性" @click="recolor" />
     </div>
-    <span class="demo-tag">version {{ version }} · 节点 {{ order }} · 边 {{ size }} · 回调 {{ updates }} 次</span>
-  </div>
+
+    <div class="bg-accented p-2 text-muted text-xs">
+      version {{ version }} · 节点 {{ order }} · 边 {{ size }} · 回调 {{ updates }} 次
+    </div>
+  </SigmaControls>
 </template>
