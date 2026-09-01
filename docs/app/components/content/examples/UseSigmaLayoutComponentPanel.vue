@@ -29,8 +29,8 @@ async function run(mode: 'whole' | 'packed') {
       <UButton size="xs" label="按分量" :color="current === 'packed' ? 'primary' : 'neutral'" @click="run('packed')" />
     </div>
 
-    <div class="bg-accented p-2 text-muted text-xs w-72">
-      {{ error || '整图一次会把互不相连的分量推满整个平面，按分量则各自成团' }}
+    <div v-if="error" class="bg-accented p-2 text-muted text-xs w-72">
+      {{ error }}
     </div>
   </SigmaControls>
 </template>

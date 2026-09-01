@@ -42,8 +42,7 @@ async function loadNeighbors(key: string): Promise<SerializedGraph> {
     />
 
     <div class="bg-accented p-2 text-muted text-xs">
-      <p>节点 {{ order }} · 边 {{ size }} · 已展开 {{ expanded.size }} 个</p>
-      <p>已有节点的坐标不变，只有新节点需要摆位</p>
+      节点 {{ order }} · 边 {{ size }} · 已展开 {{ expanded.size }} 个
     </div>
   </SigmaControls>
 </template>

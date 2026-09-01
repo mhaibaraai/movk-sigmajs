@@ -37,5 +37,9 @@ async function fitAll() {
       <UButton size="xs" color="neutral" label="容纳全图" @click="fitAll" />
       <UButton size="xs" color="neutral" label="读状态" @click="readState" />
     </div>
+
+    <div v-if="error || state" class="bg-accented p-2 text-muted text-xs w-72">
+      {{ error || state }}
+    </div>
   </SigmaControls>
 </template>

@@ -67,8 +67,7 @@ function applyDegreeSize() {
     </div>
 
     <div class="bg-accented p-2 text-muted text-xs w-72">
-      <p>{{ error || summary || '点一个指标看视觉映射' }}</p>
-      <p>graphology-metrics@2.4.0 的 betweenness 在分叉节点上偏低、首个插入的节点恒为 0，依赖它做判断前请自行核对</p>
+      {{ error || summary || '点一个指标看视觉映射' }}
     </div>
   </SigmaControls>
 </template>

@@ -42,7 +42,9 @@ async function toggle() {
 
     <div class="bg-accented p-2 text-muted text-xs w-72">
       <p>{{ forceAtlas2.isRunning.value ? 'worker 迭代中' : '未运行' }}</p>
-      <p>{{ error || 'isSupervised 为 true 才有 start / stop，一次性布局上 start 等价于 assign' }}</p>
+      <p v-if="error">
+        {{ error }}
+      </p>
     </div>
   </SigmaControls>
 </template>

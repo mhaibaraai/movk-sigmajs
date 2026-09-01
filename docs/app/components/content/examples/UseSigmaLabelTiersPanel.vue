@@ -20,7 +20,7 @@ const label = computed(() =>
     </div>
 
     <div class="bg-accented p-2 text-muted text-xs">
-      {{ label }} —— 拉远两级依次掉最低档与中间档
+      {{ label }}
     </div>
   </SigmaControls>
 </template>

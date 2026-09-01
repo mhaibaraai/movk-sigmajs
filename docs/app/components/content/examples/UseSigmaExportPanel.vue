@@ -33,8 +33,8 @@ async function save() {
       <UButton size="xs" color="neutral" label="download" :disabled="isExporting" @click="save" />
     </div>
 
-    <div class="bg-accented p-2 text-muted text-xs w-64">
-      {{ error || info || (isExporting ? '导出中…' : '导出不做成组件，加一个自己的按钮即可') }}
+    <div v-if="error || info || isExporting" class="bg-accented p-2 text-muted text-xs w-64">
+      {{ error || info || '导出中…' }}
     </div>
   </SigmaControls>
 </template>
