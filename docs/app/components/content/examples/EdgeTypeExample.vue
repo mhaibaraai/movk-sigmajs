@@ -50,19 +50,6 @@ const data = {
     :styles="styles"
     :settings="{ renderEdgeLabels: true }"
   >
-    <div class="demo-panel" data-at="top-left">
-      <div class="demo-row">
-        <span class="demo-label">关联</span>
-        <span class="demo-tag">line · 无端点</span>
-      </div>
-      <div class="demo-row">
-        <span class="demo-label">流向</span>
-        <span class="demo-tag">curved · arrow</span>
-      </div>
-      <div class="demo-row">
-        <span class="demo-label">依赖</span>
-        <span class="demo-tag">step · circle</span>
-      </div>
-    </div>
+    <EdgeTypePanel />
   </SigmaGraph>
 </template>

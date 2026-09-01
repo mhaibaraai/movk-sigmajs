@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue'
-
 const { goto } = useSigmaCamera()
+
 const rotated = shallowRef(false)
 
 function toggle() {
@@ -11,16 +10,19 @@ function toggle() {
 </script>
 
 <template>
-  <div class="demo-panel" data-at="top-left">
-    <div class="demo-row">
-      <span class="demo-label">形状</span>
-      <span class="demo-tag">按节点下标循环取 circle / square / diamond / hexagon / star</span>
+  <SigmaControls>
+    <div class="flex gap-1">
+      <UBadge size="sm" color="neutral" variant="subtle" label="核心 · star" />
+      <UBadge size="sm" color="neutral" variant="subtle" label="次要 · hexagon" />
+      <UBadge size="sm" color="neutral" variant="subtle" label="边缘 · square" />
     </div>
-    <div class="demo-row">
-      <button type="button" :aria-pressed="rotated" @click="toggle">
-        {{ rotated ? '转回正视' : '旋转相机' }}
-      </button>
-      <span class="demo-tag">size 是外接圆半径，inradiusFactor 决定标签让位的距离</span>
+
+    <div class="flex gap-1">
+      <UButton size="xs" color="neutral" :label="rotated ? '转回正视' : '旋转相机'" @click="toggle" />
     </div>
-  </div>
+
+    <div class="bg-accented p-2 text-muted text-xs">
+      size 是外接圆半径，inradiusFactor 决定标签让位的距离
+    </div>
+  </SigmaControls>
 </template>
