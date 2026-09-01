@@ -47,7 +47,6 @@ const groups = [
     items: [
       { api: 'applyGraphDiff', to: '/utils', examples: ['ApplyGraphDiff'] },
       { api: 'composeStyles', to: '/utils', examples: ['ComposeStyles'] },
-      { api: 'sampleGraph', to: '/utils', examples: ['SampleGraph'] },
       { api: 'defineSigmaPrimitives', to: '/graph', examples: ['GraphPrimitives'] }
     ]
   },

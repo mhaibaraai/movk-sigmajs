@@ -22,13 +22,5 @@
     >
       <ComposeStylesExample />
     </ExampleCard>
-
-    <ExampleCard
-      title="sampleGraph"
-      name="SampleGraphExample"
-      description="按度数取 Top-N 得到概览子图，图级 attributes 与 options 原样保留。"
-    >
-      <SampleGraphExample />
-    </ExampleCard>
   </div>
 </template>
