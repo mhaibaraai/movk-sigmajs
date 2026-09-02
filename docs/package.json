@@ -8,7 +8,7 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
-    "@iconify-json/lucide": "^1.2.127",
+    "@iconify-json/lucide": "^1.2.128",
     "@movk/nuxt-docs": "^2.2.2",
     "@movk/sigma": "workspace:*",
     "@nuxt/content": "^3.16.0",
@@ -24,7 +24,7 @@
     "graphology-layout": "^0.6.1",
     "graphology-layout-forceatlas2": "^0.10.1",
     "graphology-layout-noverlap": "^0.4.2",
-    "graphology-metrics": "^2.4.0",
+    "graphology-metrics": "^2.4.1",
     "nuxt": "^4.5.2",
     "sigma": "4.0.0-beta.5",
     "tailwindcss": "^4.3.3"
