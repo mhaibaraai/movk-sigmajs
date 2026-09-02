@@ -28,7 +28,7 @@
     <ExampleCard
       title="概览 + 按需扩展"
       name="ScaleOverviewExample"
-      description="20k 的完整图只在内存里，屏上放 sampleGraph 抽出的枢纽，点击节点再增量补齐。"
+      description="20k 的完整图只在内存里，屏上放按度数抽出的枢纽，点击节点再增量补齐。"
       height="480px"
     >
       <ScaleOverviewExample />

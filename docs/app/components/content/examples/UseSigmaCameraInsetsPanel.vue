@@ -1,12 +1,9 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue'
-
 const { fitTo } = useSigmaCamera()
 
 const current = shallowRef('')
 const error = shallowRef('')
 
-// fitTo 依赖可选 peer @sigma/utils，未安装时给出可操作的报错
 async function run(withInsets: boolean) {
   error.value = ''
   try {
@@ -20,16 +17,20 @@ async function run(withInsets: boolean) {
 </script>
 
 <template>
-  <div class="demo-panel" data-at="top-right">
-    <div class="demo-row">
-      <span class="demo-label">fit</span>
-      <button type="button" :aria-pressed="current === 'plain'" @click="run(false)">
-        整块舞台
-      </button>
-      <button type="button" :aria-pressed="current === 'insets'" @click="run(true)">
-        扣掉侧栏
-      </button>
+  <SigmaControls position="top-right">
+    <div class="flex gap-1">
+      <UButton
+        size="xs"
+        label="整块舞台"
+        :color="current === 'plain' ? 'primary' : 'neutral'"
+        @click="run(false)"
+      />
+      <UButton
+        size="xs"
+        label="扣掉侧栏"
+        :color="current === 'insets' ? 'primary' : 'neutral'"
+        @click="run(true)"
+      />
     </div>
-    <span class="demo-tag">{{ error || '整块舞台会把左侧内容压在侧栏底下，扣掉遮挡后内容整体右移并退远' }}</span>
-  </div>
+  </SigmaControls>
 </template>

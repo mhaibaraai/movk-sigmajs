@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue'
-
-// 全部基于原生 sigma.getCamera()，需要更底层的控制随时可以直接拿实例自己调
 const { zoomIn, zoomOut, reset, goto, gotoNode, fitTo, getState, toViewport } = useSigmaCamera()
 
 const state = shallowRef('')
@@ -15,7 +12,6 @@ function readState() {
     : '未就绪'
 }
 
-// fitTo 依赖可选 peer @sigma/utils，未安装时给出可操作的报错
 async function fitAll() {
   error.value = ''
   try {
@@ -28,32 +24,22 @@ async function fitAll() {
 </script>
 
 <template>
-  <div class="demo-panel" data-at="top-left">
-    <div class="demo-row">
-      <button type="button" @click="zoomIn()">
-        放大
-      </button>
-      <button type="button" @click="zoomOut()">
-        缩小
-      </button>
-      <button type="button" @click="reset()">
-        复位
-      </button>
+  <SigmaControls>
+    <div class="flex gap-1">
+      <UButton size="xs" color="neutral" label="放大" @click="zoomIn()" />
+      <UButton size="xs" color="neutral" label="缩小" @click="zoomOut()" />
+      <UButton size="xs" color="neutral" label="复位" @click="reset()" />
     </div>
-    <div class="demo-row">
-      <button type="button" @click="gotoNode('n3', { ratio: 0.4 })">
-        聚焦 n3
-      </button>
-      <button type="button" @click="goto({ angle: Math.PI / 6 }, { duration: 400 })">
-        旋转
-      </button>
-      <button type="button" @click="fitAll">
-        容纳全图
-      </button>
-      <button type="button" @click="readState">
-        读状态
-      </button>
+
+    <div class="flex gap-1">
+      <UButton size="xs" color="neutral" label="聚焦 Valjean" @click="gotoNode('11.0', { ratio: 0.4 })" />
+      <UButton size="xs" color="neutral" label="旋转" @click="goto({ angle: Math.PI / 6 }, { duration: 400 })" />
+      <UButton size="xs" color="neutral" label="容纳全图" @click="fitAll" />
+      <UButton size="xs" color="neutral" label="读状态" @click="readState" />
     </div>
-    <span class="demo-tag">{{ error || state || '点「读状态」看当前相机' }}</span>
-  </div>
+
+    <div v-if="error || state" class="bg-accented p-2 text-muted text-xs w-72">
+      {{ error || state }}
+    </div>
+  </SigmaControls>
 </template>

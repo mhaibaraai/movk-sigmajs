@@ -1,12 +1,4 @@
 <script setup lang="ts">
-import { shallowRef } from 'vue'
-
-/**
- * 把当前画面导出为 PNG。
- *
- * 依赖可选 peer `@sigma/export-image`，用到时才动态加载——它与 sigma 本体一样
- * 在模块顶层读 WebGL 全局，静态 import 会让 SSR 直接崩。
- */
 const { toBlob, download, isExporting } = useSigmaExport()
 
 const info = shallowRef('')
@@ -23,7 +15,6 @@ async function measure() {
   }
 }
 
-// 上游会按格式自行追加扩展名，因此 download('x.png') 与 download('x') 归一为同一结果
 async function save() {
   error.value = ''
   try {
@@ -36,16 +27,14 @@ async function save() {
 </script>
 
 <template>
-  <div class="demo-panel" data-at="top-left">
-    <div class="demo-row">
-      <button type="button" :disabled="isExporting" @click="measure">
-        toBlob
-      </button>
-      <button type="button" :disabled="isExporting" @click="save">
-        download
-      </button>
-      <span class="demo-tag">{{ isExporting ? '导出中…' : '' }}</span>
+  <SigmaControls>
+    <div class="flex gap-1">
+      <UButton size="xs" color="neutral" label="toBlob" :disabled="isExporting" @click="measure" />
+      <UButton size="xs" color="neutral" label="download" :disabled="isExporting" @click="save" />
     </div>
-    <span class="demo-tag">{{ error || info || '导出不做成组件，加一个自己的按钮即可' }}</span>
-  </div>
+
+    <div v-if="error || info || isExporting" class="bg-accented p-2 text-muted text-xs w-64">
+      {{ error || info || '导出中…' }}
+    </div>
+  </SigmaControls>
 </template>

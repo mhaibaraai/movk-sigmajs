@@ -1,9 +1,9 @@
 <script setup lang="ts">
-const data = demoGraph({ nodes: 18, extraEdges: 1 })
+const { data } = await useFetch('/api/data.json')
 </script>
 
 <template>
-  <SigmaGraph :data="data" :settings="{ renderEdgeLabels: true }">
+  <SigmaGraph :data="data">
     <UseSigmaFilterPanel />
   </SigmaGraph>
 </template>

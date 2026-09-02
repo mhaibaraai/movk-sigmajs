@@ -50,7 +50,7 @@ export default defineNuxtModule<ModuleOptions>({
     nuxt.options.alias['#sigma'] = resolve('./runtime')
 
     if (options.css) {
-      nuxt.options.css.push(resolve('./runtime/index.css'))
+      nuxt.options.css.unshift(resolve('./runtime/index.css'))
     }
 
     if (options.optimizeDeps) {

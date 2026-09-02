@@ -16,6 +16,29 @@ export interface ApplyGraphDiffOptions {
   prune?: boolean
 }
 
+const CONTRACT_HINT = '需要 graphology 的 SerializedGraph（graph.export() 的产物）'
+
+function fields(value: unknown): string {
+  return value && typeof value === 'object' ? Object.keys(value).join(', ') : String(value)
+}
+
+/** 原始数据集几乎不会正好是 SerializedGraph，形状不对时立刻点名缺失字段，别等到逐条边失败 */
+function assertSerializedGraph(next: SerializedGraph): void {
+  if (!Array.isArray(next?.nodes) || !Array.isArray(next?.edges)) {
+    throw new TypeError(`[@movk/sigma] data.nodes 与 data.edges 必须是数组，${CONTRACT_HINT}。收到的字段：${fields(next)}`)
+  }
+
+  const node = next.nodes[0]
+  if (node !== undefined && node.key === undefined) {
+    throw new TypeError(`[@movk/sigma] data.nodes[0] 缺少 key，${CONTRACT_HINT}。收到的字段：${fields(node)}`)
+  }
+
+  const edge = next.edges[0]
+  if (edge !== undefined && (edge.source === undefined || edge.target === undefined)) {
+    throw new TypeError(`[@movk/sigma] data.edges[0] 缺少 source 或 target，${CONTRACT_HINT}。收到的字段：${fields(edge)}`)
+  }
+}
+
 /**
  * 把 `SerializedGraph` 增量同步到 graphology 实例，替代 `clear()` 加 `import()`。
  *
@@ -28,6 +51,8 @@ export function applyGraphDiff(
   options: ApplyGraphDiffOptions = {}
 ): void {
   const { preservePositions = true, prune = true } = options
+
+  assertSerializedGraph(next)
 
   const nextNodeKeys = new Set(next.nodes.map(node => String(node.key)))
 
@@ -61,24 +86,23 @@ export function applyGraphDiff(
   }
 
   const touchedEdgeKeys = new Set<string>()
+  const dangling: string[] = []
 
   for (const edge of next.edges) {
     const source = String(edge.source)
     const target = String(edge.target)
 
-    // 增量合入局部数据时，边可能指向尚未加载的节点。这属于「概览 + 按需扩展」的正常情况，
-    // 跳过即可；直接交给 graphology 只会抛出难以定位的 NotFoundGraphError
+    // 增量合入局部数据时，边可能指向尚未加载的节点。这是「概览 + 按需扩展」的正常情况，
+    // 跳过即可；交给 graphology 只会抛出难以定位的 NotFoundGraphError
     if (!graph.hasNode(source) || !graph.hasNode(target)) {
-      if (import.meta.dev) {
-        console.warn(`[@movk/sigma] 边 ${source} → ${target} 的端点不在图中，已跳过`)
-      }
+      dangling.push(`${source} → ${target}`)
       continue
     }
 
     const attributes: Attributes = { ...edge.attributes }
 
     // 多重图上无 key 的边一律新增：按端点匹配会让三条 a→b 压成一条。
-    // 代价是每次全量同步边 key 会重新生成，需要稳定边身份或用 prune: false 增量合入时请显式给 key
+    // 需要稳定边身份时显式给 key
     const existingKey = edge.key !== undefined
       ? String(edge.key)
       : (graph.multi ? undefined : graph.edge(source, target))
@@ -94,6 +118,10 @@ export function applyGraphDiff(
         ? graph.addEdge(source, target, attributes)
         : graph.addEdgeWithKey(existingKey, source, target, attributes)
     )
+  }
+
+  if (dangling.length > 0 && import.meta.dev) {
+    console.warn(`[@movk/sigma] 已跳过 ${dangling.length} 条端点不在图中的边，前几条：${dangling.slice(0, 3).join('、')}`)
   }
 
   if (prune) {

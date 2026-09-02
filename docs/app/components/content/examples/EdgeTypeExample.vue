@@ -1,45 +1,36 @@
 <script setup lang="ts">
 import type { StylesDeclaration } from 'sigma/types'
 
+const { data } = await useFetch('/api/relations.json')
+
 /**
  * path/head 与节点的 shape 走同一套 attribute-dict 绑定：primitives 注册可用的
  * path/extremity 名字，styles 按边的 kind 属性选取，数据决定每条边用哪种线型
  */
 const primitives = defineSigmaPrimitives(async () => {
-  const { pathLine, pathCurved, pathStep, extremityArrow, extremityCircle } = await import('sigma/rendering')
+  const { pathLine, pathCurved, pathStep, pathLoop, extremityArrow, extremityCircle } = await import('sigma/rendering')
 
   return {
     edges: {
-      paths: [pathLine(), pathCurved(), pathStep()],
+      paths: [pathLine(), pathCurved(), pathStep(), pathLoop()],
       extremities: [extremityArrow(), extremityCircle()]
     }
   }
 })
 
 const styles: StylesDeclaration = {
+  nodes: {
+    color: '#64748b',
+    size: 14
+  },
   edges: {
     path: { attribute: 'kind', dict: { assoc: 'line', flow: 'curved', dependency: 'step' }, defaultValue: 'line' },
-    head: { attribute: 'kind', dict: { flow: 'arrow', dependency: 'circle' }, defaultValue: 'none' }
+    head: { attribute: 'kind', dict: { flow: 'arrow', dependency: 'circle' }, defaultValue: 'none' },
+    // 平行边与自环由这三个字段接管，其余边才轮到 path 按 kind 选取
+    parallelPath: 'curved',
+    parallelSpread: 3,
+    selfLoopPath: 'loop'
   }
-}
-
-const data = {
-  attributes: {},
-  options: { type: 'directed' as const, multi: false, allowSelfLoops: false },
-  nodes: [
-    { key: 'a', attributes: { label: '节点 A', x: 0, y: -180, size: 14, color: '#64748b' } },
-    { key: 'b', attributes: { label: '节点 B', x: 170, y: -60, size: 14, color: '#64748b' } },
-    { key: 'c', attributes: { label: '节点 C', x: 105, y: 145, size: 14, color: '#64748b' } },
-    { key: 'd', attributes: { label: '节点 D', x: -105, y: 145, size: 14, color: '#64748b' } },
-    { key: 'e', attributes: { label: '节点 E', x: -170, y: -60, size: 14, color: '#64748b' } }
-  ],
-  edges: [
-    { source: 'a', target: 'b', attributes: { kind: 'assoc', label: '关联' } },
-    { source: 'b', target: 'c', attributes: { kind: 'flow', label: '流向' } },
-    { source: 'c', target: 'd', attributes: { kind: 'dependency', label: '依赖' } },
-    { source: 'd', target: 'e', attributes: { kind: 'flow', label: '流向' } },
-    { source: 'e', target: 'a', attributes: { kind: 'assoc', label: '关联' } }
-  ]
 }
 </script>
 
@@ -49,20 +40,5 @@ const data = {
     :primitives="primitives"
     :styles="styles"
     :settings="{ renderEdgeLabels: true }"
-  >
-    <div class="demo-panel" data-at="top-left">
-      <div class="demo-row">
-        <span class="demo-label">关联</span>
-        <span class="demo-tag">line · 无端点</span>
-      </div>
-      <div class="demo-row">
-        <span class="demo-label">流向</span>
-        <span class="demo-tag">curved · arrow</span>
-      </div>
-      <div class="demo-row">
-        <span class="demo-label">依赖</span>
-        <span class="demo-tag">step · circle</span>
-      </div>
-    </div>
-  </SigmaGraph>
+  />
 </template>

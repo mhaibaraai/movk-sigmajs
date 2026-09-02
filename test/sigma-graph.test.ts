@@ -96,18 +96,12 @@ describe('SigmaGraph 出口兼容', () => {
     expect(settings.renderLabels).toBe(false)
   })
 
-  it('用户自带的 nodeReducer 位于链首被调用，返回的补丁合并进显示数据', async () => {
+  it('用户自带的 nodeReducer 原样透传给构造函数，不被包装', async () => {
     const nodeReducer = vi.fn(() => ({ size: 20 }))
 
     await mountGraph({ nodeReducer })
 
-    // 传给 sigma 的是稳定的 dispatcher，不是原函数：链要替只返回补丁的归约补全 x / y，
-    // 否则 sigma 拿不到完整显示数据会直接抛错
-    const dispatch = state.calls[0]!.options.nodeReducer!
-    const result = dispatch('n1', { x: 1, y: 2, label: 'N1' }, {}, {}, {}, {})
-
-    expect(nodeReducer).toHaveBeenCalledWith('n1', expect.objectContaining({ label: 'N1' }), {}, {}, {}, {})
-    expect(result).toMatchObject({ x: 1, y: 2, label: 'N1', size: 20 })
+    expect(state.calls[0]!.options.nodeReducer).toBe(nodeReducer)
   })
 
   it('内置默认 allowInvalidContainer 可被用户覆盖', async () => {
@@ -119,15 +113,16 @@ describe('SigmaGraph 出口兼容', () => {
     expect(state.calls[0]!.options.settings.allowInvalidContainer).toBe(false)
   })
 
-  it('styles 整体透传，不做键白名单', async () => {
-    const styles = {
-      nodes: { color: '#f43f5e', someFutureStyleKey: 1 },
-      edges: { parallelPath: 'curved' }
-    }
+  it('styles 整体透传，不做键白名单，且排在基础规则之后', async () => {
+    const nodeRule = { color: '#f43f5e', someFutureStyleKey: 1 }
+    const edgeRule = { parallelPath: 'curved' }
 
-    await mountGraph({ styles })
+    await mountGraph({ styles: { nodes: nodeRule, edges: edgeRule } })
 
-    expect(state.calls[0]!.options.styles).toMatchObject(styles)
+    const styles = state.calls[0]!.options.styles as { nodes: unknown[], edges: unknown[] }
+    // 索引 0 是 DEFAULT_STYLES，用户规则在它之后才盖得住
+    expect(styles.nodes.indexOf(nodeRule)).toBeGreaterThan(0)
+    expect(styles.edges.indexOf(edgeRule)).toBeGreaterThan(0)
   })
 
   it('primitives 整体透传', async () => {
@@ -155,11 +150,35 @@ describe('SigmaGraph 出口兼容', () => {
       .toMatchObject({ nodes: { shapes: [{ name: 'hex' }] } })
   })
 
-  it('未传 styles 与 primitives 时不干预 sigma 自己的默认值', async () => {
+  it('未传 styles 也合成 DEFAULT_STYLES：sigma 是整体替换而非合并', async () => {
+    const { DEFAULT_STYLES } = await import('sigma/types')
+
     await mountGraph()
 
-    expect(state.calls[0]!.options.styles).toBeUndefined()
+    const styles = state.calls[0]!.options.styles as { nodes: unknown[], edges: unknown[] }
+    expect(styles.nodes[0]).toBe(DEFAULT_STYLES.nodes)
+    expect(styles.edges[0]).toBe(DEFAULT_STYLES.edges)
     expect(state.calls[0]!.options.primitives).toBeUndefined()
+  })
+
+  it('stylesBase: \'none\' 时不带任何基础规则', async () => {
+    const { DEFAULT_STYLES } = await import('sigma/types')
+    const nodeRule = { color: '#111' }
+
+    await mountGraph({ stylesBase: 'none', styles: { nodes: nodeRule } })
+
+    const styles = state.calls[0]!.options.styles as { nodes: unknown[] }
+    expect(styles.nodes).not.toContain(DEFAULT_STYLES.nodes)
+    expect(styles.nodes[0]).toBe(nodeRule)
+  })
+
+  it('库内规则排在最后，高亮淡出与标签分级才盖得住用户的视觉映射', async () => {
+    const nodeRule = { color: '#111' }
+
+    await mountGraph({ styles: { nodes: nodeRule } })
+
+    const styles = state.calls[0]!.options.styles as { nodes: unknown[] }
+    expect(styles.nodes.indexOf(nodeRule)).toBeLessThan(styles.nodes.length - 1)
   })
 
   it('styles 是构造时读取的，变更后重建实例', async () => {
@@ -174,10 +193,11 @@ describe('SigmaGraph 出口兼容', () => {
     })
 
     expect(state.killed).toBe(1)
-    expect(state.calls[1]!.options.styles).toMatchObject({ nodes: { color: '#222' } })
+    const styles = state.calls[1]!.options.styles as { nodes: unknown[] }
+    expect(styles.nodes).toContainEqual({ color: '#222' })
   })
 
-  it('绑定 sigma 的全部 53 个事件', async () => {
+  it('绑定 sigma 的全部 55 个事件', async () => {
     await mountGraph()
 
     expect(state.events).toContain('clickNode')
@@ -186,7 +206,8 @@ describe('SigmaGraph 出口兼容', () => {
     expect(state.events).toContain('clickNodeLabel')
     expect(state.events).toContain('nodeDragStart')
     expect(state.events).toContain('afterTexturesUpload')
-    expect(state.events).toHaveLength(53)
+    expect(state.events).toContain('webglContextRestored')
+    expect(state.events).toHaveLength(55)
   })
 
   it('settings 变化后经 setSettings 同步，仍不做键过滤', async () => {

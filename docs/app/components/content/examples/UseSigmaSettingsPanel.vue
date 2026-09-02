@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { computed, shallowRef } from 'vue'
-
-// 响应式 settings：源变化即 setSettings，无需手动调用
 const labels = shallowRef(true)
 const edgeLabels = shallowRef(false)
 const density = shallowRef(1)
@@ -15,19 +12,12 @@ useSigmaSettings(computed(() => ({
 </script>
 
 <template>
-  <div class="demo-panel" data-at="top-left">
-    <div class="demo-row">
-      <button type="button" :aria-pressed="labels" @click="labels = !labels">
-        节点标签
-      </button>
-      <button type="button" :aria-pressed="edgeLabels" @click="edgeLabels = !edgeLabels">
-        边标签
-      </button>
+  <SigmaControls>
+    <div class="bg-accented p-2 flex flex-col gap-2 w-48">
+      <USwitch v-model="labels" size="xs" label="节点标签" />
+      <USwitch v-model="edgeLabels" size="xs" label="边标签" />
+      <USlider v-model="density" size="xs" :min="0.1" :max="3" :step="0.1" />
+      <span class="text-muted text-xs">labelDensity {{ density }}</span>
     </div>
-    <div class="demo-row">
-      <span class="demo-label">密度</span>
-      <input v-model.number="density" type="range" min="0.1" max="3" step="0.1">
-      <span class="demo-tag">{{ density }}</span>
-    </div>
-  </div>
+  </SigmaControls>
 </template>

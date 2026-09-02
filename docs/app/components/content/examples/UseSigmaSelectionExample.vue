@@ -1,10 +1,12 @@
 <script setup lang="ts">
-const data = demoGraph({ nodes: 14, extraEdges: 1 })
+defineProps<{ dim: boolean }>()
+
+const { data } = await useFetch('/api/data.json')
 </script>
 
 <template>
   <SigmaGraph :data="data">
-    <UseSigmaSelectionPanel />
+    <UseSigmaSelectionPanel :key="String(dim)" :dim="dim" />
     <SigmaTooltip />
   </SigmaGraph>
 </template>

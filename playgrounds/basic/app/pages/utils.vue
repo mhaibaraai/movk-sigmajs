@@ -16,19 +16,11 @@
     </ExampleCard>
 
     <ExampleCard
-      title="chainReducers"
-      name="ChainReducersExample"
-      description="用户自带的 nodeReducer 作为链的基座先执行，库注册的在其后叠加。"
+      title="composeStyles"
+      name="ComposeStylesExample"
+      description="用户规则与 DEFAULT_STYLES 合成，缺了基础规则连 x / y 绑定都会丢。"
     >
-      <ChainReducersExample />
-    </ExampleCard>
-
-    <ExampleCard
-      title="sampleGraph"
-      name="SampleGraphExample"
-      description="按度数取 Top-N 得到概览子图，图级 attributes 与 options 原样保留。"
-    >
-      <SampleGraphExample />
+      <ComposeStylesExample />
     </ExampleCard>
   </div>
 </template>

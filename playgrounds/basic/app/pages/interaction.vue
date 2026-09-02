@@ -2,8 +2,8 @@
   <div>
     <h1>交互原语</h1>
     <p class="lead">
-      选中、邻域、拖拽、检索、过滤与归约。它们共用一条按 <code>order</code> 排序的 reducer 链，
-      互不覆盖；用户经 <code>settings</code> 自带的 reducer 始终位于链首。
+      选中、邻域、拖拽、检索与过滤。它们只写 sigma 的状态，外观由 <code>styles</code> 规则消费，
+      互不覆盖；用户自带的 <code>styles</code> 与 reducer 原样进构造选项。
     </p>
 
     <ExampleCard
@@ -11,7 +11,7 @@
       name="UseSigmaSelectionExample"
       description="hover / selected / focused 状态机，内建高亮与淡出。核心交互原语。"
     >
-      <UseSigmaSelectionExample />
+      <UseSigmaSelectionExample :dim="true" />
     </ExampleCard>
 
     <ExampleCard
@@ -19,7 +19,7 @@
       name="UseSigmaNeighborhoodExample"
       description="N 度邻域计算，切换深度看可达范围的变化。"
     >
-      <UseSigmaNeighborhoodExample />
+      <UseSigmaNeighborhoodExample :depth="2" />
     </ExampleCard>
 
     <ExampleCard
@@ -35,7 +35,7 @@
       name="UseSigmaDragExample"
       description="拖拽移动节点。与迭代型布局互斥，示例里可开关布局对照。"
     >
-      <UseSigmaDragExample />
+      <UseSigmaDragExample :enabled="true" />
     </ExampleCard>
 
     <ExampleCard
@@ -49,17 +49,9 @@
     <ExampleCard
       title="useSigmaFilter"
       name="UseSigmaFilterExample"
-      description="按分类、度数、边类型过滤，落到 reducer 的 hidden。不改动图数据本身。"
+      description="按分类、度数、边类型过滤，落到 sigma 的 isHidden 状态。不改动图数据本身。"
     >
       <UseSigmaFilterExample />
-    </ExampleCard>
-
-    <ExampleCard
-      title="useSigmaReducer"
-      name="UseSigmaReducerExample"
-      description="自定义归约与内建的选中高亮、过滤按 order 共存。"
-    >
-      <UseSigmaReducerExample />
     </ExampleCard>
 
     <ExampleCard

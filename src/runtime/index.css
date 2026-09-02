@@ -1,23 +1,23 @@
 :where(.sigma-root) {
-  /* primitive */
-  --sigma-color-bg: #fff;
-  --sigma-color-fg: #1f2328;
-  --sigma-color-muted: #57606a;
-  --sigma-color-border: rgb(0 0 0 / 12%);
-  --sigma-color-hover: rgb(0 0 0 / 5%);
-  --sigma-color-active: rgb(0 0 0 / 9%);
-  --sigma-color-accent: #3b82f6;
-  --sigma-shadow-sm: 0 1px 3px rgb(0 0 0 / 12%);
-  --sigma-shadow-md: 0 2px 8px rgb(0 0 0 / 15%);
-  --sigma-radius: 6px;
-  --sigma-space: 4px;
-  --sigma-font-size: 13px;
-  --sigma-font: system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* primitive：绑定 Nuxt UI v4 的设计令牌，未安装 @nuxt/ui 时回落到其默认主题（slate + green）的同值字面量 */
+  --sigma-color-bg: var(--ui-bg, #fff);
+  --sigma-color-fg: var(--ui-text-highlighted, oklch(20.8% 0.042 265.755));
+  --sigma-color-muted: var(--ui-text-muted, oklch(55.4% 0.046 257.417));
+  --sigma-color-border: var(--ui-border, oklch(92.9% 0.013 255.508));
+  --sigma-color-hover: var(--ui-bg-elevated, oklch(96.8% 0.007 247.896));
+  --sigma-color-active: var(--ui-bg-accented, oklch(92.9% 0.013 255.508));
+  --sigma-color-accent: var(--ui-primary, oklch(72.3% 0.219 149.579));
+  --sigma-shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 10%), 0 1px 2px -1px rgb(0 0 0 / 10%);
+  --sigma-shadow-md: 0 10px 15px -3px rgb(0 0 0 / 10%), 0 4px 6px -4px rgb(0 0 0 / 10%);
+  --sigma-radius: calc(var(--ui-radius, 0.25rem) * 1.5);
+  --sigma-space: 0.25rem;
+  --sigma-font-size: 0.875rem;
+  --sigma-font: var(--font-sans, system-ui, -apple-system, "Segoe UI", sans-serif);
 
   /* semantic：控件 */
-  --sigma-control-size: 32px;
+  --sigma-control-size: 2rem;
   --sigma-control-gap: var(--sigma-space);
-  --sigma-control-inset: 8px;
+  --sigma-control-inset: 0.5rem;
   --sigma-control-radius: var(--sigma-radius);
   --sigma-control-bg: var(--sigma-color-bg);
   --sigma-control-fg: var(--sigma-color-fg);
@@ -31,7 +31,7 @@
   --sigma-overlay-fg: var(--sigma-color-fg);
   --sigma-overlay-border: var(--sigma-color-border);
   --sigma-overlay-radius: var(--sigma-radius);
-  --sigma-overlay-padding: 6px 10px;
+  --sigma-overlay-padding: 0.25rem 0.625rem;
   --sigma-overlay-shadow: var(--sigma-shadow-md);
 
   /* semantic：小地图 */
@@ -40,29 +40,38 @@
   --sigma-minimap-viewport: var(--sigma-color-accent);
 }
 
+/* 深色下的语义令牌由 Nuxt UI 自行翻转，字面量兜底取其 .dark 取值；阴影两种模式相同，不重写 */
 @media (prefers-color-scheme: dark) {
   :where(html:not(.light)) :where(.sigma-root) {
-    --sigma-color-bg: #1f2328;
-    --sigma-color-fg: #e6edf3;
-    --sigma-color-muted: #8b949e;
-    --sigma-color-border: rgb(255 255 255 / 15%);
-    --sigma-color-hover: rgb(255 255 255 / 8%);
-    --sigma-color-active: rgb(255 255 255 / 14%);
-    --sigma-shadow-sm: 0 1px 3px rgb(0 0 0 / 40%);
-    --sigma-shadow-md: 0 2px 8px rgb(0 0 0 / 50%);
+    --sigma-color-bg: var(--ui-bg, oklch(20.8% 0.042 265.755));
+    --sigma-color-fg: var(--ui-text-highlighted, #fff);
+    --sigma-color-muted: var(--ui-text-muted, oklch(70.4% 0.04 256.788));
+    --sigma-color-border: var(--ui-border, oklch(27.9% 0.041 260.031));
+    --sigma-color-hover: var(--ui-bg-elevated, oklch(27.9% 0.041 260.031));
+    --sigma-color-active: var(--ui-bg-accented, oklch(37.2% 0.044 257.287));
+    --sigma-color-accent: var(--ui-primary, oklch(79.2% 0.209 151.711));
   }
 }
 
-:where(html.dark) :where(.sigma-root),
+:where(html.dark) :where(.sigma-root) {
+  --sigma-color-bg: var(--ui-bg, oklch(20.8% 0.042 265.755));
+  --sigma-color-fg: var(--ui-text-highlighted, #fff);
+  --sigma-color-muted: var(--ui-text-muted, oklch(70.4% 0.04 256.788));
+  --sigma-color-border: var(--ui-border, oklch(27.9% 0.041 260.031));
+  --sigma-color-hover: var(--ui-bg-elevated, oklch(27.9% 0.041 260.031));
+  --sigma-color-active: var(--ui-bg-accented, oklch(37.2% 0.044 257.287));
+  --sigma-color-accent: var(--ui-primary, oklch(79.2% 0.209 151.711));
+}
+
+/* 实例级深色要在浅色页面里也成立，只能引用不随明暗翻转的调色板令牌 */
 :where(.sigma-root[data-sigma-scheme="dark"]) {
-  --sigma-color-bg: #1f2328;
-  --sigma-color-fg: #e6edf3;
-  --sigma-color-muted: #8b949e;
-  --sigma-color-border: rgb(255 255 255 / 15%);
-  --sigma-color-hover: rgb(255 255 255 / 8%);
-  --sigma-color-active: rgb(255 255 255 / 14%);
-  --sigma-shadow-sm: 0 1px 3px rgb(0 0 0 / 40%);
-  --sigma-shadow-md: 0 2px 8px rgb(0 0 0 / 50%);
+  --sigma-color-bg: var(--ui-color-neutral-900, oklch(20.8% 0.042 265.755));
+  --sigma-color-fg: #fff;
+  --sigma-color-muted: var(--ui-color-neutral-400, oklch(70.4% 0.04 256.788));
+  --sigma-color-border: var(--ui-color-neutral-800, oklch(27.9% 0.041 260.031));
+  --sigma-color-hover: var(--ui-color-neutral-800, oklch(27.9% 0.041 260.031));
+  --sigma-color-active: var(--ui-color-neutral-700, oklch(37.2% 0.044 257.287));
+  --sigma-color-accent: var(--ui-color-primary-400, oklch(79.2% 0.209 151.711));
 }
 
 .sigma-root {
@@ -95,6 +104,10 @@
   font-family: var(--sigma-font);
   font-size: var(--sigma-font-size);
   white-space: nowrap;
+}
+
+:where(.sigma-tooltip) {
+  box-shadow: var(--sigma-shadow-sm);
 }
 
 .sigma-tooltip,
@@ -194,8 +207,12 @@
   background: transparent;
   color: var(--sigma-control-fg);
   font: inherit;
+  font-weight: 500;
   line-height: 1;
   cursor: pointer;
+  transition:
+    color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 :where(.sigma-control-button:hover:not(:disabled)) {
@@ -207,13 +224,13 @@
 }
 
 :where(.sigma-control-button:disabled) {
-  opacity: 0.45;
+  opacity: 0.75;
   cursor: not-allowed;
 }
 
 :where(.sigma-control-button:focus-visible) {
-  outline: 2px solid var(--sigma-color-accent);
-  outline-offset: -2px;
+  outline: 3px solid color-mix(in oklab, var(--sigma-color-accent) 25%, transparent);
+  outline-offset: 0;
 }
 
 /* 检索控件 */
@@ -226,18 +243,22 @@
 
 :where(.sigma-search-input) {
   height: var(--sigma-control-size);
-  padding: 0 8px;
+  padding: 0 0.625rem;
   border: 1px solid var(--sigma-control-border);
   border-radius: var(--sigma-control-radius);
   background: var(--sigma-control-bg);
   color: var(--sigma-control-fg);
   font: inherit;
   box-shadow: var(--sigma-control-shadow);
+  transition:
+    border-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 :where(.sigma-search-input:focus-visible) {
-  outline: 2px solid var(--sigma-color-accent);
-  outline-offset: -1px;
+  border-color: var(--sigma-color-accent);
+  outline: 3px solid color-mix(in oklab, var(--sigma-color-accent) 25%, transparent);
+  outline-offset: 0;
 }
 
 .sigma-search-results {
@@ -265,7 +286,7 @@
 :where(.sigma-search-option) {
   display: block;
   width: 100%;
-  padding: 6px 8px;
+  padding: 0.375rem 0.625rem;
   border: 0;
   background: transparent;
   color: var(--sigma-control-fg);
@@ -284,7 +305,7 @@
 }
 
 :where(.sigma-search-empty) {
-  padding: 6px 8px;
+  padding: 0.375rem 0.625rem;
   color: var(--sigma-color-muted);
 }
 
@@ -307,7 +328,7 @@
   gap: 6px;
   padding: 3px 6px;
   border: 0;
-  border-radius: calc(var(--sigma-control-radius) - 2px);
+  border-radius: var(--sigma-radius);
   background: transparent;
   color: inherit;
   font: inherit;

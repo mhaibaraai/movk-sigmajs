@@ -11,7 +11,7 @@
       name="UseSigmaLayoutExample"
       description="circular / circlepack / random / noverlap / forceatlas2，一次性布局只需 assign()。"
     >
-      <UseSigmaLayoutExample />
+      <UseSigmaLayoutExample name="circular" />
     </ExampleCard>
 
     <ExampleCard

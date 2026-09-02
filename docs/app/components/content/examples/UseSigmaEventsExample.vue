@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const data = demoGraph({ nodes: 7 })
+const { data } = await useFetch('/api/small.json')
 </script>
 
 <template>

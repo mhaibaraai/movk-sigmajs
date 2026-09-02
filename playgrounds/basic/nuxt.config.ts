@@ -4,6 +4,7 @@ const examplesDir = fileURLToPath(new URL('../../docs/app/components/content/exa
 const corpusDir = fileURLToPath(new URL('../../docs/app/utils', import.meta.url))
 const examplesCss = fileURLToPath(new URL('../../docs/app/assets/css/main.css', import.meta.url))
 const dataDir = fileURLToPath(new URL('../../docs/public/data', import.meta.url))
+const serverDir = fileURLToPath(new URL('../../docs/server', import.meta.url))
 
 export default defineNuxtConfig({
   modules: ['@movk/sigma'],
@@ -14,9 +15,10 @@ export default defineNuxtConfig({
   imports: { dirs: [corpusDir] },
   devtools: { enabled: true },
   css: [examplesCss],
-  alias: { '#examples': examplesDir },
+  alias: { '#examples': examplesDir, '#corpus': corpusDir },
   compatibilityDate: '2026-06-30',
   nitro: {
+    scanDirs: [serverDir],
     publicAssets: [{ baseURL: '/data', dir: dataDir }]
   }
 })

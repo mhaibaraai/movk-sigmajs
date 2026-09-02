@@ -1,18 +1,19 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="NS = object, ES = object, GS = object">
 import Graph from 'graphology'
 import { useResizeObserver } from '@vueuse/core'
 import { defu } from 'defu'
 import { useRuntimeConfig } from '#app'
 import { computed, onBeforeUnmount, onMounted, provide, readonly, shallowRef, toRaw, watch } from 'vue'
+import type { ShallowRef } from 'vue'
 import type Sigma from 'sigma'
-import type { SerializedGraph } from 'graphology-types'
+import type { Attributes, SerializedGraph } from 'graphology-types'
 import type { Settings } from 'sigma/settings'
 import type {
   BaseEdgeState,
+  BaseGraphState,
   BaseNodeState,
-  EdgeDisplayData,
   EdgeReducer,
-  NodeDisplayData,
+  ForbidBaseKeys,
   NodeReducer,
   SigmaEdgeEventPayload,
   SigmaEdgeLabelEventPayload,
@@ -21,17 +22,17 @@ import type {
   SigmaNodeDragMovePayload,
   SigmaNodeEventPayload,
   SigmaNodeLabelEventPayload,
-  SigmaStageEventPayload,
-  StylesDeclaration
+  SigmaStageEventPayload
 } from 'sigma/types'
 import { registerSigma } from '../composables/use-sigma'
 import { SIGMA_CONTEXT_KEY, SIGMA_EVENTS } from '../types'
-import type { SigmaContext, SigmaPrimitivesSource, SigmaReducer, SigmaReducerEntry } from '../types'
+import type { SigmaContext, SigmaPrimitivesSource, SigmaStyleOptions, SigmaStyles, SigmaStylesBase } from '../types'
 import { applyGraphDiff } from '../utils/apply-graph-diff'
 import type { ApplyGraphDiffOptions } from '../utils/apply-graph-diff'
-import { chainReducers } from '../utils/chain-reducers'
+import { composeStyles } from '../utils/compose-styles'
 import { isLazySigmaPrimitives } from '../utils/define-sigma-primitives'
-import { DEFAULT_NODE_LABEL_ATLAS_FONT_SIZE, applyNodeLabelAtlasFontSize } from '../utils/node-label-atlas'
+import { applyNodeLabelAtlas, watchNodeLabelAtlasOverflow } from '../utils/node-label-atlas'
+import type { SigmaLabelAtlasOptions } from '../utils/node-label-atlas'
 
 defineOptions({ name: 'SigmaGraph', inheritAttrs: false })
 
@@ -47,10 +48,17 @@ const props = defineProps<{
    */
   graph?: Graph
   /**
-   * 声明式视觉规则，整体透传。sigma 只在构造时读取，变更会重建实例
-   * @see https://v4.sigmajs.org/how-to/styles/
+   * 声明式视觉规则，排在基础规则之后因而覆盖它们。
+   * sigma 只在构造时读取，变更会重建实例
+   * @see https://v4.sigmajs.org/get-started/style-the-graph/
    */
-  styles?: StylesDeclaration
+  styles?: SigmaStyles<NoInfer<NS>, NoInfer<ES>, NoInfer<GS>>
+  /**
+   * 与哪一套基础规则合成。sigma 拿到 `styles.nodes` 时是整体替换而非合并，
+   * 不合成就会丢掉标签绑定、`isHidden` 可见性与悬浮反馈
+   * @defaultValue 'default'
+   */
+  stylesBase?: SigmaStylesBase
   /**
    * 渲染原语：节点形状、边路径、端点、深度层。同样只在构造时读取。
    * 取用 sigma 内置的形状与层工厂时须包在 `defineSigmaPrimitives()` 里延迟加载
@@ -62,19 +70,28 @@ const props = defineProps<{
    * @see https://v4.sigmajs.org/how-to/settings/
    */
   settings?: Partial<Settings>
-  /** 自带的节点归约，作为 reducer 链的基座执行 */
-  nodeReducer?: NodeReducer
-  /** 自带的边归约，作为 reducer 链的基座执行 */
-  edgeReducer?: EdgeReducer
   /**
-   * 节点标签 SDF 字形图集的源字号，不是标签显示字号（后者在 `styles` 的 `labelSize`）。
+   * 逐帧计算显示数据的逃生舱，styles 表达不了时才用。
+   * 常规视觉映射一律写 `styles`
+   */
+  nodeReducer?: NodeReducer
+  /** 边侧的同名逃生舱 */
+  edgeReducer?: EdgeReducer
+  /** 自定义节点状态标志位的默认值，键名不能与 `BaseNodeState` 冲突 */
+  customNodeState?: ForbidBaseKeys<BaseNodeState, NS>
+  /** 自定义边状态标志位的默认值 */
+  customEdgeState?: ForbidBaseKeys<BaseEdgeState, ES>
+  /** 自定义图级状态标志位的默认值 */
+  customGraphState?: ForbidBaseKeys<BaseGraphState, GS>
+  /**
+   * 节点标签 SDF 字形图集的参数，调的是烘进纹理的源字形，不是标签显示字号（后者在 `styles` 的 `labelSize`）。
    *
    * 上游按 `64 × devicePixelRatio` 生成字形，2 倍屏上 2048² 的图集一页只装得下约 190 个，
-   * 中文字形集溢出后节点标签会整体消失，故这里压回 64。Latin 字形集不受此限，
-   * 想在大字号下更锐利可以调高
-   * @defaultValue 64
+   * 中文字形集溢出后节点标签会整体消失，故 `fontSize` 压回 64；字形集更大时再调 `maxTextureSize`。
+   * 与 `primitives` 一样只在构造时读取，挂载后改不生效
+   * @see https://github.com/jacomyal/sigma.js/issues/1552
    */
-  labelAtlasFontSize?: number
+  labelAtlas?: SigmaLabelAtlasOptions
   /** 实例 id，登记后可经 `useSigmaById(id)` 在组件树之外访问 */
   id?: string
   /** `applyGraphDiff` 的行为选项 */
@@ -190,6 +207,10 @@ const emit = defineEmits<{
   'afterRender': []
   /** 每帧纹理上传完成后 */
   'afterTexturesUpload': []
+  /** 浏览器回收了 WebGL 上下文，画布此刻是空的 */
+  'webglContextLost': []
+  /** 上下文已恢复，sigma 重建了渲染资源并自动重绘 */
+  'webglContextRestored': []
   /** 容器尺寸变化、画布已重新适配 */
   'resize': []
   /** 实例被销毁 */
@@ -230,58 +251,50 @@ const resolvedSettings = computed<Partial<Settings>>(() => defu(
   { allowInvalidContainer: true }
 ) as Partial<Settings>)
 
-const reducerEntries: SigmaReducerEntry[] = []
-
-let composedNode: SigmaReducer<NodeDisplayData, BaseNodeState> | null = null
-let composedEdge: SigmaReducer<EdgeDisplayData, BaseEdgeState> | null = null
-
-/**
- * v4 的 reducer 只能在构造时给定，因此交出去的是这对稳定闭包，
- * 链的增删只重算 composed，不必重建实例
- */
-function composeReducers() {
-  const sorted = [...reducerEntries].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-
-  composedNode = chainReducers<NodeDisplayData, BaseNodeState>([
-    props.nodeReducer as SigmaReducer<NodeDisplayData, BaseNodeState> | undefined,
-    ...sorted.map(entry => entry.node)
-  ])
-  composedEdge = chainReducers<EdgeDisplayData, BaseEdgeState>([
-    props.edgeReducer as SigmaReducer<EdgeDisplayData, BaseEdgeState> | undefined,
-    ...sorted.map(entry => entry.edge)
-  ])
+const styleOptions: SigmaStyleOptions = {
+  dimColor: shallowRef<string | null>(null),
+  labelTier: shallowRef(Number.POSITIVE_INFINITY),
+  labelTierAttribute: shallowRef('labelTier')
 }
 
-const dispatchNodeReducer: NodeReducer = (key, data, attributes, state, graphState, instanceGraph) =>
-  composedNode?.(key, data, attributes, state, graphState, instanceGraph) ?? data
+function isBeyondLabelTier(attributes: Attributes): boolean {
+  const tier = attributes[styleOptions.labelTierAttribute.value]
+  return typeof tier === 'number' && tier > styleOptions.labelTier.value
+}
 
-const dispatchEdgeReducer: EdgeReducer = (key, data, attributes, state, graphState, instanceGraph) =>
-  composedEdge?.(key, data, attributes, state, graphState, instanceGraph) ?? data
+function isDimmed(state: { isHighlighted: boolean }, graphState: BaseGraphState): boolean {
+  return styleOptions.dimColor.value !== null && graphState.hasHighlighted && !state.isHighlighted
+}
+
+const dimmed = {
+  color: () => styleOptions.dimColor.value ?? '#d1d5db',
+  labelVisibility: 'hidden',
+  zIndex: 0
+} as const
+
+/**
+ * 库内规则。v4 没有 `setStyles()`，规则形状只能固定在构造期，可变部分由闭包
+ * 从 `styleOptions` 读。排在用户规则之后，composables 的分级与淡出才盖得住用户的视觉映射
+ */
+const libraryStyles: SigmaStyles = {
+  nodes: [
+    { when: attributes => isBeyondLabelTier(attributes), then: { labelVisibility: 'hidden' } },
+    { when: (_attributes, state, graphState) => isDimmed(state, graphState), then: { ...dimmed } }
+  ],
+  edges: [
+    { when: (_attributes, state, graphState) => isDimmed(state, graphState), then: { ...dimmed } }
+  ]
+}
 
 /*
  * 刷新前先取一次图级状态：`setNodeState` 系列只把标志位标脏，`hasHighlighted` 等要
- * 等下一次 flush 才重算，而 `refresh()` 内部把未 flush 的 graphState 直接喂给归约。
- * 状态刚写完就刷新时（悬浮解除是典型场景），归约会拿旧标志算出淡出态，`processNodes`
+ * 等下一次 flush 才重算，而 `refresh()` 内部把未 flush 的 graphState 直接喂给求值。
+ * 状态刚写完就刷新时（悬浮解除是典型场景），规则会拿旧标志算出淡出态，`processNodes`
  * 再把它烘进 labelGrid，之后的状态刷新只改样式不重建栅格，标签就再也回不来。
- * `getGraphState()` 会先 flush，读一下即可让归约与条目状态对齐。
  */
-function refreshReducers() {
-  composeReducers()
+function refresh(options?: { skipIndexation?: boolean }) {
   sigma.value?.getGraphState()
-  sigma.value?.refresh()
-}
-
-function registerReducer(entry: SigmaReducerEntry): () => void {
-  reducerEntries.push(entry)
-  refreshReducers()
-
-  return () => {
-    const index = reducerEntries.indexOf(entry)
-    if (index !== -1) {
-      reducerEntries.splice(index, 1)
-      refreshReducers()
-    }
-  }
+  sigma.value?.refresh(options)
 }
 
 const context: SigmaContext = {
@@ -289,11 +302,15 @@ const context: SigmaContext = {
   graph,
   isReady: readonly(isReady),
   whenReady: () => (sigma.value ? Promise.resolve(sigma.value) : readyPromise),
-  registerReducer,
-  refreshReducers
+  styleOptions,
+  refresh
 }
 
 provide(SIGMA_CONTEXT_KEY, context)
+
+// 纯颜色变更不影响标签栅格与拾取，可以跳过重建索引
+watch(styleOptions.dimColor, () => refresh({ skipIndexation: true }))
+watch([styleOptions.labelTier, styleOptions.labelTierAttribute], () => refresh())
 
 function syncData() {
   if (!props.data || isExternalGraph.value) {
@@ -317,21 +334,40 @@ watch(resolvedSettings, (next) => {
   sigma.value?.setSettings(next)
 }, { deep: true })
 
-watch([() => props.nodeReducer, () => props.edgeReducer], refreshReducers)
-
 useResizeObserver(containerRef, () => {
   sigma.value?.resize()
 })
 
 let disposed = false
+let stopAtlasWatch: (() => void) | undefined
 
 function destroyInstance() {
+  stopAtlasWatch?.()
+  stopAtlasWatch = undefined
   sigma.value?.kill()
   sigma.value = null
   isReady.value = false
   readyPromise = new Promise<Sigma>((resolve) => {
     resolveReady = resolve
   })
+}
+
+/**
+ * sigma 拿到 `styles.nodes` 时整体替换 `DEFAULT_STYLES.nodes` 而非合并，
+ * 不显式合成就会丢掉标签绑定、`isHidden` 可见性与悬浮反馈
+ */
+async function resolveStyles(): Promise<SigmaStyles> {
+  // 组件的泛型到这里为止：composeStyles 只按序拼接规则数组，不看状态形状
+  const userStyles = toRaw(props.styles) as SigmaStyles | undefined
+  const base = props.stylesBase ?? 'default'
+  if (base === 'none') {
+    return composeStyles(userStyles, libraryStyles)
+  }
+
+  const { DEFAULT_STYLES, DEPTHLESS_STYLES } = await import('sigma/types')
+  const preset = base === 'depthless' ? DEPTHLESS_STYLES : DEFAULT_STYLES
+
+  return composeStyles(preset as SigmaStyles, userStyles, libraryStyles)
 }
 
 async function createInstance() {
@@ -342,8 +378,6 @@ async function createInstance() {
   if (disposed || !container) {
     return
   }
-
-  composeReducers()
 
   // 延迟声明的原语在建实例前解析完，避免节点带着尚未注册的形状先渲染
   const source = props.primitives
@@ -357,18 +391,22 @@ async function createInstance() {
 
   const instance = new Sigma(graph.value, container, {
     primitives,
-    styles: toRaw(props.styles),
+    styles: await resolveStyles(),
     settings: resolvedSettings.value,
-    nodeReducer: dispatchNodeReducer,
-    edgeReducer: dispatchEdgeReducer
+    nodeReducer: props.nodeReducer,
+    edgeReducer: props.edgeReducer,
+    customNodeState: toRaw(props.customNodeState),
+    customEdgeState: toRaw(props.customEdgeState),
+    customGraphState: toRaw(props.customGraphState)
   })
 
   // 必须赶在首帧之前：此刻图集里还没有任何字形，换掉整个 manager 不丢数据
-  applyNodeLabelAtlasFontSize(
-    instance,
-    props.labelAtlasFontSize ?? DEFAULT_NODE_LABEL_ATLAS_FONT_SIZE,
-    primitives?.nodes?.label?.font
-  )
+  applyNodeLabelAtlas(instance, toRaw(props.labelAtlas), primitives?.nodes?.label?.font)
+
+  // 挂在换过图集之后，否则监听的是那个已经被丢弃的 manager
+  if (import.meta.dev) {
+    stopAtlasWatch = watchNodeLabelAtlasOverflow(instance)
+  }
 
   for (const event of SIGMA_EVENTS) {
     instance.on(event as SigmaEventType, (payload: unknown) => {
@@ -384,19 +422,19 @@ async function createInstance() {
 }
 
 /**
- * styles 与 primitives 是构造时读取的，改了只能重建。
+ * styles、primitives 与 reducer 都是构造时读取的，改了只能重建。
  *
  * 比引用而非比值：deep 比较会让模板里内联的对象字面量在父组件每次重渲染时
  * 都判定为「变了」，于是反复重建实例。使用方应把它们提到 setup 顶层或包进
  * computed 保持引用稳定
  */
-watch([() => props.styles, () => props.primitives], async () => {
+watch([() => props.styles, () => props.primitives, () => props.stylesBase, () => props.nodeReducer, () => props.edgeReducer], async () => {
   if (!sigma.value) {
     return
   }
 
   if (import.meta.dev) {
-    console.warn('[@movk/sigma] styles 或 primitives 变更，正在重建 sigma 实例。若非有意为之，请把它们提到 setup 顶层保持引用稳定')
+    console.warn('[@movk/sigma] styles、primitives 或 reducer 变更，正在重建 sigma 实例。若非有意为之，请把它们提到 setup 顶层保持引用稳定')
   }
 
   destroyInstance()
@@ -426,7 +464,10 @@ onBeforeUnmount(() => {
   destroyInstance()
 })
 
-defineExpose({ sigma, graph })
+defineExpose({
+  sigma: sigma as ShallowRef<Sigma<Attributes, Attributes, Attributes, NS, ES, GS> | null>,
+  graph
+})
 </script>
 
 <template>

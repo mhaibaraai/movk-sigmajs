@@ -10,11 +10,11 @@ export type { SigmaLabelTierBreakpoint, UseSigmaLabelTiersOptions, UseSigmaLabel
 export type { SigmaLayoutComponentOptions, UseSigmaLayoutOptions, UseSigmaLayoutReturn } from '../composables/use-sigma-layout'
 export type { SigmaCentralityKind, UseSigmaMetricsReturn } from '../composables/use-sigma-metrics'
 export type { UseSigmaNeighborhoodOptions, UseSigmaNeighborhoodReturn } from '../composables/use-sigma-neighborhood'
-export type { UseSigmaReducerReturn } from '../composables/use-sigma-reducer'
 export type { SigmaSearchResult, UseSigmaSearchOptions, UseSigmaSearchReturn } from '../composables/use-sigma-search'
 export type { UseSigmaSelectionOptions, UseSigmaSelectionReturn } from '../composables/use-sigma-selection'
 export type { UseSigmaStateReturn } from '../composables/use-sigma-state'
 
 export type { ApplyGraphDiffOptions } from '../utils/apply-graph-diff'
 export type { DegreeToTierOptions, LabelPlacementsOptions } from '../utils/graph-visual'
+export type { SigmaLabelAtlasOptions } from '../utils/node-label-atlas'
 export type { SdfPolygonOptions, SdfStarOptions } from '../utils/node-shape'

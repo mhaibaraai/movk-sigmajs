@@ -33,11 +33,20 @@ export default defineNuxtConfig({
     '/docs': { redirect: '/docs/getting-started', prerender: false },
     '/docs/components': { redirect: '/docs/components/graph', prerender: false },
     '/docs/composables': { redirect: '/docs/composables/use-sigma', prerender: false },
-    '/docs/utils': { redirect: '/docs/utils/apply-graph-diff', prerender: false },
-    '/docs/guides': { redirect: '/docs/guides/scale', prerender: false }
+    '/docs/utils': { redirect: '/docs/utils/apply-graph-diff', prerender: false }
   },
 
   compatibilityDate: '2026-06-30',
+
+  vite: {
+    optimizeDeps: {
+      include: [
+        '@unhead/schema-org/vue',
+        '@movk/core',
+        'sigma/types'
+      ]
+    }
+  },
 
   aiChat: {
     model: 'alibaba/glm-5.1',
@@ -58,5 +67,14 @@ export default defineNuxtConfig({
   mcp: {
     name: 'Movk Sigma',
     browserRedirect: '/docs/getting-started/ai/mcp'
+  },
+
+  sigma: {
+    settings: {
+      gestureTarget: 'shared',
+      sharedGestureWheelMessage: '按住 Ctrl 滚动可缩放图谱',
+      sharedGestureAppleWheelMessage: '按住 ⌘ 滚动可缩放图谱',
+      sharedGestureTouchMessage: '双指拖动可操作图谱'
+    }
   }
 })

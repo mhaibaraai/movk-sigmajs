@@ -63,8 +63,6 @@ vi.mock('sigma', () => {
   return { default: MockSigma }
 })
 
-type Reducer = (...args: unknown[]) => Record<string, unknown>
-
 async function mountTiers(options: UseSigmaLabelTiersOptions = {}) {
   let api!: UseSigmaLabelTiersReturn
 
@@ -99,13 +97,30 @@ async function mountTiers(options: UseSigmaLabelTiersOptions = {}) {
       instance.camera.handlers.updated?.()
       await nextTick()
     },
-    nodeReducer: () => {
-      const reducer = instance.options.nodeReducer as Reducer
-      // v4 把图属性放在第三参数，档位从那里读
-      return (key: string, attributes: Record<string, unknown> = {}) =>
-        reducer(key, {}, attributes, {}, {}, {})
+    // 走真实的 evaluateNodeStyle，顺带验证库内规则确实合成进了声明里
+    async evaluate(attributes: Record<string, unknown>) {
+      const { evaluateNodeStyle } = await import('sigma/types')
+      const styles = instance.options.styles as { nodes: Record<string, unknown>[] }
+      return evaluateNodeStyle(styles.nodes, { x: 0, y: 0, ...attributes }, NODE_STATE, GRAPH_STATE, graph)
     }
   }
+}
+
+const NODE_STATE = {
+  isHovered: false,
+  isLabelHovered: false,
+  isHidden: false,
+  isHighlighted: false,
+  isDragged: false
+}
+
+const GRAPH_STATE = {
+  isIdle: true,
+  isPanning: false,
+  isZooming: false,
+  isDragging: false,
+  hasHovered: false,
+  hasHighlighted: false
 }
 
 enableAutoUnmount(afterEach)
@@ -145,31 +160,29 @@ describe('useSigmaLabelTiers', () => {
   })
 
   it('超出当前档位的节点标签被隐藏', async () => {
-    const { moveCamera, nodeReducer } = await mountTiers()
+    const { moveCamera, evaluate } = await mountTiers()
 
     await moveCamera(1.5)
-    const reduce = nodeReducer()
 
     // 隐藏而非置空：sigma 用 auto 的标签参与网格竞争，hidden 的直接让出名额
-    expect(reduce('b', { labelTier: 2 }).labelVisibility).toBe('hidden')
-    expect(reduce('a', { labelTier: 0 }).labelVisibility).toBeUndefined()
+    expect((await evaluate({ labelTier: 2 })).labelVisibility).toBe('hidden')
+    expect((await evaluate({ labelTier: 0 })).labelVisibility).not.toBe('hidden')
   })
 
   it('没有档位属性的节点不受影响', async () => {
-    const { moveCamera, nodeReducer } = await mountTiers()
+    const { moveCamera, evaluate } = await mountTiers()
 
     await moveCamera(3)
 
-    expect(nodeReducer()('c', {}).labelVisibility).toBeUndefined()
+    expect((await evaluate({})).labelVisibility).not.toBe('hidden')
   })
 
   it('读取的属性名可配置', async () => {
-    const { moveCamera, nodeReducer } = await mountTiers({ attribute: 'rankTier' })
+    const { moveCamera, evaluate } = await mountTiers({ attribute: 'rankTier' })
 
     await moveCamera(3)
-    const reduce = nodeReducer()
 
-    expect(reduce('b', { rankTier: 2 }).labelVisibility).toBe('hidden')
-    expect(reduce('b', { labelTier: 2 }).labelVisibility).toBeUndefined()
+    expect((await evaluate({ rankTier: 2 })).labelVisibility).toBe('hidden')
+    expect((await evaluate({ labelTier: 2 })).labelVisibility).not.toBe('hidden')
   })
 })

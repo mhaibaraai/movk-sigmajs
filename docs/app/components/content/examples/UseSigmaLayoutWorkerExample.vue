@@ -1,11 +1,24 @@
 <script setup lang="ts">
-const data = demoGraph({ nodes: 60, extraEdges: 1 })
+import type { StylesDeclaration } from 'sigma/types'
+
+const { data } = await useFetch('/api/euroSIS.json', { server: false })
+
+const styles: StylesDeclaration = {
+  nodes: {
+    color: '#3b82f6',
+    size: { attribute: 'nansi-degree', min: 2, max: 12, minValue: 1, maxValue: 125 }
+  },
+  edges: { color: '#e2e8f0' }
+}
 </script>
 
 <template>
-  <!-- worker 每一帧都在回写坐标，跨度持续变化。
-       v4 默认 size 是图坐标单位，不切到 screen 语义节点会随收敛过程一路胀大 -->
-  <SigmaGraph :data="data" :settings="{ hideEdgesOnMove: true, itemSizesReference: 'screen' }">
+  <SigmaGraph
+    v-if="data"
+    :data="data"
+    :styles="styles"
+    :settings="{ hideEdgesOnMove: true, itemSizesReference: 'screen', renderLabels: false }"
+  >
     <UseSigmaLayoutWorkerPanel />
   </SigmaGraph>
 </template>

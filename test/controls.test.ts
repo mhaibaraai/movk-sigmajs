@@ -7,6 +7,7 @@ import SigmaControls from '../src/runtime/components/controls/Controls.vue'
 import SigmaZoomControl from '../src/runtime/components/controls/ZoomControl.vue'
 import SigmaSearchControl from '../src/runtime/components/controls/SearchControl.vue'
 import SigmaLegend from '../src/runtime/components/controls/Legend.vue'
+import SigmaMiniMap from '../src/runtime/components/controls/MiniMap.vue'
 
 const state = vi.hoisted(() => ({
   instances: [] as Array<{
@@ -14,6 +15,7 @@ const state = vi.hoisted(() => ({
     settings: Record<string, unknown>
     handlers: Record<string, (payload: unknown) => void>
     camera: { zoomIn: number, zoomOut: number, reset: number, animated: unknown[] }
+    nodeStates: Map<string, { isHidden?: boolean }>
   }>
 }))
 
@@ -23,6 +25,7 @@ vi.mock('sigma', () => {
     settings: Record<string, unknown> = {}
     handlers: Record<string, (payload: unknown) => void> = {}
     camera = { zoomIn: 0, zoomOut: 0, reset: 0, animated: [] as unknown[] }
+    nodeStates = new Map<string, { isHidden?: boolean }>()
     graph: Graph
 
     constructor(graph: Graph, _container: unknown, options: { settings: Record<string, unknown> }) {
@@ -58,9 +61,34 @@ vi.mock('sigma', () => {
       return this.graph.hasNode(key) ? { x: 0, y: 0, visibility: 'visible' } : undefined
     }
 
+    getDimensions() {
+      return { width: 800, height: 600 }
+    }
+
+    getGraphDimensions() {
+      return { width: 1, height: 1 }
+    }
+
+    viewportToFramedGraph(coordinates: { x: number, y: number }) {
+      return { x: coordinates.x / 800, y: 1 - coordinates.y / 600 }
+    }
+
     on(event: string, handler: (payload: unknown) => void) {
       this.handlers[event] = handler
     }
+
+    setNodesState(keys: string[], patch: { isHidden?: boolean }) {
+      for (const key of keys) {
+        this.nodeStates.set(key, { ...this.nodeStates.get(key), ...patch })
+      }
+    }
+
+    setNodeState(key: string, patch: { isHidden?: boolean }) {
+      this.setNodesState([key], patch)
+    }
+
+    setEdgesState() {}
+    setEdgeState() {}
 
     off() {}
     resize() {}
@@ -124,11 +152,11 @@ describe('SigmaControls', () => {
     expect(el.attributes('data-direction')).toBe('horizontal')
   })
 
-  it('默认停靠右下且纵向排布', async () => {
+  it('默认停靠左上且纵向排布', async () => {
     const { wrapper } = await mountControl(() => h(SigmaControls, null, () => 'x'))
 
     const el = wrapper.find('.sigma-controls')
-    expect(el.attributes('data-position')).toBe('bottom-right')
+    expect(el.attributes('data-position')).toBe('top-left')
     expect(el.attributes('data-direction')).toBe('vertical')
   })
 
@@ -417,14 +445,13 @@ describe('SigmaLegend', () => {
     expect(wrapper.find('.sigma-legend-item').text()).toContain('未分类')
   })
 
-  it('点击条目切换该组显隐并落到 reducer 的 visibility', async () => {
+  it('点击条目切换该组显隐并落到 isHidden 状态', async () => {
     const { wrapper, instance } = await mountControl(() => h(SigmaLegend, { field: 'type' }))
 
     await wrapper.findAll('.sigma-legend-item')[0]!.trigger('click')
 
-    const reducer = instance.options.nodeReducer as (...args: unknown[]) => { visibility?: string }
-    expect(reducer('a', {}, {}, {}, {}, {}).visibility).toBe('hidden')
-    expect(reducer('c', {}, {}, {}, {}, {}).visibility).toBeUndefined()
+    expect(instance.nodeStates.get('a')?.isHidden).toBe(true)
+    expect(instance.nodeStates.get('c')?.isHidden).not.toBe(true)
     expect(wrapper.findAll('.sigma-legend-item')[0]!.attributes('aria-pressed')).toBe('false')
   })
 
@@ -435,10 +462,8 @@ describe('SigmaLegend', () => {
     await item.trigger('click')
     await item.trigger('click')
 
-    // 过滤归约常驻链上，清空后不再隐藏任何节点
-    const reducer = instance.options.nodeReducer as (...args: unknown[]) => { visibility?: string }
-    expect(reducer('a', {}, {}, {}, {}, {}).visibility).toBeUndefined()
-    expect(reducer('c', {}, {}, {}, {}, {}).visibility).toBeUndefined()
+    expect(instance.nodeStates.get('a')?.isHidden).toBe(false)
+    expect(instance.nodeStates.get('c')?.isHidden).not.toBe(true)
     expect(item.attributes('aria-pressed')).toBe('true')
   })
 
@@ -460,5 +485,62 @@ describe('SigmaLegend', () => {
 
     expect(wrapper.text()).toBe('管理:2技术:1')
     expect(wrapper.find('.sigma-legend-item').exists()).toBe(false)
+  })
+})
+
+describe('SigmaMiniMap', () => {
+  // happy-dom 不排版，缩略图的 CSS 尺寸得手动给，否则投影除零
+  beforeEach(() => {
+    for (const prop of ['clientWidth', 'clientHeight']) {
+      Object.defineProperty(HTMLCanvasElement.prototype, prop, { value: 140, configurable: true })
+    }
+  })
+
+  afterEach(() => {
+    for (const prop of ['clientWidth', 'clientHeight']) {
+      Reflect.deleteProperty(HTMLCanvasElement.prototype, prop)
+    }
+  })
+
+  async function mountMiniMap(props?: Record<string, unknown>) {
+    const mounted = await mountControl(() => h(SigmaMiniMap, props))
+
+    // 等 sigma/utils 动态导入完成并跑完一帧
+    await vi.waitFor(() => {
+      if (!mounted.wrapper.find('canvas').exists()) {
+        throw new Error('缩略图尚未挂载')
+      }
+    })
+    await new Promise(resolve => requestAnimationFrame(() => resolve(null)))
+    await nextTick()
+
+    return mounted
+  }
+
+  it('点缩略图上半区，相机去的是 framed 空间的上半区', async () => {
+    const { wrapper, instance } = await mountMiniMap()
+
+    await wrapper.find('.sigma-minimap').trigger('click', { clientX: 70, clientY: 20 })
+
+    const target = instance.camera.animated.at(-1) as { x: number, y: number }
+    expect(target.y).toBeGreaterThan(0.5)
+    expect(target.x).toBeCloseTo(0.5, 1)
+  })
+
+  it('点缩略图下半区，相机去的是 framed 空间的下半区', async () => {
+    const { wrapper, instance } = await mountMiniMap()
+
+    await wrapper.find('.sigma-minimap').trigger('click', { clientX: 70, clientY: 120 })
+
+    const target = instance.camera.animated.at(-1) as { x: number, y: number }
+    expect(target.y).toBeLessThan(0.5)
+  })
+
+  it('clickToMove 为 false 时不动相机', async () => {
+    const { wrapper, instance } = await mountMiniMap({ clickToMove: false })
+
+    await wrapper.find('.sigma-minimap').trigger('click', { clientX: 70, clientY: 20 })
+
+    expect(instance.camera.animated).toHaveLength(0)
   })
 })

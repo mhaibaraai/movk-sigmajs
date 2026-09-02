@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useResizeObserver } from '@vueuse/core'
-import { onMounted, shallowRef, useTemplateRef } from 'vue'
+import { onMounted, shallowRef, useTemplateRef, watch } from 'vue'
+import type { MinimapProjection, SigmaMatrixUtils } from '../../utils/minimap-projection'
+import { createMinimapProjection } from '../../utils/minimap-projection'
 import { useSigma } from '../../composables/use-sigma'
 import { useSigmaEvents } from '../../composables/use-sigma-events'
 
@@ -34,94 +36,21 @@ const props = withDefaults(defineProps<{
   duration: 300
 })
 
-/**
- * 全程使用 framed 坐标：`getNodeDisplayData` 返回的是它，相机的 x / y 也是它，
- * 于是画点、画视口框、点击回写三者同在一个坐标系里，不必来回转换。
- */
 const { sigma } = useSigma()
 const canvasRef = useTemplateRef<HTMLCanvasElement>('canvas')
 const rootRef = useTemplateRef<HTMLDivElement>('root')
 
-/** 全图在 framed 坐标系下的包围盒 */
-interface Extent {
-  minX: number
-  maxX: number
-  minY: number
-  maxY: number
-}
-
-const extent = shallowRef<Extent | null>(null)
+/** sigma 的矩阵工具和实例一样只在客户端加载 */
+const matrixUtils = shallowRef<SigmaMatrixUtils | null>(null)
+/** 绘制时建立、点击时复用，画和点始终共用同一套投影参数 */
+const projection = shallowRef<MinimapProjection | null>(null)
 let frame = 0
-
-function computeExtent(): Extent | null {
-  const instance = sigma.value
-  if (!instance) {
-    return null
-  }
-
-  let minX = Infinity
-  let maxX = -Infinity
-  let minY = Infinity
-  let maxY = -Infinity
-  let found = false
-
-  instance.getGraph().forEachNode((key) => {
-    const display = instance.getNodeDisplayData(key)
-    if (!display || display.visibility === 'hidden') {
-      return
-    }
-    found = true
-    minX = Math.min(minX, display.x)
-    maxX = Math.max(maxX, display.x)
-    minY = Math.min(minY, display.y)
-    maxY = Math.max(maxY, display.y)
-  })
-
-  if (!found) {
-    return null
-  }
-
-  // 单点或共线时给一个最小跨度，避免除零
-  const spanX = maxX - minX || 1
-  const spanY = maxY - minY || 1
-
-  return { minX, maxX: minX + spanX, minY, maxY: minY + spanY }
-}
-
-/**
- * 把 framed 坐标等比缩放并居中到缩略图画布上。
- * 一并返回 `scale` 与偏移量，供点击时做逆运算，两处共用同一套参数才不会错位。
- */
-function project(point: { x: number, y: number }, box: Extent, width: number, height: number) {
-  const inner = props.padding
-  const scale = Math.min(
-    (width - inner * 2) / (box.maxX - box.minX),
-    (height - inner * 2) / (box.maxY - box.minY)
-  )
-  const offsetX = (width - (box.maxX - box.minX) * scale) / 2
-  const offsetY = (height - (box.maxY - box.minY) * scale) / 2
-
-  return {
-    x: (point.x - box.minX) * scale + offsetX,
-    y: (point.y - box.minY) * scale + offsetY,
-    scale,
-    offsetX,
-    offsetY
-  }
-}
 
 function draw() {
   const instance = sigma.value
   const canvas = canvasRef.value
-  if (!instance || !canvas) {
-    return
-  }
-
-  const box = computeExtent()
-  extent.value = box
-  const context = canvas.getContext('2d')
-  if (!context || !box) {
-    context?.clearRect(0, 0, canvas.width, canvas.height)
+  const utils = matrixUtils.value
+  if (!instance || !canvas || !utils) {
     return
   }
 
@@ -134,6 +63,20 @@ function draw() {
     canvas.height = height * ratio
   }
 
+  // 先建投影再取上下文：拿不到 2D 上下文时点击依然可用
+  const project = createMinimapProjection(
+    utils,
+    { width, height },
+    instance.getGraphDimensions(),
+    props.padding
+  )
+  projection.value = project
+
+  const context = canvas.getContext('2d')
+  if (!context) {
+    return
+  }
+
   context.setTransform(ratio, 0, 0, ratio, 0, 0)
   context.clearRect(0, 0, width, height)
 
@@ -142,34 +85,39 @@ function draw() {
   const viewportColor = styles.getPropertyValue('--sigma-minimap-viewport').trim() || '#3b82f6'
 
   context.fillStyle = nodeColor
+  let hasVisibleNode = false
   instance.getGraph().forEachNode((key) => {
     const display = instance.getNodeDisplayData(key)
     if (!display || display.visibility === 'hidden') {
       return
     }
-    const point = project(display, box, width, height)
+    hasVisibleNode = true
+    const point = project.toCanvas(display)
     context.beginPath()
     context.arc(point.x, point.y, props.nodeRadius, 0, Math.PI * 2)
     context.fill()
   })
 
+  if (!hasVisibleNode) {
+    return
+  }
+
   const { width: viewWidth, height: viewHeight } = instance.getDimensions()
-  const topLeft = project(instance.viewportToFramedGraph({ x: 0, y: 0 }), box, width, height)
-  const bottomRight = project(
-    instance.viewportToFramedGraph({ x: viewWidth, y: viewHeight }),
-    box,
-    width,
-    height
-  )
+  const first = project.toCanvas(instance.viewportToFramedGraph({ x: 0, y: 0 }))
+  const second = project.toCanvas(instance.viewportToFramedGraph({ x: viewWidth, y: viewHeight }))
+  const left = Math.min(first.x, second.x)
+  const top = Math.min(first.y, second.y)
+  const right = Math.max(first.x, second.x)
+  const bottom = Math.max(first.y, second.y)
+
+  // 视野已装下整张图，画出来只会是贴着边框的一圈，不如不画
+  if (left <= 0 && top <= 0 && right >= width && bottom >= height) {
+    return
+  }
 
   context.strokeStyle = viewportColor
   context.lineWidth = 1
-  context.strokeRect(
-    topLeft.x,
-    topLeft.y,
-    bottomRight.x - topLeft.x,
-    bottomRight.y - topLeft.y
-  )
+  context.strokeRect(left, top, right - left, bottom - top)
 }
 
 function scheduleDraw() {
@@ -186,30 +134,31 @@ function scheduleDraw() {
 useSigmaEvents({ afterRender: scheduleDraw })
 
 useResizeObserver(rootRef, scheduleDraw)
-onMounted(scheduleDraw)
+// 绘制参数只在 draw 里读，改了不重绘就看不到变化
+watch(() => [props.nodeRadius, props.padding], scheduleDraw)
+
+onMounted(async () => {
+  matrixUtils.value = await import('sigma/utils')
+  scheduleDraw()
+})
 
 function moveTo(event: MouseEvent) {
   const instance = sigma.value
   const canvas = canvasRef.value
-  const box = extent.value
+  const project = projection.value
 
-  if (!props.clickToMove || !instance || !canvas || !box) {
+  if (!props.clickToMove || !instance || !canvas || !project) {
     return
   }
 
   const rect = canvas.getBoundingClientRect()
-  const width = canvas.clientWidth
-  const height = canvas.clientHeight
-  const origin = project({ x: box.minX, y: box.minY }, box, width, height)
+  // 逆运算把画布像素送回 framed 坐标，正是相机 x / y 所在的坐标系
+  const target = project.toFramed({
+    x: event.clientX - rect.left,
+    y: event.clientY - rect.top
+  })
 
-  // project 的逆运算：屏幕像素回到 framed 坐标，正是相机 x / y 所在的坐标系
-  instance.getCamera().animate(
-    {
-      x: (event.clientX - rect.left - origin.x) / origin.scale + box.minX,
-      y: (event.clientY - rect.top - origin.y) / origin.scale + box.minY
-    },
-    { duration: props.duration }
-  )
+  instance.getCamera().animate(target, { duration: props.duration })
 }
 </script>
 

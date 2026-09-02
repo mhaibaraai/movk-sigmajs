@@ -198,3 +198,36 @@ describe('applyGraphDiff 与多重图', () => {
     expect(graph.getEdgeAttribute('e2', 'label')).toBe('废止')
   })
 })
+
+describe('applyGraphDiff 的形状校验', () => {
+  it('原始数据集的扁平节点行被拒绝，消息点名实际字段', () => {
+    const graph = new Graph()
+    const raw = {
+      nodes: [{ key: 'a', label: 'A', cluster: '0', x: 1, y: 2, score: 0.1 }],
+      edges: [['a', 'b']]
+    } as unknown as SerializedGraph
+
+    expect(() => applyGraphDiff(graph, raw))
+      .toThrow(/data.edges\[0\] 缺少 source 或 target[\s\S]*收到的字段：0, 1/)
+  })
+
+  it('节点缺 key 时抛错', () => {
+    const graph = new Graph()
+    const raw = { nodes: [{ id: 'a', label: 'A' }], edges: [] } as unknown as SerializedGraph
+
+    expect(() => applyGraphDiff(graph, raw)).toThrow(/data.nodes\[0\] 缺少 key[\s\S]*收到的字段：id, label/)
+  })
+
+  it('nodes 或 edges 不是数组时抛错', () => {
+    const graph = new Graph()
+
+    expect(() => applyGraphDiff(graph, { nodes: {}, edges: [] } as unknown as SerializedGraph))
+      .toThrow(TypeError)
+  })
+
+  it('空图与空数组照常通过', () => {
+    const graph = new Graph()
+
+    expect(() => applyGraphDiff(graph, serialized({}))).not.toThrow()
+  })
+})

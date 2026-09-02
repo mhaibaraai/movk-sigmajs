@@ -1,87 +1,79 @@
 <script setup lang="ts">
 import Graph from 'graphology'
-import { shallowRef } from 'vue'
 import type { SerializedGraph } from 'graphology-types'
 
-/**
- * 增量同步 SerializedGraph，替代 clear() 加 import()。
- *
- * 节点属性按新数据整体替换，唯一例外是坐标：新数据显式给出 x / y 时以新值为准
- * （服务端重算布局的场景），未给出则沿用图上现有坐标——这正是「跑完布局后拉一次
- * 增量数据，画面不该跳」要的语义。关掉 preservePositions 则布局结果丢失。
- */
-const graph = new Graph()
-graph.import(demoGraph({ nodes: 6, extraEdges: 0 }))
+const { data } = await useFetch('/api/data.json')
+
+const payload = data.value as unknown as SerializedGraph
+const graph = new Graph(payload.options)
+graph.import(payload)
 
 const prune = shallowRef(true)
 const log = shallowRef<string[]>([])
 
-function snapshot(prefix: string) {
-  const n0 = graph.getNodeAttributes('n0')
-  log.value = [`${prefix} · n0 (${n0.x.toFixed(1)}, ${n0.y.toFixed(1)}) · 节点 ${graph.order} · 边 ${graph.size}`, ...log.value].slice(0, 3)
+const patch: SerializedGraph = {
+  attributes: {},
+  options: {},
+  nodes: [
+    { key: '11.0', attributes: { label: 'Valjean（已改名）', size: 45, color: '#e11d48' } },
+    { key: '48.0', attributes: { label: 'Gavroche（已改色）', size: 30, color: '#f59e0b' } },
+    { key: 'newcomer', attributes: { label: '新增节点', x: 0, y: 260, size: 24, color: '#a855f7' } }
+  ],
+  edges: [
+    { source: '11.0', target: '48.0' },
+    { source: '11.0', target: 'newcomer' },
+    { source: '11.0', target: '尚未加载的节点' }
+  ]
 }
 
-/** 先把坐标打乱，模拟「跑过布局」的状态 */
+function record(prefix: string) {
+  const { x, y } = graph.getNodeAttributes('11.0')
+  log.value = [
+    `${prefix} · Valjean (${(x as number).toFixed(1)}, ${(y as number).toFixed(1)}) · 节点 ${graph.order} · 边 ${graph.size}`,
+    ...log.value
+  ].slice(0, 3)
+}
+
 function shuffle() {
   graph.forEachNode((node) => {
-    graph.mergeNodeAttributes(node, { x: (Math.random() - 0.5) * 360, y: (Math.random() - 0.5) * 360 })
+    graph.mergeNodeAttributes(node, { x: (Math.random() - 0.5) * 700, y: (Math.random() - 0.5) * 700 })
   })
-  snapshot('已打乱坐标')
+  record('已打乱坐标')
 }
 
-/** 服务端只回业务字段、不回坐标，是增量接口的常见形态 */
-function syncWithoutPositions() {
-  const next: SerializedGraph = {
-    attributes: {},
-    options: { type: 'mixed', multi: false, allowSelfLoops: true },
-    nodes: [
-      { key: 'n0', attributes: { label: '改了标签的 n0', size: 16, color: '#f43f5e' } },
-      { key: 'n1', attributes: { label: '改了颜色的 n1', size: 11, color: '#f59e0b' } },
-      { key: 'fresh', attributes: { label: '新增节点', x: 0, y: 220, size: 11, color: '#a855f7' } }
-    ],
-    edges: [
-      { source: 'n0', target: 'n1' },
-      { source: 'n0', target: 'fresh' },
-      // 端点不在图中，会被跳过并在开发环境告警。「概览 + 按需扩展」下这是正常情况
-      { source: 'n0', target: '尚未加载的节点' }
-    ]
-  }
-
-  applyGraphDiff(graph, next, { prune: prune.value })
-  snapshot(prune.value ? '已同步（prune 开，其余节点被剪除）' : '已同步（prune 关，其余节点保留）')
+function sync() {
+  applyGraphDiff(graph, patch, { prune: prune.value })
+  record(prune.value ? '已同步（prune 开）' : '已同步（prune 关）')
 }
 
-function restore() {
-  applyGraphDiff(graph, demoGraph({ nodes: 6, extraEdges: 0 }))
-  snapshot('已还原')
+async function restore() {
+  applyGraphDiff(graph, await $fetch('/api/data.json') as unknown as SerializedGraph)
+  record('已还原')
 }
 </script>
 
 <template>
   <SigmaGraph :graph="graph">
-    <div class="demo-panel" data-at="top-left">
-      <div class="demo-row">
-        <button type="button" @click="shuffle">
-          打乱坐标
-        </button>
-        <button type="button" @click="syncWithoutPositions">
-          同步不带坐标的数据
-        </button>
-        <button type="button" @click="restore">
-          还原
-        </button>
+    <SigmaControls>
+      <div class="flex gap-1">
+        <UButton size="xs" color="neutral" label="打乱坐标" @click="shuffle" />
+        <UButton size="xs" color="neutral" label="同步不带坐标的数据" @click="sync" />
+        <UButton size="xs" color="neutral" variant="ghost" label="还原" @click="restore" />
       </div>
-      <div class="demo-row">
-        <button type="button" :aria-pressed="prune" @click="prune = !prune">
-          prune {{ prune ? '开' : '关' }}
-        </button>
-        <span class="demo-tag">增量合入局部数据时应关掉</span>
-      </div>
-      <ul class="demo-log">
-        <li v-for="(line, index) in log" :key="`${line}-${index}`">
+
+      <UButton
+        size="xs"
+        :color="prune ? 'primary' : 'neutral'"
+        :label="`prune ${prune ? '开' : '关'}`"
+        class="self-start"
+        @click="prune = !prune"
+      />
+
+      <div v-if="log.length" class="bg-accented p-2 text-muted text-xs font-mono">
+        <p v-for="(line, index) in log" :key="`${line}-${index}`">
           {{ line }}
-        </li>
-      </ul>
-    </div>
+        </p>
+      </div>
+    </SigmaControls>
   </SigmaGraph>
 </template>

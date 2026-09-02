@@ -78,7 +78,7 @@ onBeforeUnmount(() => {
       name="FullscreenControlExample"
       description="对 .sigma-root 取全屏目标，覆盖层与其他控件一起进入。"
     >
-      <FullscreenControlExample />
+      <FullscreenControlExample enter-label="进入全屏" exit-label="退出全屏" />
     </ExampleCard>
 
     <ExampleCard
@@ -102,7 +102,7 @@ onBeforeUnmount(() => {
       name="MiniMapExample"
       description="缩略图与视口框，全程使用 framed 坐标。"
     >
-      <MiniMapExample />
+      <MiniMapExample :node-radius="1.5" :padding="6" />
     </ExampleCard>
 
     <ExampleCard
