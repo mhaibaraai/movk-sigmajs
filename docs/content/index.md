@@ -1,6 +1,6 @@
 ---
 seo:
-  title: Movk Sigma
+  title: Movk Sigma — 把知识图谱写成组件
   description: A declarative sigma v4 wrapper for Vue 3 and Nuxt 4 — components and composables for large-scale knowledge graph visualization.
 ---
 
@@ -52,22 +52,11 @@ transition: { duration: 0.6, delay: 0.5 }
 :::
 
 #default
-:::motion{class="mx-auto"}
+:::motion{class="mx-auto w-full"}
 ---
 transition: { duration: 0.6, delay: 0.1 }
 ---
-```vue [pages/graph.vue]
-<template>
-  <SigmaGraph :data="data" :settings="{ hideEdgesOnMove: true }" style="height: 70vh">
-    <SigmaControls position="bottom-right">
-      <SigmaZoomControl />
-      <SigmaFullscreenControl />
-    </SigmaControls>
-
-    <SigmaTooltip />
-  </SigmaGraph>
-</template>
-```
+:home-hero-demo
 :::
 ::
 
@@ -79,10 +68,7 @@ transition: { duration: 0.6, delay: 0.1 }
 库没覆盖的原生能力，用户必须仍然能用。
 
 #features
-  :::u-page-feature
-  ---
-  icon: i-lucide-unplug
-  ---
+  :::u-page-feature{icon="i-lucide-unplug"}
   #title
   原生实例直达
 
@@ -90,10 +76,7 @@ transition: { duration: 0.6, delay: 0.1 }
   `useSigma()` 返回原生 `Sigma` 与 `Graph`，不包 Proxy、不做代理，sigma 与 graphology 的任何方法都能直接调。
   :::
 
-  :::u-page-feature
-  ---
-  icon: i-lucide-arrow-right-left
-  ---
+  :::u-page-feature{icon="i-lucide-arrow-right-left"}
   #title
   settings 整体透传
 
@@ -101,10 +84,7 @@ transition: { duration: 0.6, delay: 0.1 }
   不逐字段枚举、不过滤未知键，上游新增配置无需本模块升级即可使用。
   :::
 
-  :::u-page-feature
-  ---
-  icon: i-lucide-split
-  ---
+  :::u-page-feature{icon="i-lucide-split"}
   #title
   数据双通道
 
@@ -112,10 +92,7 @@ transition: { duration: 0.6, delay: 0.1 }
   传 `data` 由库做增量 diff 并保留布局坐标；传 `graph` 则库完全不碰数据，只负责渲染与生命周期。
   :::
 
-  :::u-page-feature
-  ---
-  icon: i-lucide-layers
-  ---
+  :::u-page-feature{icon="i-lucide-layers"}
   #title
   styles 合成
 
@@ -123,10 +100,7 @@ transition: { duration: 0.6, delay: 0.1 }
   用户规则与 `DEFAULT_STYLES` 按序合成，不会互相顶掉，坐标绑定与悬浮反馈都还在。
   :::
 
-  :::u-page-feature
-  ---
-  icon: i-lucide-package-open
-  ---
+  :::u-page-feature{icon="i-lucide-package-open"}
   #title
   不 re-export 上游
 
@@ -134,14 +108,33 @@ transition: { duration: 0.6, delay: 0.1 }
   `sigma` 与 `graphology` 保持 peer 依赖，不夹带第二份实例，类型从原包直接 import。
   :::
 
-  :::u-page-feature
-  ---
-  icon: i-lucide-paintbrush
-  ---
+  :::u-page-feature{icon="i-lucide-paintbrush"}
   #title
   控件外观全接管
 
   #description
   零第三方依赖，插槽作用域连行为一起暴露，接管外观不等于丢掉功能。
   :::
+::
+
+::u-page-c-t-a
+---
+class: dark:bg-neutral-950
+links:
+  - label: Star on GitHub
+    to: https://github.com/mhaibaraai/movk-sigmajs
+    target: _blank
+    icon: i-lucide-star
+    color: neutral
+  - label: 快速入门
+    to: /docs/getting-started
+    color: neutral
+    variant: outline
+    trailingIcon: i-lucide-arrow-right
+---
+#title
+开始构建你的下一张知识图谱
+
+#description
+从一个最小组件到大规模节点渲染、交互、布局与分析，Movk Sigma 用声明式组件把 sigma.js 的复杂度收敛为可组合的能力。
 ::

@@ -78,7 +78,7 @@
     "test": "vitest run",
     "test:watch": "vitest watch",
     "typecheck": "vue-tsc --noEmit && nuxt typecheck playgrounds/basic && nuxt typecheck playgrounds/ui && nuxt typecheck docs",
-    "release": "release-it && npm publish",
+    "release": "release-it",
     "clean": "movk-clean"
   },
   "dependencies": {
