@@ -49,11 +49,11 @@ export default defineNuxtConfig({
   },
 
   aiChat: {
-    model: 'alibaba/glm-5.1',
+    model: 'alibaba/qwen3.7-plus',
     models: [
       'alibaba/qwen3.7-plus',
-      'alibaba/glm-5.1',
-      'alibaba/deepseek-v3.2'
+      'zai/glm-5.3',
+      'deepseek/deepseek-v4-pro'
     ]
   },
 
@@ -61,7 +61,11 @@ export default defineNuxtConfig({
     domain: 'https://sigma.mhaibaraai.cn',
     title: 'Movk Sigma',
     description: '基于 sigma v4 的知识图谱可视化 Nuxt 模块，为 Vue 3 / Nuxt 4 提供声明式组件与 composables。',
-    notes: ['Nuxt 4', 'Vue 3', 'sigma.js v4', 'graphology', 'WebGL', '知识图谱', '网络可视化']
+    full: {
+      title: 'Movk Sigma — 声明式知识图谱可视化组件库',
+      description: '基于 sigma v4 与 graphology 的 Nuxt 模块完整文档：11 个组件（渲染、覆盖层、控件）、16 个 composables（相机、选中、邻域、拖拽、搜索、过滤、布局、指标、导出）与 7 个工具函数（增量 diff、styles 合成、标签方位与档位、SDF 形状、渲染原语声明）的全部 API 与示例。'
+    },
+    notes: ['sigma', 'sigmajs', 'sigma-v4', 'graphology', 'nuxt', 'nuxt4', 'vue', 'vue3', 'webgl', 'knowledge-graph', 'network-visualization', 'force-atlas2', 'community-detection', 'composables', 'declarative', 'auto-import', 'SSR 下 sigma 各子路径必须动态 import，useSigma() 必须在 SigmaGraph 子树内调用，settings 整体透传，styles 需 composeStyles 合成']
   },
 
   mcp: {
