@@ -1,5 +1,108 @@
 # Changelog
 
+## [0.2.0](https://github.com/mhaibaraai/movk-sigmajs/compare/v0.1.3...v0.2.0) (2026-09-04)
+
+### ⚠ BREAKING CHANGES
+
+* **graph:** labelAtlasFontSize 移除，改用 labelAtlas.fontSize。
+* **controls:** SigmaControls 未显式传 position 时由 bottom-right 变为 top-left，
+  依赖旧默认值的调用方需显式声明 position="bottom-right"。
+* **styles:** 控件与覆盖层的默认配色不再是原先的 GitHub 风格灰蓝，
+  自定义过 --sigma-color-* 的应用需重新核对取值。
+* **styles:** 移除 useSigmaReducer 与 chainReducers，useSigmaFilter
+  与 SigmaLegend 的 order 选项一并去掉。自定义归约请改写 styles 规则，或
+  经 SigmaGraph 的 nodeReducer / edgeReducer 逃生舱接入。
+
+### Features
+
+* **apply-graph-diff:** 校验入参形状并聚合悬空边告警 ([b288e8d](https://github.com/mhaibaraai/movk-sigmajs/commit/b288e8d9a86468eda50f459b27997402a364912c))
+* **camera:** 新增 framed 与原始图坐标的互转 ([ee0ad60](https://github.com/mhaibaraai/movk-sigmajs/commit/ee0ad6066644a3801a0ee894513aa6aa87dfc86d))
+* **docs:** data 接口补充分类字段与边标签 ([22597f8](https://github.com/mhaibaraai/movk-sigmajs/commit/22597f883c81b0fb192639a65fb8c6b29da1d978))
+* **docs:** 引入 euroSIS 数据集与接口 ([8fbc334](https://github.com/mhaibaraai/movk-sigmajs/commit/8fbc334108e5210c2ffb16668601584afa2735a2))
+* **docs:** 新增 small 数据集接口 ([99307b4](https://github.com/mhaibaraai/movk-sigmajs/commit/99307b456bcc3f375735f3c858d8f02cb9d4d6ea))
+* **graph:** 透出 WebGL 上下文丢失与恢复事件 ([a9fe542](https://github.com/mhaibaraai/movk-sigmajs/commit/a9fe542fb8140e1b0f026e5cff4161b04c4cc497))
+* **styles:** SigmaStyles 支持自定义状态泛型 ([add985a](https://github.com/mhaibaraai/movk-sigmajs/commit/add985a45f6578e2d526b8d55f732862f9812f31))
+
+### Bug Fixes
+
+* **mini-map:** 绘制参数变化后立即重绘 ([5d6b154](https://github.com/mhaibaraai/movk-sigmajs/commit/5d6b154bd781c3919b46a2c4c475576165ac89b6))
+* **playground:** 全屏控件示例补上必填的标签文案 ([1577ac2](https://github.com/mhaibaraai/movk-sigmajs/commit/1577ac2fe0de604aff402b1e31a4315c026d0bc1))
+* **playground:** 示例改为必填 props 后补齐调用点 ([c456970](https://github.com/mhaibaraai/movk-sigmajs/commit/c456970f7f83a28ef1fa528f44bea9b00a9794c6))
+
+### Documentation
+
+* **agents:** 精简约定，只留 sigma v4 的架构指向 ([07b156c](https://github.com/mhaibaraai/movk-sigmajs/commit/07b156c04b36d42f10bfde0b5c38de43e2dd098e))
+* **components:** duration、labels、debounce、emptyText 各配独立示例 ([0833090](https://github.com/mhaibaraai/movk-sigmajs/commit/0833090217698cd01b242589a47c73e0fe9ffc4d))
+* **components:** overlay 等四页按 prop 逐项重新设计 ([83bcf38](https://github.com/mhaibaraai/movk-sigmajs/commit/83bcf38c76dce137a4b926d17c682495654d0117))
+* **components:** 删除 popover 页中冗余的 update:open 说明 ([abafe3b](https://github.com/mhaibaraai/movk-sigmajs/commit/abafe3bb7f8cd8b34574746a66405133d2160c55))
+* **components:** 控件六页按骨架重写并补齐前缀 ([320b220](https://github.com/mhaibaraai/movk-sigmajs/commit/320b22019c520a4e21dea3196d2b1a064d90f426))
+* **components:** 补充 overlay 与 tooltip 页面说明 ([3f60f7a](https://github.com/mhaibaraai/movk-sigmajs/commit/3f60f7aadc11b97a2a6aad72017f5a73ef5952f5))
+* **composables:** 交互七页按用法-示例-API 骨架重写 ([7c829df](https://github.com/mhaibaraai/movk-sigmajs/commit/7c829df2ebb7bf0f5e35f68114d13d98dfd3b586))
+* **composables:** 基础六页按用法-示例-API 骨架重写 ([6c854aa](https://github.com/mhaibaraai/movk-sigmajs/commit/6c854aac5b2cae886d3bff2a6725b63cec38b628))
+* **composables:** 布局与分析三页按用法-示例-API 骨架重写 ([9b6bc8f](https://github.com/mhaibaraai/movk-sigmajs/commit/9b6bc8f8b5aee863b38332a9065e694d2fa85056))
+* **composables:** 精简示例章节并对齐数据集节点 id ([cdc92f3](https://github.com/mhaibaraai/movk-sigmajs/commit/cdc92f38e3a7340bb1510a1b36e7c66906639727))
+* **examples:** edges 拆成独立示例并让边标签常显 ([dfd083f](https://github.com/mhaibaraai/movk-sigmajs/commit/dfd083f4d5bfd36270d431245c2c1f706d2de521))
+* **examples:** 交互组示例迁到 SigmaControls 与 Nuxt UI ([ce5c915](https://github.com/mhaibaraai/movk-sigmajs/commit/ce5c9151db3453ac98e6faf22e35952cf949f353))
+* **examples:** 基础组示例迁到 SigmaControls 与 Nuxt UI ([2492fd8](https://github.com/mhaibaraai/movk-sigmajs/commit/2492fd86cc0125eae0a9662c6dbcfd4f96e35351))
+* **examples:** 工具函数示例迁到 SigmaControls 与真实数据集 ([f175e1b](https://github.com/mhaibaraai/movk-sigmajs/commit/f175e1b1725b6dc8d1cad5a0f6aa3ca313c49e34))
+* **examples:** 布局与分析组示例迁到 SigmaControls 与 Nuxt UI ([c76aedc](https://github.com/mhaibaraai/movk-sigmajs/commit/c76aedca62d28871ecba09b115b5d14e41fd7ae2))
+* **examples:** 控件六组件的示例按 prop 拆分重写 ([f9afd1f](https://github.com/mhaibaraai/movk-sigmajs/commit/f9afd1f917e3a018ead677cbf00c8c40168a4fba))
+* **examples:** 示例去掉 withDefaults 与说明性注释 ([19fc959](https://github.com/mhaibaraai/movk-sigmajs/commit/19fc95918bc519bde7f59f9e8d1dacec3ab8ca92))
+* **examples:** 示例改用真实数据集接口并统一容器布局 ([2775093](https://github.com/mhaibaraai/movk-sigmajs/commit/277509332af2c95bf5c94a4d7c4fd7b2e828e8b4))
+* **examples:** 精简覆盖层示例并改用 small 数据集 ([c5a2783](https://github.com/mhaibaraai/movk-sigmajs/commit/c5a278378ba591d5cfe16216db0a3d7f081805bc))
+* **examples:** 覆盖层四组件的示例按 prop 拆分重写 ([08f3648](https://github.com/mhaibaraai/movk-sigmajs/commit/08f36480e8477b0c6c2f44458bf5c89e350ab91c))
+* **examples:** 覆盖层示例改用接口数据集 ([8953f74](https://github.com/mhaibaraai/movk-sigmajs/commit/8953f7414374903e51f7a50aeabe08af602d6c83))
+* **examples:** 面板并入示例并接入 relations 数据集 ([693cd92](https://github.com/mhaibaraai/movk-sigmajs/commit/693cd9214065815652fb3d2edbd4cff682f527ec))
+* **graph:** labelAtlasFontSize 小节改写为 labelAtlas ([49e9a5f](https://github.com/mhaibaraai/movk-sigmajs/commit/49e9a5fc6c6cad1e30c4adb0bcf825650d334842))
+* **graph:** 组件页按 prop 逐项重写并补齐示例 ([e37e7ce](https://github.com/mhaibaraai/movk-sigmajs/commit/e37e7ce8a12c9b09289170425c84211128c3a125))
+* **guides:** 移除 guides 章节 ([07180aa](https://github.com/mhaibaraai/movk-sigmajs/commit/07180aad9f22c5ffa5e9025449091d496dc02c8c))
+* **mini-map:** 说明改写为基于 sigma 投影矩阵 ([87f206a](https://github.com/mhaibaraai/movk-sigmajs/commit/87f206abb122182f72b50a272d7f1e7690196a22))
+* **site:** 开启共享手势并换用 rose + mist 配色 ([a26f573](https://github.com/mhaibaraai/movk-sigmajs/commit/a26f57382105464d148882a1f12db4b519b7f3a7))
+* **utils:** compose-styles 不再重复 stylesBase 示例 ([a64531b](https://github.com/mhaibaraai/movk-sigmajs/commit/a64531be5f73a40c617bbed590ffb681aa6dcd8b))
+* **utils:** 删除 sampleGraph 文档页并重编号 ([ae305a0](https://github.com/mhaibaraai/movk-sigmajs/commit/ae305a0dbc2acdbd8d9ff389821e8c1edba8c9b7))
+* **utils:** 重写工具函数文档并补齐序号 ([b64f987](https://github.com/mhaibaraai/movk-sigmajs/commit/b64f98762a2b10306f94f115d12d1dc3c88ee66a))
+* 对齐 mapbox 文档站点并补齐首页、MCP 与 AI 集成 ([24b5f98](https://github.com/mhaibaraai/movk-sigmajs/commit/24b5f98458b5b49b1a4d2af473a57803fcbb69ac))
+* 清理指向已删除 guides 的死链 ([ff12e73](https://github.com/mhaibaraai/movk-sigmajs/commit/ff12e739f68dcd4ac7e8d0d7b72f06408ac2696b))
+* 示例与文档站同步至 styles 架构 ([cb5855e](https://github.com/mhaibaraai/movk-sigmajs/commit/cb5855eec1b6034d6581056ab02cb06b86547cc0)), references [#corpus](https://github.com/mhaibaraai/movk-sigmajs/issues/corpus)
+* 示例统一容器高度并改用 SigmaControls 承载面板 ([5cd9e23](https://github.com/mhaibaraai/movk-sigmajs/commit/5cd9e23c1e6ac8d46ef1928ec39fe10ed374ccff))
+* 精简 AGENTS.md 与 README ([511e440](https://github.com/mhaibaraai/movk-sigmajs/commit/511e4400e39b7cb2195ee609e69f0e7a26af8a5e))
+* 约定组件文档页的骨架与示例写法 ([c513d87](https://github.com/mhaibaraai/movk-sigmajs/commit/c513d879539168fc9f92be05bcdcba84ac8ccc66))
+
+### Code Refactoring
+
+* **controls:** 默认停靠位改为 top-left ([d49a115](https://github.com/mhaibaraai/movk-sigmajs/commit/d49a1157db8b5efda867646f26b8a348d5f0c478))
+* **docs:** composables 页补齐两位数字前缀并重排分组 ([de19afd](https://github.com/mhaibaraai/movk-sigmajs/commit/de19afd04656eaa13767a9198e6f0ac1096787c2))
+* **docs:** wikipedia 接口去掉手写数据集类型 ([5051e76](https://github.com/mhaibaraai/movk-sigmajs/commit/5051e764b1103593693d91ab7348bbfd2f6f01ae))
+* **docs:** 前五个组件页文件名补齐两位数字前缀 ([adc6f95](https://github.com/mhaibaraai/movk-sigmajs/commit/adc6f95f1ad55f01782491fe7086288c3d8a4513))
+* **docs:** 数据集转换下沉到服务端接口 ([2f15d5b](https://github.com/mhaibaraai/movk-sigmajs/commit/2f15d5b90a40d7f69aa6254a5cf22446aa307f1e))
+* **graph:** labelAtlasFontSize 改为 labelAtlas 对象 ([15cc96c](https://github.com/mhaibaraai/movk-sigmajs/commit/15cc96c333bfaf1c79179521fe8d8abc44e3f241))
+* **minimap:** 投影改用 sigma 的相机矩阵 ([aa9994a](https://github.com/mhaibaraai/movk-sigmajs/commit/aa9994a057a75455a3669a1172ac20e12c9df534))
+* **playground:** basic 同步 styles 架构与示例改名 ([fa8c1e5](https://github.com/mhaibaraai/movk-sigmajs/commit/fa8c1e55e29fa94cc83a169b0e2954dac3c20a8b)), references [#corpus](https://github.com/mhaibaraai/movk-sigmajs/issues/corpus)
+* **styles:** reducer 链改为 v4 的 styles 与状态标志位 ([e3cb899](https://github.com/mhaibaraai/movk-sigmajs/commit/e3cb899beb048e83e37a170016372603cfbb2ab8))
+* **styles:** 样式令牌绑定 Nuxt UI 的设计令牌 ([6222f47](https://github.com/mhaibaraai/movk-sigmajs/commit/6222f4778021f4cea7a0ad74395fbca3441fcf57))
+* **utils:** 移除 sampleGraph ([8c77bbd](https://github.com/mhaibaraai/movk-sigmajs/commit/8c77bbd4c340483922b104ebdbfcdc0b1abd82d1))
+
+### Tests
+
+* **minimap:** 补齐投影与点击移动的用例 ([2f690af](https://github.com/mhaibaraai/movk-sigmajs/commit/2f690af1c259b8133e1340f8480b5669af9bf99b))
+
+### Build System
+
+* **deps:** 升级 pnpm 与开发依赖 ([aa81fd1](https://github.com/mhaibaraai/movk-sigmajs/commit/aa81fd181843ed3c9fd86bc1f8e10213f33f00d8))
+* **deps:** 升级 sigma 至 4.0.0-beta.5 ([84ae09a](https://github.com/mhaibaraai/movk-sigmajs/commit/84ae09a7a971f209ec6b5919da6c542e9bfcad83))
+* **docs:** 升级 @movk/nuxt-docs 并预构建常用依赖 ([df2b10e](https://github.com/mhaibaraai/movk-sigmajs/commit/df2b10e14bc52da6bec4a76fa214d795189f26be))
+
+### CI
+
+* **release:** 修正发布工作流指向仓库根包 ([bf9064f](https://github.com/mhaibaraai/movk-sigmajs/commit/bf9064f203ef7e8d5aa17d1229efe54b6a37fab1))
+
+### Chores
+
+* **deps:** 升级 @nuxt/content、测试工具链与图标依赖 ([477940a](https://github.com/mhaibaraai/movk-sigmajs/commit/477940a9f71a47e633ca0ce666e8de9aad26aa41))
+* **deps:** 升级依赖版本 ([417f236](https://github.com/mhaibaraai/movk-sigmajs/commit/417f2368c36c372e7190310e5f0dffa6b1cab573))
+* **docs:** 清理孤儿示例与 corpus 数据链 ([46c8265](https://github.com/mhaibaraai/movk-sigmajs/commit/46c8265b692826974007a4fb3e69047ad8c78c93)), references [#corpus](https://github.com/mhaibaraai/movk-sigmajs/issues/corpus)
+* 接入 Renovate 依赖更新 ([980cf88](https://github.com/mhaibaraai/movk-sigmajs/commit/980cf88b788944b16556c63377597cbfef29a9f4))
+
 ## [0.1.3](https://github.com/mhaibaraai/movk-sigmajs/compare/v0.1.2...v0.1.3) (2026-08-17)
 
 ### ⚠ BREAKING CHANGES
