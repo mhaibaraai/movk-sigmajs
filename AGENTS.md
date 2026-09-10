@@ -19,21 +19,22 @@ src/runtime/index.css                  控件与覆盖层样式，--sigma-color-
 docs/                                  文档站，extends @movk/nuxt-docs + Nuxt Content 3
 docs/app/components/content/examples/  文档示例组件 XxxExample.vue
 docs/server/api/                       示例数据接口
-playgrounds/basic|ui/                  开发用 playground
+playgrounds/nuxt/                      Nuxt 示例场，分组对齐 docs 的 category
+playgrounds/vite/                      纯 Vite + Vue 3 骨架，等模块改造出框架无关入口后接入
 test/                                  vitest 用例，test/fixtures/basic 为 Nuxt fixture
 ```
 
-`playgrounds/basic` 通过 alias `#examples` / `#corpus` 直接复用 docs 的示例组件与数据，改动 docs 示例会同时影响该 playground。
+`playgrounds/nuxt` 只复用 docs 的**数据层**：`nitro.scanDirs` 挂 `docs/server`、`publicAssets` 挂 `docs/public/data`，示例统一 `useFetch('/api/xxx.json')`。示例组件由 playground 自建，改动 docs 示例不影响 playground。
 
 ## 常用命令
 
 | 命令 | 用途 |
 | --- | --- |
 | `pnpm dev:prepare` | 首次克隆或依赖变更后必须先跑：stub 构建 + prepare 全部子包 |
-| `pnpm dev` / `pnpm dev:ui` | 启动 `playgrounds/basic` / `playgrounds/ui` |
+| `pnpm dev` / `pnpm dev:vite` | 启动 `playgrounds/nuxt` / `playgrounds/vite` |
 | `pnpm docs` / `pnpm docs:build` | 文档站开发与构建 |
 | `pnpm lint` / `pnpm lint:fix` | eslint 检查与修复 |
-| `pnpm typecheck` | vue-tsc 加两个 playground 与 docs 的 nuxt typecheck |
+| `pnpm typecheck` | vue-tsc 加 `playgrounds/nuxt` 与 docs 的 nuxt typecheck，以及 `playgrounds/vite` 的 vue-tsc |
 | `pnpm test` / `pnpm test:watch` | vitest |
 | `pnpm build` | nuxt-module-build 构建发布产物 |
 
