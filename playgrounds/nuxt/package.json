@@ -1,0 +1,30 @@
+{
+  "private": true,
+  "name": "playground-nuxt",
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "generate": "nuxt generate"
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "^1.2.130",
+    "@movk/sigma": "workspace:*",
+    "@nuxt/ui": "^4.11.1",
+    "@sigma/export-image": "4.0.0-beta.0",
+    "@sigma/node-border": "4.0.0-alpha.3",
+    "@sigma/utils": "4.0.0-alpha.2",
+    "graphology": "^0.26.0",
+    "graphology-communities-louvain": "^2.0.2",
+    "graphology-layout": "^0.6.1",
+    "graphology-layout-forceatlas2": "^0.10.1",
+    "graphology-layout-noverlap": "^0.4.2",
+    "graphology-metrics": "^2.4.2",
+    "nuxt": "^4.5.2",
+    "sigma": "4.0.0-beta.5",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "graphology-types": "^0.24.8"
+  }
+}

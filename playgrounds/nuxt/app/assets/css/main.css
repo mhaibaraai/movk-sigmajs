@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/* 示例舞台由 ExampleCard 给出确定高度，图铺满即可 */
+.sigma-root {
+  height: 100%;
+}
