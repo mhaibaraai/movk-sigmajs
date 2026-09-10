@@ -4,6 +4,7 @@ import type { HighlightSegment } from '@movk/core'
 import { watchDebounced } from '@vueuse/core'
 import { computed, shallowRef, useSlots } from 'vue'
 import { useSigmaSearch } from '../../composables/use-sigma-search'
+import { isDev } from '../../env'
 import type { SigmaSearchResult } from '../../composables/use-sigma-search'
 
 defineOptions({ name: 'SigmaSearchControl', inheritAttrs: false })
@@ -102,7 +103,7 @@ defineSlots<{
 const slots = useSlots()
 
 // #option 与 #empty 的出口位于 #results 的默认内容内部，接管后二者静默失效
-if (import.meta.dev && slots.results && (slots.option || slots.empty)) {
+if (isDev && slots.results && (slots.option || slots.empty)) {
   console.warn('[@movk/sigma] SigmaSearchControl 已接管 #results，#option 与 #empty 不再渲染')
 }
 

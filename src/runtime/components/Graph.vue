@@ -2,7 +2,6 @@
 import Graph from 'graphology'
 import { useResizeObserver } from '@vueuse/core'
 import { defu } from 'defu'
-import { useRuntimeConfig } from '#app'
 import { computed, onBeforeUnmount, onMounted, provide, readonly, shallowRef, toRaw, watch } from 'vue'
 import type { ShallowRef } from 'vue'
 import type Sigma from 'sigma'
@@ -25,6 +24,8 @@ import type {
   SigmaStageEventPayload
 } from 'sigma/types'
 import { registerSigma } from '../composables/use-sigma'
+import { getSigmaConfig } from '../config'
+import { isClient, isDev } from '../env'
 import { SIGMA_CONTEXT_KEY, SIGMA_EVENTS } from '../types'
 import type { SigmaContext, SigmaPrimitivesSource, SigmaStyleOptions, SigmaStyles, SigmaStylesBase } from '../types'
 import { applyGraphDiff } from '../utils/apply-graph-diff'
@@ -242,11 +243,9 @@ let readyPromise = new Promise<Sigma>((resolve) => {
   resolveReady = resolve
 })
 
-const moduleDefaults = (useRuntimeConfig().public.sigma as { settings?: Partial<Settings> } | undefined)?.settings ?? {}
-
 const resolvedSettings = computed<Partial<Settings>>(() => defu(
   props.settings ?? {},
-  moduleDefaults,
+  getSigmaConfig().settings,
   // 容器尺寸为 0 时不让 sigma 直接抛错，随后由 ResizeObserver 补一次 resize
   { allowInvalidContainer: true }
 ) as Partial<Settings>)
@@ -404,7 +403,7 @@ async function createInstance() {
   applyNodeLabelAtlas(instance, toRaw(props.labelAtlas), primitives?.nodes?.label?.font)
 
   // 挂在换过图集之后，否则监听的是那个已经被丢弃的 manager
-  if (import.meta.dev) {
+  if (isDev) {
     stopAtlasWatch = watchNodeLabelAtlasOverflow(instance)
   }
 
@@ -433,7 +432,7 @@ watch([() => props.styles, () => props.primitives, () => props.stylesBase, () =>
     return
   }
 
-  if (import.meta.dev) {
+  if (isDev) {
     console.warn('[@movk/sigma] styles、primitives 或 reducer 变更，正在重建 sigma 实例。若非有意为之，请把它们提到 setup 顶层保持引用稳定')
   }
 
@@ -442,7 +441,7 @@ watch([() => props.styles, () => props.primitives, () => props.stylesBase, () =>
 })
 
 onMounted(async () => {
-  if (import.meta.dev && props.data && isExternalGraph.value) {
+  if (isDev && props.data && isExternalGraph.value) {
     console.warn('[@movk/sigma] data 与 graph 互斥，已传入外部 graph，data 将被忽略')
   }
 
@@ -454,7 +453,7 @@ onMounted(async () => {
 })
 
 // 只在客户端登记：注册表是模块级单例，而服务端不触发 onBeforeUnmount，条目只增不减
-if (props.id && import.meta.client) {
+if (props.id && isClient) {
   const unregister = registerSigma(props.id, context)
   onBeforeUnmount(unregister)
 }

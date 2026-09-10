@@ -2,6 +2,7 @@ import { createRegistry } from '@movk/core'
 import { consola } from 'consola'
 import { computed, inject, nextTick, toValue } from 'vue'
 import type { ComputedRef, MaybeRefOrGetter } from 'vue'
+import { isDev } from '../env'
 import { SIGMA_CONTEXT_KEY } from '../types'
 import type { SigmaContext } from '../types'
 
@@ -31,7 +32,7 @@ export function registerSigma(id: string, context: SigmaContext): () => void {
   const previous = registry.get(id)
   const unregister = registry.register(id, context)
 
-  if (import.meta.dev && previous && previous !== context) {
+  if (isDev && previous && previous !== context) {
     nextTick(() => {
       if (!retired.has(previous)) {
         consola.warn(
