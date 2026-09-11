@@ -1,40 +1,51 @@
 <script setup lang="ts">
-/**
- * 占位骨架。
- *
- * `@movk/sigma` 目前是 Nuxt 模块：组件注册、自动导入与 `#sigma` alias 都依赖
- * `@nuxt/kit`，在纯 Vite 环境下无法直接消费。这个 playground 先保证一个可运行的
- * Vue 3 + Vite 空壳，等模块改造出框架无关的入口后再在此接入。
- */
+import AutoImportExample from './examples/AutoImportExample.vue'
+import BarrelExample from './examples/BarrelExample.vue'
+import ComposableExample from './examples/ComposableExample.vue'
+import GlobalSettingsExample from './examples/GlobalSettingsExample.vue'
 </script>
 
 <template>
   <main>
     <h1>@movk/sigma · Vite Playground</h1>
-    <p>
-      模块尚未提供框架无关入口，此处暂不引入 <code>@movk/sigma</code>。
-      改造完成后，这里将以纯 Vite + Vue 3 的方式渲染 <code>SigmaGraph</code>。
+    <p class="intro">
+      纯 Vue 3 + Vite，无 Nuxt。验证 <code>@movk/sigma/vite</code>、
+      <code>@movk/sigma/vue</code> 与 <code>@movk/sigma/vue-plugin</code> 三条消费路径。
     </p>
+
+    <section>
+      <h2>组件自动导入</h2>
+      <p>
+        <code>SigmaGraph</code> 与 controls 均未显式 import，由 Vite 插件的组件解析器接管；
+        <code>SigmaZoomControl</code> 证明子目录不进组件名。
+      </p>
+      <AutoImportExample />
+    </section>
+
+    <section>
+      <h2>composable 自动导入与可选 peer</h2>
+      <p>
+        <code>useSigmaLayout</code> 与 <code>useSigmaExport</code> 同样来自自动导入，
+        分别在运行时动态加载 graphology-layout-forceatlas2 与 @sigma/export-image。
+      </p>
+      <ComposableExample />
+    </section>
+
+    <section>
+      <h2>具名导入</h2>
+      <p>
+        改从 <code>@movk/sigma/vue</code> 显式导入，不依赖任何 unplugin。
+      </p>
+      <BarrelExample />
+    </section>
+
+    <section>
+      <h2>全局默认 settings</h2>
+      <p>
+        <code>main.ts</code> 经 <code>SigmaPlugin</code> 注入全局默认，组件只覆盖
+        <code>labelDensity</code>；<code>renderEdgeLabels</code> 仍从全局兜底。
+      </p>
+      <GlobalSettingsExample />
+    </section>
   </main>
 </template>
-
-<style>
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  line-height: 1.6;
-}
-
-main {
-  max-width: 640px;
-  margin: 0 auto;
-  padding: 48px 24px;
-}
-
-code {
-  padding: 1px 5px;
-  border-radius: 4px;
-  background: rgb(0 0 0 / 6%);
-  font-size: 0.9em;
-}
-</style>
