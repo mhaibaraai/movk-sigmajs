@@ -1,5 +1,49 @@
 # Changelog
 
+## [0.3.0](https://github.com/mhaibaraai/movk-sigmajs/compare/v0.2.0...v0.3.0) (2026-09-11)
+
+### Features
+
+* **playground:** vite 场接入 @movk/sigma ([4e2d7c2](https://github.com/mhaibaraai/movk-sigmajs/commit/4e2d7c23466b90328658caa05fc439e388faf79d))
+* **playground:** 新增 vite 最小骨架 ([9dc9c90](https://github.com/mhaibaraai/movk-sigmajs/commit/9dc9c90787342473b13f6eb47dca2f87efd59b4c))
+* **playground:** 新增基于 Nuxt UI 的 nuxt playground 骨架 ([d5d779e](https://github.com/mhaibaraai/movk-sigmajs/commit/d5d779e43311aea4f58e7779bea40fb3518bc1e7))
+* **playground:** 补齐组件、composables 与工具函数示例 ([c25e207](https://github.com/mhaibaraai/movk-sigmajs/commit/c25e2073368568fa60ae832c38d38b08ab4fad71))
+* **vue:** 新增 vite、unplugin、vue-plugin 与具名导出入口 ([d08b317](https://github.com/mhaibaraai/movk-sigmajs/commit/d08b317b98ba9f10c2361fe606db4f88c82e9409))
+
+### Bug Fixes
+
+* **optimize-deps:** 预构建纳入 sigma/types 避免 sigma 被拆成两份副本 ([fdcd7a9](https://github.com/mhaibaraai/movk-sigmajs/commit/fdcd7a95b55d6fe3b2a0602a2eacd793be3ff02c))
+
+### Documentation
+
+* 新增 Vue + Vite 用法页 ([b1cea60](https://github.com/mhaibaraai/movk-sigmajs/commit/b1cea60355788a358c91573cfd3dfcd927a9137d))
+
+### Code Refactoring
+
+* **playground:** 移除 basic 与 ui 两个 playground ([34b39d4](https://github.com/mhaibaraai/movk-sigmajs/commit/34b39d4d9af13e4b5ddc6278a30de6e59fe8d218)), references [#corpus](https://github.com/mhaibaraai/movk-sigmajs/issues/corpus)
+* **runtime:** 运行时脱离 Nuxt 专属 API ([b87f663](https://github.com/mhaibaraai/movk-sigmajs/commit/b87f66388215522d1bdaba4a25a5a05f33f95893)), references [#app](https://github.com/mhaibaraai/movk-sigmajs/issues/app) [#app](https://github.com/mhaibaraai/movk-sigmajs/issues/app)
+
+### Tests
+
+* **runtime:** 补齐全局配置用例并移除 [#app](https://github.com/mhaibaraai/movk-sigmajs/issues/app) 替身 ([68b8d1f](https://github.com/mhaibaraai/movk-sigmajs/commit/68b8d1f0c376e68f0a182f0f40d73c0b89d8ee19))
+* **vue:** 覆盖具名导出入口与组件解析器 ([cc1d127](https://github.com/mhaibaraai/movk-sigmajs/commit/cc1d127480ad275cf1163dbcfe0ac6df8fb92d7d))
+
+### Build System
+
+* 新增多入口构建配置与子路径导出 ([1a41bf6](https://github.com/mhaibaraai/movk-sigmajs/commit/1a41bf6273cdadf8b81caacb641ccfce0c56bd3b))
+
+### CI
+
+* **release:** 发布前执行 dev:prepare 并放开 lockfile 校验 ([783537b](https://github.com/mhaibaraai/movk-sigmajs/commit/783537b4c6b154880e85297eb130b9b27d81b82a))
+
+### Chores
+
+* **deps:** 更新 pnpm-lock 依赖版本 ([5b801a2](https://github.com/mhaibaraai/movk-sigmajs/commit/5b801a2463ff34401948f2d11a10e52f24a40f80))
+* **playground:** vite 场自动生成的声明文件不再入库 ([4ef2a34](https://github.com/mhaibaraai/movk-sigmajs/commit/4ef2a341c6fdc81282fd005045b6034a99751401))
+* 升级依赖并补充仓库开发说明 ([5a0322f](https://github.com/mhaibaraai/movk-sigmajs/commit/5a0322f9b3bacbd297c80709564355843a6e1989))
+* 更新 AGENTS.md 说明 Vite 入口与运行时约定 ([99fe822](https://github.com/mhaibaraai/movk-sigmajs/commit/99fe8226a86ce4ffe576f5ac549a575a080a408c))
+* 更新根 scripts、eslint 配置与仓库说明 ([86231fd](https://github.com/mhaibaraai/movk-sigmajs/commit/86231fdfd10c1089715772b1bd7f2fb41b15a6a7))
+
 ## [0.2.0](https://github.com/mhaibaraai/movk-sigmajs/compare/v0.1.3...v0.2.0) (2026-09-04)
 
 ### ⚠ BREAKING CHANGES
