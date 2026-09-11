@@ -1,5 +1,6 @@
 import type Graph from 'graphology'
 import type { Attributes, SerializedGraph } from 'graphology-types'
+import { isDev } from '../env'
 
 export interface ApplyGraphDiffOptions {
   /**
@@ -120,7 +121,7 @@ export function applyGraphDiff(
     )
   }
 
-  if (dangling.length > 0 && import.meta.dev) {
+  if (dangling.length > 0 && isDev) {
     console.warn(`[@movk/sigma] 已跳过 ${dangling.length} 条端点不在图中的边，前几条：${dangling.slice(0, 3).join('、')}`)
   }
 

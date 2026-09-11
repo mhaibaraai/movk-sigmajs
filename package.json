@@ -21,6 +21,7 @@
   },
   "keywords": [
     "nuxt",
+    "vite",
     "nuxt-module",
     "nuxt4",
     "vue",
@@ -39,8 +40,25 @@
       "style": "./dist/runtime/index.css",
       "import": "./dist/module.mjs"
     },
+    "./vue": {
+      "types": "./dist/runtime/index.d.ts",
+      "import": "./dist/runtime/index.js"
+    },
+    "./vite": {
+      "types": "./dist/vite.d.mts",
+      "import": "./dist/vite.mjs"
+    },
+    "./unplugin": {
+      "types": "./dist/unplugin.d.mts",
+      "import": "./dist/unplugin.mjs"
+    },
+    "./vue-plugin": {
+      "types": "./dist/vue-plugin.d.mts",
+      "import": "./dist/vue-plugin.mjs"
+    },
     "./index.css": "./dist/runtime/index.css",
     "./runtime/*": "./dist/runtime/*",
+    "./components/*": "./dist/runtime/components/*",
     "./utils/*": {
       "types": "./dist/runtime/utils/*.d.ts",
       "import": "./dist/runtime/utils/*.js"
@@ -51,8 +69,23 @@
       ".": [
         "./dist/types.d.mts"
       ],
+      "vue": [
+        "./dist/runtime/index.d.ts"
+      ],
+      "vite": [
+        "./dist/vite.d.mts"
+      ],
+      "unplugin": [
+        "./dist/unplugin.d.mts"
+      ],
+      "vue-plugin": [
+        "./dist/vue-plugin.d.mts"
+      ],
       "runtime/*": [
         "./dist/runtime/*"
+      ],
+      "components/*": [
+        "./dist/runtime/components/*"
       ],
       "utils/*": [
         "./dist/runtime/utils/*.d.ts"
@@ -70,7 +103,7 @@
     "dev": "nuxt dev playgrounds/nuxt",
     "dev:vite": "pnpm --filter playground-vite dev",
     "dev:build": "nuxt build playgrounds/nuxt && pnpm --filter playground-vite build",
-    "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxt prepare playgrounds/nuxt && nuxt prepare docs",
+    "dev:prepare": "nuxt-module-build build --stub && nuxt-module-build prepare && nuxt prepare playgrounds/nuxt && nuxt prepare docs && pnpm dev:vite:build",
     "docs": "nuxt dev docs",
     "docs:build": "nuxt build docs",
     "lint": "eslint .",
@@ -79,11 +112,11 @@
     "test:watch": "vitest watch",
     "typecheck": "vue-tsc --noEmit && nuxt typecheck playgrounds/nuxt && pnpm --filter playground-vite typecheck && nuxt typecheck docs",
     "release": "release-it",
-    "clean": "movk-clean"
+    "clean": "movk-clean",
+    "dev:vite:build": "pnpm --filter playground-vite build"
   },
   "dependencies": {
     "@movk/core": "^1.4.1",
-    "@nuxt/kit": "^4.5.2",
     "@vueuse/core": "^14.4.0",
     "consola": "^3.4.2",
     "defu": "^6.1.7"
@@ -101,6 +134,9 @@
     "graphology-layout-noverlap": ">=0.4.0",
     "graphology-metrics": ">=2.0.0",
     "sigma": ">=4.0.0-beta.5",
+    "unplugin": ">=2.0.0",
+    "unplugin-auto-import": ">=20.0.0",
+    "unplugin-vue-components": ">=31.0.0",
     "vue": ">=3.5.0"
   },
   "peerDependenciesMeta": {
@@ -133,10 +169,20 @@
     },
     "graphology-metrics": {
       "optional": true
+    },
+    "unplugin": {
+      "optional": true
+    },
+    "unplugin-auto-import": {
+      "optional": true
+    },
+    "unplugin-vue-components": {
+      "optional": true
     }
   },
   "devDependencies": {
     "@nuxt/eslint-config": "^1.17.0",
+    "@nuxt/kit": "^4.5.2",
     "@nuxt/module-builder": "^1.0.3",
     "@nuxt/schema": "^4.5.2",
     "@nuxt/test-utils": "^4.3.2",
@@ -152,6 +198,11 @@
     "release-it": "^21.0.2",
     "sigma": "4.0.0-beta.5",
     "typescript": "~6.0.3",
+    "unbuild": "^3.6.1",
+    "unplugin": "^3.3.0",
+    "unplugin-auto-import": "^21.1.0",
+    "unplugin-vue-components": "^32.1.0",
+    "vite": "^7.3.6",
     "vitest": "^5.0.0",
     "vue": "^3.5.42",
     "vue-tsc": "^3.3.11"

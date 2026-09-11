@@ -1,4 +1,4 @@
-import { addComponentsDir, addImportsDir, createResolver, defineNuxtModule, extendViteConfig } from '@nuxt/kit'
+import { addComponentsDir, addImportsDir, addPlugin, createResolver, defineNuxtModule, extendViteConfig } from '@nuxt/kit'
 import { defu } from 'defu'
 import type { Settings } from 'sigma/settings'
 import { name, version } from '../package.json'
@@ -78,5 +78,8 @@ export default defineNuxtModule<ModuleOptions>({
 
     addImportsDir(resolve('./runtime/composables'))
     addImportsDir(resolve('./runtime/utils'))
+
+    // 把 runtimeConfig 里的全局默认 settings 转交给框架无关的运行时配置单例
+    addPlugin(resolve('./runtime/plugins/config'))
   }
 })

@@ -164,11 +164,11 @@ describe('实例注册表', () => {
   it('注册路径带客户端保护，避免模块级注册表在 SSR 期只增不减', () => {
     // SSR 不触发 onBeforeUnmount，若照常登记，模块级注册表的条目会跨请求残留，
     // 后续渲染还会被误判成 id 冲突；何况服务端 sigma 恒为 null，登记本身没有意义。
-    // 测试环境里 import.meta.client 被替换为 true，无法从行为上覆盖服务端分支，
+    // happy-dom 里 isClient 恒为 true，无法从行为上覆盖服务端分支，
     // 故直接锁住源码结构，防止守卫被误删
     // vitest 里 import.meta.url 不是 file: 协议，用工作目录定位
     const source = readFileSync(resolve(process.cwd(), 'src/runtime/components/Graph.vue'), 'utf8')
 
-    expect(source).toMatch(/if \(props\.id && import\.meta\.client\)/)
+    expect(source).toMatch(/if \(props\.id && isClient\)/)
   })
 })

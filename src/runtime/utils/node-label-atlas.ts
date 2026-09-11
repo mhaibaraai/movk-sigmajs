@@ -1,5 +1,6 @@
 import type Sigma from 'sigma'
 import type { SDFAtlasManager } from 'sigma'
+import { isDev } from '../env'
 
 /**
  * 节点标签字形图集的默认源字号。
@@ -94,7 +95,7 @@ function resolveMaxTextureSize(instance: Sigma, requested: number): number {
     return requested
   }
 
-  if (import.meta.dev) {
+  if (isDev) {
     console.warn(`[@movk/sigma] labelAtlas.maxTextureSize 请求的 ${requested} 超出本机 GL 上限 ${limit}，已夹回 ${limit}`)
   }
 

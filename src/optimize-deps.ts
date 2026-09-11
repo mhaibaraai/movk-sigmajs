@@ -33,6 +33,9 @@ export const OPTIMIZE_DEPS_CANDIDATES: OptimizeDepCandidate[] = [
   { id: 'graphology' },
   { id: 'sigma' },
   { id: 'sigma/settings' },
+  // sigma 的 dist 内部自引用 sigma/types，漏掉它会被拆成第二个预构建产物，
+  // 两份副本各带一套 program 注册表，渲染出来的就是整片纯色
+  { id: 'sigma/types' },
   // 使用方声明 primitives 时会取用内置形状与路径的工厂函数
   { id: 'sigma/primitives' },
   { id: 'sigma/rendering' },
