@@ -26,3 +26,6 @@ logs
 
 .codex
 .claude
+
+playgrounds/vite/auto-imports.d.ts
+playgrounds/vite/components.d.ts

@@ -40,7 +40,7 @@ test/                                  vitest 用例，test/fixtures/basic 为 N
 | --- | --- |
 | `pnpm dev:prepare` | 首次克隆或依赖变更后必须先跑：stub 构建 + prepare 全部子包 + 一次 `dev:vite:build` |
 | `pnpm dev` / `pnpm dev:vite` | 启动 `playgrounds/nuxt` / `playgrounds/vite` |
-| `pnpm dev:vite:build` | 真实 vite 构建 `playgrounds/vite`，防止 Vue 路径静默腐化 |
+| `pnpm dev:vite:build` | 真实 vite 构建 `playgrounds/vite`，防止 Vue 路径静默腐化；同时生成不入库的 `auto-imports.d.ts` / `components.d.ts`，先于 `vue-tsc` 执行 |
 | `pnpm docs` / `pnpm docs:build` | 文档站开发与构建 |
 | `pnpm lint` / `pnpm lint:fix` | eslint 检查与修复 |
 | `pnpm typecheck` | vue-tsc 加 `playgrounds/nuxt` 与 docs 的 nuxt typecheck，以及 `playgrounds/vite` 的 vue-tsc |
