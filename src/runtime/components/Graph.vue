@@ -88,7 +88,7 @@ const props = defineProps<{
    * 节点标签 SDF 字形图集的参数，调的是烘进纹理的源字形，不是标签显示字号（后者在 `styles` 的 `labelSize`）。
    *
    * 上游按 `64 × devicePixelRatio` 生成字形，2 倍屏上 2048² 的图集一页只装得下约 190 个，
-   * 中文字形集溢出后节点标签会整体消失，故 `fontSize` 压回 64；字形集更大时再调 `maxTextureSize`。
+   * 中文字形集溢出后超出第一页的字形不会显示，故 `fontSize` 压回 64；字形集更大时再调 `maxTextureSize`。
    * 与 `primitives` 一样只在构造时读取，挂载后改不生效
    * @see https://github.com/jacomyal/sigma.js/issues/1552
    */

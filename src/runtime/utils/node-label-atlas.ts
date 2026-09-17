@@ -108,12 +108,13 @@ function resolveMaxTextureSize(instance: Sigma, requested: number): number {
  * sigma 的节点标签程序按 `64 × devicePixelRatio` 生成字形（边标签程序则固定 64）。
  * 2 倍屏上单个字形连同 buffer 占约 144px，2048² 的图集一页只装得下约 190 个；
  * 中文标签的字形集轻易超过这个数，游标于是翻到第二页，而 `updateAtlasTexture()`
- * 只上传 `textures[0]`——翻页那一步又会把它截成 1px 宽（`finalizeCurrentTexture()`
- * 在 `cursor.x === 0 && rowHeight === 0` 时算出的宽度就是 1）。结果是节点标签全部
- * 提交了绘制却一个字都不显示，边标签因字形少仍正常，1 倍屏也正常。
+ * 只上传 `textures[0]`，超出第一页的字形都不会显示。4.0.0-beta.5 及更早版本在翻页那一步
+ * 还会把第一页截成 1px 宽，节点标签因此一个字都不显示；beta.6 已修复这一截断，
+ * 只上传第一页的限制仍在。边标签因字形少仍正常，1 倍屏也正常。
  *
  * 压回 64 后字形约 80px、一页可容约 600 个。字形集更大时再调 `maxTextureSize`，
- * 容量按边长平方增长。上游追踪见 https://github.com/jacomyal/sigma.js/issues/1552
+ * 容量按边长平方增长。上游追踪见 https://github.com/jacomyal/sigma.js/issues/1552 与
+ * https://github.com/jacomyal/sigma.js/pull/1554
  *
  * 必须在实例刚建好、尚未渲染时调用：此刻图集里只有默认字体、没有任何字形，
  * 换掉整个 manager 不会丢已生成的数据。
@@ -181,8 +182,8 @@ export function applyNodeLabelAtlas(
 /**
  * 监听字形图集更新，翻到第二页时告警一次。
  *
- * 上游只上传 `textures[0]`，翻页那一刻还会把它截成 1px 宽，症状是标签缺字甚至整体消失、
- * 控制台一行报错都没有。容量再大也可能被超，所以这条监听与字号、页边长都无关，恒挂。
+ * 上游只上传 `textures[0]`，症状是标签缺字（beta.5 及更早版本翻页时首页被截成 1px，
+ * 标签整体消失），控制台一行报错都没有。容量再大也可能被超，所以这条监听与字号、页边长都无关，恒挂。
  *
  * 只做告警，由调用方决定是否只在开发环境挂。要挂在 `applyNodeLabelAtlas()` 之后，
  * 否则监听的是那个已经被换掉的旧 manager。
@@ -212,7 +213,7 @@ export function watchNodeLabelAtlasOverflow(instance: Sigma): () => void {
     warned = true
     console.warn(
       `[@movk/sigma] 节点标签字形图集翻页了（已生成 ${payload.glyphCount} 个字形）。`
-      + 'sigma 只上传第一页，标签会缺字甚至整体消失。'
+      + 'sigma 只上传第一页，超出第一页的字形不会显示。'
       + '调大 labelAtlas.maxTextureSize 或调小 labelAtlas.fontSize。'
     )
   }
