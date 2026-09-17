@@ -1,17 +1,7 @@
-// @ts-check
 import { fileURLToPath } from 'node:url'
 import { createConfigForNuxt } from '@nuxt/eslint-config/flat'
 import betterTailwindcss from 'eslint-plugin-better-tailwindcss'
 
-/**
- * Tailwind class checks for the apps in this repo (docs and playgrounds).
- * `src/runtime` is excluded: it ships plain `sigma-*` classes styled by `index.css`.
- * @param {string} cwd
- * @param {string[]} files
- * @param {string} entryPoint
- * @param {string[]} ignore
- * @returns {import('eslint').Linter.Config}
- */
 function betterTailwindcssConfig(cwd, files, entryPoint, ignore = []) {
   const resolve = (/** @type {string} */ path) => fileURLToPath(new URL(path, import.meta.url))
   return {
