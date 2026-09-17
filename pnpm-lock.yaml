@@ -175,19 +175,19 @@ importers:
         version: 1.4.1(vue@3.5.42(typescript@6.0.3))
       '@sigma/export-image':
         specifier: '>=4.0.0-beta.0'
-        version: 4.0.0-beta.0(sigma@4.0.0-beta.5(graphology-types@0.24.8))
+        version: 4.0.0-beta.0(sigma@4.0.0-beta.6(graphology-types@0.24.8))
       '@sigma/node-border':
         specifier: '>=4.0.0-alpha.3'
-        version: 4.0.0-alpha.3(sigma@4.0.0-beta.5(graphology-types@0.24.8))
+        version: 4.0.0-alpha.3(sigma@4.0.0-beta.6(graphology-types@0.24.8))
       '@sigma/node-image':
         specifier: '>=4.0.0-alpha.3'
-        version: 4.0.0-alpha.3(sigma@4.0.0-beta.5(graphology-types@0.24.8))
+        version: 4.0.0-alpha.3(sigma@4.0.0-beta.6(graphology-types@0.24.8))
       '@sigma/node-piechart':
         specifier: '>=4.0.0-alpha.3'
-        version: 4.0.0-beta.0(sigma@4.0.0-beta.5(graphology-types@0.24.8))
+        version: 4.0.0-beta.0(sigma@4.0.0-beta.6(graphology-types@0.24.8))
       '@sigma/utils':
         specifier: '>=4.0.0-alpha.2'
-        version: 4.0.0-alpha.2(sigma@4.0.0-beta.5(graphology-types@0.24.8))
+        version: 4.0.0-alpha.2(sigma@4.0.0-beta.6(graphology-types@0.24.8))
       '@vueuse/core':
         specifier: ^15.0.0
         version: 15.0.0(vue@3.5.42(typescript@6.0.3))
@@ -262,8 +262,8 @@ importers:
         specifier: ^21.0.3
         version: 21.0.3(@types/node@22.20.3)(magicast@0.5.5)(supports-color@10.2.2)
       sigma:
-        specifier: 4.0.0-beta.5
-        version: 4.0.0-beta.5(graphology-types@0.24.8)
+        specifier: 4.0.0-beta.6
+        version: 4.0.0-beta.6(graphology-types@0.24.8)
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -311,13 +311,13 @@ importers:
         version: 4.11.1(c156e25dbf73e11216fecf239c8919a9)
       '@sigma/export-image':
         specifier: 4.0.0-beta.0
-        version: 4.0.0-beta.0(sigma@4.0.0-beta.5(graphology-types@0.24.8))
+        version: 4.0.0-beta.0(sigma@4.0.0-beta.6(graphology-types@0.24.8))
       '@sigma/node-border':
         specifier: 4.0.0-alpha.3
-        version: 4.0.0-alpha.3(sigma@4.0.0-beta.5(graphology-types@0.24.8))
+        version: 4.0.0-alpha.3(sigma@4.0.0-beta.6(graphology-types@0.24.8))
       '@sigma/utils':
         specifier: 4.0.0-alpha.2
-        version: 4.0.0-alpha.2(sigma@4.0.0-beta.5(graphology-types@0.24.8))
+        version: 4.0.0-alpha.2(sigma@4.0.0-beta.6(graphology-types@0.24.8))
       '@vercel/analytics':
         specifier: ^2.0.1
         version: 2.0.1(nuxt@4.5.2(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7(supports-color@10.2.2)))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7(supports-color@10.2.2)))(@oxc-project/types@0.150.0)(@types/node@26.6.1)(@vue/compiler-sfc@3.5.42)(better-sqlite3@13.0.3)(commander@14.0.3)(db0@0.4.1)(esbuild@0.28.2)(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(ioredis@5.11.1(supports-color@10.2.2))(lightningcss@1.33.0)(magicast@0.5.5)(optionator@0.9.4)(oxc-parser@0.149.0)(rolldown@1.2.9)(rollup-plugin-visualizer@7.1.1(rolldown@1.2.9)(rollup@4.63.3))(rollup@4.63.3)(srvx@0.12.8)(supports-color@10.2.2)(terser@5.51.2)(typescript@6.0.3)(vite@8.3.0(@types/node@26.6.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))(vue-tsc@3.3.11(typescript@6.0.3))(yaml@2.9.1))(vue@3.5.42(typescript@6.0.3))
@@ -349,8 +349,8 @@ importers:
         specifier: ^4.5.2
         version: 4.5.2(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7(supports-color@10.2.2)))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7(supports-color@10.2.2)))(@oxc-project/types@0.150.0)(@types/node@26.6.1)(@vue/compiler-sfc@3.5.42)(better-sqlite3@13.0.3)(commander@14.0.3)(db0@0.4.1)(esbuild@0.28.2)(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(ioredis@5.11.1(supports-color@10.2.2))(lightningcss@1.33.0)(magicast@0.5.5)(optionator@0.9.4)(oxc-parser@0.149.0)(rolldown@1.2.9)(rollup-plugin-visualizer@7.1.1(rolldown@1.2.9)(rollup@4.63.3))(rollup@4.63.3)(srvx@0.12.8)(supports-color@10.2.2)(terser@5.51.2)(typescript@6.0.3)(vite@8.3.0(@types/node@26.6.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))(vue-tsc@3.3.11(typescript@6.0.3))(yaml@2.9.1)
       sigma:
-        specifier: 4.0.0-beta.5
-        version: 4.0.0-beta.5(graphology-types@0.24.8)
+        specifier: 4.0.0-beta.6
+        version: 4.0.0-beta.6(graphology-types@0.24.8)
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
@@ -375,13 +375,13 @@ importers:
         version: 4.11.1(d1563824a87603e76a3f8719996f81af)
       '@sigma/export-image':
         specifier: 4.0.0-beta.0
-        version: 4.0.0-beta.0(sigma@4.0.0-beta.5(graphology-types@0.24.8))
+        version: 4.0.0-beta.0(sigma@4.0.0-beta.6(graphology-types@0.24.8))
       '@sigma/node-border':
         specifier: 4.0.0-alpha.3
-        version: 4.0.0-alpha.3(sigma@4.0.0-beta.5(graphology-types@0.24.8))
+        version: 4.0.0-alpha.3(sigma@4.0.0-beta.6(graphology-types@0.24.8))
       '@sigma/utils':
         specifier: 4.0.0-alpha.2
-        version: 4.0.0-alpha.2(sigma@4.0.0-beta.5(graphology-types@0.24.8))
+        version: 4.0.0-alpha.2(sigma@4.0.0-beta.6(graphology-types@0.24.8))
       graphology:
         specifier: ^0.26.0
         version: 0.26.0(graphology-types@0.24.8)
@@ -404,8 +404,8 @@ importers:
         specifier: ^4.5.2
         version: 4.5.2(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7(supports-color@10.2.2)))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7(supports-color@10.2.2)))(@oxc-project/types@0.150.0)(@types/node@26.6.1)(@vue/compiler-sfc@3.5.42)(better-sqlite3@13.0.3)(commander@14.0.3)(db0@0.4.1)(esbuild@0.28.2)(eslint@10.10.0(jiti@2.7.0)(supports-color@10.2.2))(ioredis@5.11.1(supports-color@10.2.2))(lightningcss@1.33.0)(magicast@0.5.5)(optionator@0.9.4)(oxc-parser@0.149.0)(rolldown@1.2.9)(rollup-plugin-visualizer@7.1.1(rolldown@1.2.9)(rollup@4.63.3))(rollup@4.63.3)(srvx@0.12.8)(supports-color@10.2.2)(terser@5.51.2)(typescript@6.0.3)(vite@8.3.0(@types/node@26.6.1)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))(vue-tsc@3.3.11(typescript@6.0.3))(yaml@2.9.1)
       sigma:
-        specifier: 4.0.0-beta.5
-        version: 4.0.0-beta.5(graphology-types@0.24.8)
+        specifier: 4.0.0-beta.6
+        version: 4.0.0-beta.6(graphology-types@0.24.8)
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
@@ -421,7 +421,7 @@ importers:
         version: link:../..
       '@sigma/export-image':
         specifier: 4.0.0-beta.0
-        version: 4.0.0-beta.0(sigma@4.0.0-beta.5(graphology-types@0.24.8))
+        version: 4.0.0-beta.0(sigma@4.0.0-beta.6(graphology-types@0.24.8))
       graphology:
         specifier: ^0.26.0
         version: 0.26.0(graphology-types@0.24.8)
@@ -429,8 +429,8 @@ importers:
         specifier: ^0.10.1
         version: 0.10.1(graphology-types@0.24.8)
       sigma:
-        specifier: 4.0.0-beta.5
-        version: 4.0.0-beta.5(graphology-types@0.24.8)
+        specifier: 4.0.0-beta.6
+        version: 4.0.0-beta.6(graphology-types@0.24.8)
       vue:
         specifier: ^3.5.42
         version: 3.5.42(typescript@6.0.3)
@@ -7992,8 +7992,8 @@ packages:
   siginfo@2.0.0:
     resolution: {integrity: sha512-ybx0WO1/8bSBLEWXZvEd7gMW3Sn3JFlW3TvX1nREbDLRNQNaeNN8WK0meBwPdAaOI7TtRRRJn/Es1zhrrCHu7g==}
 
-  sigma@4.0.0-beta.5:
-    resolution: {integrity: sha512-856d7WE21+OOvALgxBBfd4+jG++VaT26eFwxdVybI6uTKMdVnxdqKwNu2L6RFQ01d163t0oBO1PJg9IEgWuqVA==}
+  sigma@4.0.0-beta.6:
+    resolution: {integrity: sha512-QbjlV0Izo57hUGVgZaL+B+jRs0IAprWrIPLZs6p/qIEgx0dryBHg0cNbRSCSRj6N53JTw4W6onuhabJ9mHUG7g==}
 
   signal-exit@3.0.7:
     resolution: {integrity: sha512-wnD2ZE+l+SPC/uoS0vXeE9L1+0wuaMqKlfz9AMUo38JsyLSBWSFcHR1Rri62LZc12vLr1gb3jl7iwQhgwpAbGQ==}
@@ -12695,26 +12695,26 @@ snapshots:
 
   '@shikijs/vscode-textmate@10.0.2': {}
 
-  '@sigma/export-image@4.0.0-beta.0(sigma@4.0.0-beta.5(graphology-types@0.24.8))':
+  '@sigma/export-image@4.0.0-beta.0(sigma@4.0.0-beta.6(graphology-types@0.24.8))':
     dependencies:
       file-saver: 2.0.5
-      sigma: 4.0.0-beta.5(graphology-types@0.24.8)
+      sigma: 4.0.0-beta.6(graphology-types@0.24.8)
 
-  '@sigma/node-border@4.0.0-alpha.3(sigma@4.0.0-beta.5(graphology-types@0.24.8))':
+  '@sigma/node-border@4.0.0-alpha.3(sigma@4.0.0-beta.6(graphology-types@0.24.8))':
     dependencies:
-      sigma: 4.0.0-beta.5(graphology-types@0.24.8)
+      sigma: 4.0.0-beta.6(graphology-types@0.24.8)
 
-  '@sigma/node-image@4.0.0-alpha.3(sigma@4.0.0-beta.5(graphology-types@0.24.8))':
+  '@sigma/node-image@4.0.0-alpha.3(sigma@4.0.0-beta.6(graphology-types@0.24.8))':
     dependencies:
-      sigma: 4.0.0-beta.5(graphology-types@0.24.8)
+      sigma: 4.0.0-beta.6(graphology-types@0.24.8)
 
-  '@sigma/node-piechart@4.0.0-beta.0(sigma@4.0.0-beta.5(graphology-types@0.24.8))':
+  '@sigma/node-piechart@4.0.0-beta.0(sigma@4.0.0-beta.6(graphology-types@0.24.8))':
     dependencies:
-      sigma: 4.0.0-beta.5(graphology-types@0.24.8)
+      sigma: 4.0.0-beta.6(graphology-types@0.24.8)
 
-  '@sigma/utils@4.0.0-alpha.2(sigma@4.0.0-beta.5(graphology-types@0.24.8))':
+  '@sigma/utils@4.0.0-alpha.2(sigma@4.0.0-beta.6(graphology-types@0.24.8))':
     dependencies:
-      sigma: 4.0.0-beta.5(graphology-types@0.24.8)
+      sigma: 4.0.0-beta.6(graphology-types@0.24.8)
 
   '@simple-git/args-pathspec@1.0.3': {}
 
@@ -18779,7 +18779,7 @@ snapshots:
 
   siginfo@2.0.0: {}
 
-  sigma@4.0.0-beta.5(graphology-types@0.24.8):
+  sigma@4.0.0-beta.6(graphology-types@0.24.8):
     dependencies:
       events: 3.3.0
       graphology-utils: 2.5.2(graphology-types@0.24.8)
