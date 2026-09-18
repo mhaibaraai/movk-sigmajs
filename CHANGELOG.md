@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.3.1](https://github.com/mhaibaraai/movk-sigmajs/compare/v0.3.0...v0.3.1) (2026-09-18)
+
+### Documentation
+
+* **graph:** 同步上游 atlas 翻页修复后的 labelAtlas 说明 ([8a4cb0c](https://github.com/mhaibaraai/movk-sigmajs/commit/8a4cb0c5301095d21f6784830ba3560dbc66dc8e))
+
+### Build System
+
+* **deps:** 升级 sigma 至 4.0.0-beta.6 ([6774cba](https://github.com/mhaibaraai/movk-sigmajs/commit/6774cba17aba9082a756d2ba440626bd5693e85e))
+* **deps:** 升级依赖并将 vite 场对齐到 vite 8 ([1cf2969](https://github.com/mhaibaraai/movk-sigmajs/commit/1cf2969b6513595034af7c3297d3d96105606511))
+* **eslint:** 接入 eslint-plugin-better-tailwindcss 检查 docs 与 playground 类名 ([169c0a5](https://github.com/mhaibaraai/movk-sigmajs/commit/169c0a54a4853b8bd9806510f91cae6494329b72))
+
+### Chores
+
+* **eslint:** 移除配置文件的类型检查注释 ([595e6b0](https://github.com/mhaibaraai/movk-sigmajs/commit/595e6b03a78ab1c555803ae561783650f9ef5aff))
+* **playground:** nuxt 场全局 settings 启用 gestureTarget shared ([f1912e8](https://github.com/mhaibaraai/movk-sigmajs/commit/f1912e8013370196155381f1d46be1e116fcb068))
+* **vscode:** 新增 ESLint 与 Tailwind CSS 工作区设置 ([f77df5e](https://github.com/mhaibaraai/movk-sigmajs/commit/f77df5e2362d53571ce4fea26063aeeff36da823))
+
 ## [0.3.0](https://github.com/mhaibaraai/movk-sigmajs/compare/v0.2.0...v0.3.0) (2026-09-11)
 
 ### Features
