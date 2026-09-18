@@ -21,5 +21,10 @@ export default defineNuxtConfig({
     clientBundle: {
       scan: true
     }
+  },
+  sigma: {
+    settings: {
+      gestureTarget: 'shared'
+    }
   }
 })
