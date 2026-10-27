@@ -5,6 +5,36 @@ export default defineAppConfig({
       neutral: 'mist'
     }
   },
+  header: {
+    nav: [
+      { label: '文档', to: '/docs/getting-started', activeMatch: '/docs' },
+      { label: '版本发布', to: '/releases' }
+    ],
+    mobileNav: [
+      { label: '快速开始', icon: 'i-lucide-square-play', to: '/docs/getting-started' },
+      { label: '组件', icon: 'i-lucide-box', to: '/docs/components' },
+      { label: 'Composables', icon: 'i-lucide-square-function', to: '/docs/composables' },
+      { label: '工具函数', icon: 'i-lucide-wrench', to: '/docs/utils' },
+      { label: '版本发布', icon: 'i-lucide-newspaper', to: '/releases' },
+      { label: 'GitHub', icon: 'i-simple-icons-github', to: 'https://github.com/mhaibaraai/movk-sigmajs' }
+    ]
+  },
+  docs: {
+    categories: {
+      'getting-started': [
+        { id: 'ai', title: 'AI 集成', icon: 'i-lucide-bot' }
+      ],
+      'components': [
+        { id: 'core', title: '核心', icon: 'i-lucide-box' },
+        { id: 'controls', title: '控件', icon: 'i-lucide-sliders-horizontal' }
+      ],
+      'composables': [
+        { id: 'base', title: '基础', icon: 'i-lucide-plug' },
+        { id: 'interaction', title: '交互', icon: 'i-lucide-mouse-pointer-click' },
+        { id: 'analysis', title: '布局与分析', icon: 'i-lucide-network' }
+      ]
+    }
+  },
   aside: {
     filter: {
       enabled: true
