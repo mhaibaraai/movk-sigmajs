@@ -1,6 +1,6 @@
 {
   "git": {
-    "requireCleanWorkingDir": false,
+    "requireCleanWorkingDir": true,
     "commitMessage": "chore(release): v${version}",
     "tagName": "v${version}"
   },
@@ -19,7 +19,8 @@
       "pnpm lint",
       "pnpm typecheck",
       "pnpm test"
-    ]
+    ],
+    "after:release": "echo Successfully released ${name} v${version} to ${repo.repository}."
   },
   "plugins": {
     "@release-it/conventional-changelog": {
@@ -31,6 +32,7 @@
           { "type": "perf", "section": "Performance Improvements" },
           { "type": "revert", "section": "Reverts" },
           { "type": "docs", "section": "Documentation" },
+          { "type": "style", "section": "Styles" },
           { "type": "refactor", "section": "Code Refactoring" },
           { "type": "test", "section": "Tests" },
           { "type": "build", "section": "Build System" },
