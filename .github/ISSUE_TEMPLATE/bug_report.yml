@@ -1,0 +1,40 @@
+name: 问题反馈
+description: 报告 @movk/sigma 的缺陷
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: '@movk/sigma 版本'
+      placeholder: 0.3.1
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: 运行环境
+      description: sigma 版本、Nuxt / Vite 版本、浏览器
+      placeholder: sigma 4.0.0-beta.6、Nuxt 4.6.3、Chrome 141
+    validations:
+      required: true
+  - type: input
+    id: reproduction
+    attributes:
+      label: 复现仓库
+      description: 最小可复现的仓库或 StackBlitz 链接
+      placeholder: https://github.com/...
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 复现步骤、期望行为与实际行为
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志
+      description: 控制台或构建的报错输出，粘贴前请移除令牌与密钥
+      render: text

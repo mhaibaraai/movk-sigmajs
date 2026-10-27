@@ -24,7 +24,7 @@ src/runtime/composables/               15 个 use-sigma*.ts，目录级自动导
 src/runtime/utils/                     图算法与样式工具，目录级自动导入
 src/runtime/types/public.ts            对外类型出口，module.ts 里 export type *
 src/runtime/index.css                  控件与覆盖层样式，--sigma-color-* 变量
-docs/                                  文档站，extends @movk/nuxt-docs + Nuxt Content 3
+docs/                                  文档站，extends @movk/nuxt-docs v3 + Nuxt Content 3
 docs/app/components/content/examples/  文档示例组件 XxxExample.vue
 docs/server/api/                       示例数据接口
 playgrounds/nuxt/                      Nuxt 示例场，分组对齐 docs 的 category
@@ -62,6 +62,22 @@ test/                                  vitest 用例，test/fixtures/basic 为 N
 - 模块选项为 `prefix` / `settings` / `css` / `optimizeDeps`，其中全局默认 settings 写入 `runtimeConfig.public.sigma.settings`，再由 `runtime/plugins/config.ts` 转交 `config.ts`；Vite 侧对应 `vue-plugin` 的 `settings`
 - unplugin 三件套（`unplugin`、`unplugin-vue-components`、`unplugin-auto-import`）是可选 peer，只有走 `@movk/sigma/vite` 才需要，`src/unplugin.ts` 里动态 `import()` 并给出安装指引；`sigmaComponentResolver` / `sigmaAutoImportDirs` 只读文件系统，不触碰三件套
 
+## 文档站
+
+`docs/` 基于 `@movk/nuxt-docs` v3，配置以 Layer 的 `nuxt.schema.ts` 为准。
+
+- 内容目录固定为 `docs/content/docs/`，路由前缀固定为 `/docs`；`content/index.md` 与 `content/releases.yml` 留在 `content/` 根目录
+- 功能开关位于 `nuxt.config.ts` 的 `movkNuxtDocs`：组件文档（`:component-props` / `:component-slots` / `:component-emits` / `:component-example`）依赖 `componentDocs: true` 与 `nuxt-component-meta`、`vue-component-meta`、`prettier`；`mermaid`、`a11y` 默认关闭，启用时需自行安装对应依赖，缺失时构建期报错
+- 页头导航与侧栏分类在 `app/app.config.ts` 的 `header.nav` / `header.mobileNav` 与 `docs.categories` 中声明；可覆盖组件以 Layer 文档「自定义」页的覆盖契约为准，本站覆盖了 `HeaderLogo`；`nuxt.config.ts` 的 `components:extend` 钩子移除了依赖未安装 `@tanstack/charts` 的 `UChart`
+- 视觉沿用 v3 默认值（主色、中性色、字体与代码高亮主题），不在站点内另行覆盖
+- 代理发现层提供 `/raw/docs/**.md`、`/llms.txt` 与 `/.well-known/skills/`，Agent Skills 源文件位于 `docs/skills/`
+
+| 环境变量 | 说明 |
+| --- | --- |
+| `NUXT_GITHUB_TOKEN` | 生产环境获取 Releases 与提交历史 |
+| `AI_API_KEY` | AI Chat 总开关，构建期存在即启用，Gateway 与兼容端点共用 |
+| `AI_BASE_URL` | OpenAI 兼容端点；留空走 AI Gateway |
+
 ## 代码风格
 
 - 文件保持聚焦，200-400 行为宜，上限 800 行
@@ -84,7 +100,7 @@ test/                                  vitest 用例，test/fixtures/basic 为 N
 - 每个小节配一个可跑示例 `:component-example{name="XxxExample"}`；prop 变体由 MDC `options` 选择条驱动，示例内不写切换按钮
 - `### Slots` 只放 `:component-slots`，作用域说明写在 `## 示例` 的插槽小节；`### Expose` 用 `| Name | Type |` 两列表格
 - 示例的读数与按钮放进 `<SigmaControls>`，用 Nuxt UI 与工具类，不用 `.demo-*` 面板类
-- 样板：`docs/content/docs/2.components/1.graph.md`
+- 样板：`docs/content/docs/2.components/01.graph.md`
 
 ## 提交与发布
 
