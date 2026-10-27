@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 文档
+    url: https://sigma.mhaibaraai.cn
+    about: 组件、composables 与工具函数的用法说明，提问前请先查阅文档
