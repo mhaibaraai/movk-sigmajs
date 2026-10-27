@@ -68,7 +68,7 @@ test/                                  vitest 用例，test/fixtures/basic 为 N
 
 - 内容目录固定为 `docs/content/docs/`，路由前缀固定为 `/docs`；`content/index.md` 与 `content/releases.yml` 留在 `content/` 根目录
 - 功能开关位于 `nuxt.config.ts` 的 `movkNuxtDocs`：组件文档（`:component-props` / `:component-slots` / `:component-emits` / `:component-example`）依赖 `componentDocs: true` 与 `nuxt-component-meta`、`vue-component-meta`、`prettier`；`mermaid`、`a11y` 默认关闭，启用时需自行安装对应依赖，缺失时构建期报错
-- 页头导航与侧栏分类由 `app/composables/useHeader.ts`、`useCategory.ts` 定义；可覆盖组件以 Layer 文档「自定义」页的覆盖契约为准，本站覆盖了 `HeaderLogo`
+- 页头导航与侧栏分类在 `app/app.config.ts` 的 `header.nav` / `header.mobileNav` 与 `docs.categories` 中声明；可覆盖组件以 Layer 文档「自定义」页的覆盖契约为准，本站覆盖了 `HeaderLogo`；`nuxt.config.ts` 的 `components:extend` 钩子移除了依赖未安装 `@tanstack/charts` 的 `UChart`
 - 视觉沿用 v3 默认值（主色、中性色、字体与代码高亮主题），不在站点内另行覆盖
 - 代理发现层提供 `/raw/docs/**.md`、`/llms.txt` 与 `/.well-known/skills/`，Agent Skills 源文件位于 `docs/skills/`
 
