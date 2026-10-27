@@ -1,10 +1,4 @@
 export default defineAppConfig({
-  ui: {
-    colors: {
-      primary: 'rose',
-      neutral: 'mist'
-    }
-  },
   header: {
     nav: [
       { label: '文档', to: '/docs/getting-started', activeMatch: '/docs' },

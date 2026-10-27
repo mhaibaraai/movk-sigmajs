@@ -4,13 +4,10 @@ seo:
   description: A declarative sigma v4 wrapper for Vue 3 and Nuxt 4 — components and composables for large-scale knowledge graph visualization.
 ---
 
-::u-page-hero{class="dark:bg-gradient-to-b from-neutral-900 to-neutral-950"}
+::u-page-hero
 ---
 orientation: horizontal
 ---
-#top
-:hero-background
-
 #title
 :::motion
 把知识图谱写成[组件]{.text-primary}
