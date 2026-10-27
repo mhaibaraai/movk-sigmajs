@@ -31,6 +31,7 @@ export default defineNuxtConfig({
 
   routeRules: {
     '/docs': { redirect: '/docs/getting-started', prerender: false },
+    '/docs/getting-started/ai': { redirect: '/docs/getting-started/ai/mcp', prerender: false },
     '/docs/components': { redirect: '/docs/components/graph', prerender: false },
     '/docs/composables': { redirect: '/docs/composables/use-sigma', prerender: false },
     '/docs/utils': { redirect: '/docs/utils/apply-graph-diff', prerender: false }
