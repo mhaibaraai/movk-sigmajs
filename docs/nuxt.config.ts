@@ -48,6 +48,14 @@ export default defineNuxtConfig({
     }
   },
 
+  hooks: {
+    // UChart 依赖未安装的可选 peer @tanstack/charts，先于 Layer 的 ComponentCode 注册表移除，避免被打包后构建失败
+    'components:extend': (components) => {
+      const index = components.findIndex(c => c.pascalName === 'UChart')
+      if (index !== -1) components.splice(index, 1)
+    }
+  },
+
   aiChat: {
     model: 'alibaba/qwen3.8-27b',
     models: [
@@ -70,6 +78,10 @@ export default defineNuxtConfig({
   mcp: {
     name: 'Movk Sigma',
     browserRedirect: '/docs/getting-started/ai/mcp'
+  },
+
+  movkNuxtDocs: {
+    componentDocs: true
   },
 
   sigma: {
