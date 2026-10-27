@@ -78,7 +78,12 @@ export default defineAppConfig({
   },
   github: {
     rootDir: 'docs',
-    commitPath: 'src/runtime'
+    commitPath: 'src/runtime',
+    dateFormat: {
+      options: {
+        timeZone: 'Asia/Shanghai'
+      }
+    }
   },
   toc: {
     bottom: {
