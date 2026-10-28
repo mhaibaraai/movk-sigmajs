@@ -31,7 +31,6 @@ export default defineNuxtConfig({
 
   routeRules: {
     '/docs': { redirect: '/docs/getting-started', prerender: false },
-    '/docs/getting-started/ai': { redirect: '/docs/getting-started/ai/mcp', prerender: false },
     '/docs/components': { redirect: '/docs/components/graph', prerender: false },
     '/docs/composables': { redirect: '/docs/composables/use-sigma', prerender: false },
     '/docs/utils': { redirect: '/docs/utils/apply-graph-diff', prerender: false }
@@ -46,14 +45,6 @@ export default defineNuxtConfig({
         '@movk/core',
         'sigma/types'
       ]
-    }
-  },
-
-  hooks: {
-    // UChart 依赖未安装的可选 peer @tanstack/charts，先于 Layer 的 ComponentCode 注册表移除，避免被打包后构建失败
-    'components:extend': (components) => {
-      const index = components.findIndex(c => c.pascalName === 'UChart')
-      if (index !== -1) components.splice(index, 1)
     }
   },
 

@@ -12,7 +12,7 @@
     "@ai-sdk/vue": "^4.0.154",
     "@comark/vue": "^0.7.0",
     "@iconify-json/lucide": "^1.2.133",
-    "@movk/nuxt-docs": "^3.0.0",
+    "@movk/nuxt-docs": "^3.0.1",
     "@movk/sigma": "workspace:*",
     "@nuxt/content": "^3.16.0",
     "@nuxt/ui": "^4.11.1",
