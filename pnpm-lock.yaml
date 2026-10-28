@@ -307,8 +307,8 @@ importers:
         specifier: ^1.2.133
         version: 1.2.147
       '@movk/nuxt-docs':
-        specifier: ^3.0.1
-        version: 3.0.1(3329cff07cb5b8e793f0c84f9c3586d9)
+        specifier: ^3.0.2
+        version: 3.0.2(3329cff07cb5b8e793f0c84f9c3586d9)
       '@movk/sigma':
         specifier: workspace:*
         version: link:..
@@ -1840,8 +1840,8 @@ packages:
     peerDependencies:
       vue: ^3.5.25
 
-  '@movk/nuxt-docs@3.0.1':
-    resolution: {integrity: sha512-lyUIVpCxQmX6l8nAvyx2m4yqXIp/3uZfdsUm5JEBrJQp3Dob32vDFQxbonDZB+Oq2F1OBOH1a90epcFJ67vuKQ==}
+  '@movk/nuxt-docs@3.0.2':
+    resolution: {integrity: sha512-jVClupVThfBq4FqhJX0WvUj3Sd6c01Au0oh+q9s51V4OArEWy7FXCxQQKfIJl/QFjurjbRfsXsKV/9UiM1cQyA==}
     engines: {node: '>=22.5'}
     peerDependencies:
       '@ai-sdk/openai': ^4.0.89
@@ -10383,7 +10383,7 @@ snapshots:
       '@vueuse/core': 15.0.0(vue@3.5.44(typescript@6.0.3))
       vue: 3.5.44(typescript@6.0.3)
 
-  '@movk/nuxt-docs@3.0.1(3329cff07cb5b8e793f0c84f9c3586d9)':
+  '@movk/nuxt-docs@3.0.2(3329cff07cb5b8e793f0c84f9c3586d9)':
     dependencies:
       '@fontsource-variable/fraunces': 5.3.0
       '@fontsource-variable/inter': 5.3.0
