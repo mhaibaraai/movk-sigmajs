@@ -307,8 +307,8 @@ importers:
         specifier: ^1.2.133
         version: 1.2.147
       '@movk/nuxt-docs':
-        specifier: ^3.0.0
-        version: 3.0.0(e48e5c0f77da669e302a0fed0e39dce2)
+        specifier: ^3.0.1
+        version: 3.0.1(3329cff07cb5b8e793f0c84f9c3586d9)
       '@movk/sigma':
         specifier: workspace:*
         version: link:..
@@ -1840,13 +1840,13 @@ packages:
     peerDependencies:
       vue: ^3.5.25
 
-  '@movk/nuxt-docs@3.0.0':
-    resolution: {integrity: sha512-eXtTX0WTJPcbqbVGY/5mGpaK59uDVmtyzW0hYJjcmx0/jsOuks26hZ3jFPhrVuQEpBtps2aW3UO66kz3q0KqTA==}
+  '@movk/nuxt-docs@3.0.1':
+    resolution: {integrity: sha512-lyUIVpCxQmX6l8nAvyx2m4yqXIp/3uZfdsUm5JEBrJQp3Dob32vDFQxbonDZB+Oq2F1OBOH1a90epcFJ67vuKQ==}
     engines: {node: '>=22.5'}
     peerDependencies:
       '@ai-sdk/openai': ^4.0.89
       '@ai-sdk/vue': ^4.0.133
-      '@comark/vue': ^0.7.0
+      '@comark/vue': ^0.7.0 || ^0.8.0
       '@nuxt/a11y': ^1.0.0-alpha.1
       '@nuxt/content': ^3.15.0
       '@nuxtjs/i18n': ^10.6.0
@@ -1857,7 +1857,7 @@ packages:
       dompurify: 3.x
       mermaid: 11.x || 12.x
       nuxt: 4.x
-      nuxt-component-meta: ^0.18.0
+      nuxt-component-meta: ^0.18.0 || ^0.19.0
       prettier: ^3.9.9
       tailwindcss: 4.x
       typescript: ^6.0.3
@@ -6986,14 +6986,14 @@ packages:
   nth-check@2.1.1:
     resolution: {integrity: sha512-lqjrjmaOoAnWfMmBPL+XNnynZh2+swxiX3WUE0s4yEHI6m+AwrK2UZOimIRl3X/4QctVqS8AiZjFqyOGrMXb/w==}
 
-  nuxt-agent-discovery@0.7.1:
-    resolution: {integrity: sha512-Uu0OYaguwAeZLjFCyg+tR1516K+R1r7KezS/dZdcZvV2ILMzDkRKXFO4tuBxJjcBOacaX7v3p+affz5IKSuTZQ==}
+  nuxt-agent-discovery@0.8.1:
+    resolution: {integrity: sha512-dx44F/zHtxfbg+YoSX1aoCAwxuFmls8uphkxLBXvCInLBoTdw7htwZmL15XyLMuGtGdlQmfZoclx52vekVi7og==}
     peerDependencies:
-      '@nuxt/content': ^3.0.0
+      '@nuxt/content': ^3.7.0
       '@nuxtjs/mcp-toolkit': '>=0.19.0'
-      '@nuxtjs/robots': ^6.0.0
-      '@nuxtjs/sitemap': ^8.0.0
-      comark: ^0.6.0
+      '@nuxtjs/robots': ^6.0.0 || ^7.0.0
+      '@nuxtjs/sitemap': ^8.0.0 || ^9.0.0
+      comark: ^0.6.0 || ^0.7.0 || ^0.8.0
       nuxt-llms: '>=0.1.0'
     peerDependenciesMeta:
       '@nuxt/content':
@@ -7016,8 +7016,8 @@ packages:
   nuxt-define@1.0.0:
     resolution: {integrity: sha512-CYZ2WjU+KCyCDVzjYUM4eEpMF0rkPmkpiFrybTqqQCRpUbPt2h3snswWIpFPXTi+osRCY6Og0W/XLAQgDL4FfQ==}
 
-  nuxt-llms@0.2.0:
-    resolution: {integrity: sha512-GoEW00x8zaZ1wS0R0aOYptt3b54JEaRwlyVtuAiQoH51BwYdjN5/3+00/+4wi39M5cT4j5XcnGwOxJ7v4WVb9A==}
+  nuxt-llms@0.3.1:
+    resolution: {integrity: sha512-b1aIbOXdIIYDV902bOwg9YqfweJJWTwWfc8SQxkUoycmf9Fapu+Rf2dmLcrRBs9k0ctsMCC7esnU6Y/6DI/KPw==}
 
   nuxt-og-image@6.10.4:
     resolution: {integrity: sha512-UxbqEwDev09aKNqn2qXoyvJT3SsU+ShUmbfLq+P0dytpagyzGTmDQJxyrtdQeMFZbW+fxyLJ5U6QdupumhWcnw==}
@@ -10383,7 +10383,7 @@ snapshots:
       '@vueuse/core': 15.0.0(vue@3.5.44(typescript@6.0.3))
       vue: 3.5.44(typescript@6.0.3)
 
-  '@movk/nuxt-docs@3.0.0(e48e5c0f77da669e302a0fed0e39dce2)':
+  '@movk/nuxt-docs@3.0.1(3329cff07cb5b8e793f0c84f9c3586d9)':
     dependencies:
       '@fontsource-variable/fraunces': 5.3.0
       '@fontsource-variable/inter': 5.3.0
@@ -10411,8 +10411,8 @@ snapshots:
       minimark: 1.0.0
       motion-v: 2.8.0(@vueuse/core@15.0.0(vue@3.5.44(typescript@6.0.3)))(vue@3.5.44(typescript@6.0.3))
       nuxt: 4.6.3(@babel/plugin-syntax-jsx@7.29.7(@babel/core@7.29.7(supports-color@10.2.2)))(@babel/plugin-syntax-typescript@7.29.7(@babel/core@7.29.7(supports-color@10.2.2)))(@oxc-project/types@0.155.0)(@types/node@26.6.5)(@vue/compiler-sfc@3.5.44)(acorn@8.19.0)(confbox@0.2.4)(db0@0.4.1)(dotenv@17.4.2)(esbuild@0.28.2)(eslint@10.13.0(jiti@2.7.0)(supports-color@10.2.2))(giget@3.3.1)(ioredis@5.11.1(supports-color@10.2.2))(lightningcss@1.33.0)(mlly@1.8.2)(optionator@0.9.4)(oxc-parser@0.141.0)(rolldown@1.2.15)(rollup-plugin-visualizer@7.1.1(rolldown@1.2.15)(rollup@4.65.1))(rollup@4.65.1)(srvx@1.0.8)(supports-color@10.2.2)(terser@5.51.2)(typescript@6.0.3)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))(vue-tsc@3.3.13(typescript@6.0.3))(yaml@2.9.1)
-      nuxt-agent-discovery: 0.7.1(bfa58741abbe9d933b612417b0db05fd)
-      nuxt-llms: 0.2.0(@nuxt/schema@4.6.3)(confbox@0.2.4)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magic-string@1.4.5)(mlly@1.8.2)(oxc-parser@0.141.0)(rolldown@1.2.15)(unplugin@3.5.0(esbuild@0.28.2)(rolldown@1.2.15)(rollup@4.65.1)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)))
+      nuxt-agent-discovery: 0.8.1(ba5e75f3fc223d9be96e35e999800d43)
+      nuxt-llms: 0.3.1(@nuxt/schema@4.6.3)(confbox@0.2.4)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magic-string@1.4.5)(mlly@1.8.2)(oxc-parser@0.141.0)(rolldown@1.2.15)(unplugin@3.5.0(esbuild@0.28.2)(rolldown@1.2.15)(rollup@4.65.1)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)))
       nuxt-og-image: 6.10.4(d4589650b2e9d2ae4390627e8947955d)
       nuxt-schema-org: 6.4.3(7681d099378dd41466b6b5d4f22a6300)
       nuxt-site-config: 4.2.3(422a117954549db6363e3119f40a3619)
@@ -17865,7 +17865,7 @@ snapshots:
     dependencies:
       boolbase: 1.0.0
 
-  nuxt-agent-discovery@0.7.1(bfa58741abbe9d933b612417b0db05fd):
+  nuxt-agent-discovery@0.8.1(ba5e75f3fc223d9be96e35e999800d43):
     dependencies:
       '@nuxt/kit': 4.6.3(@nuxt/schema@4.6.3)(confbox@0.2.4)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magic-string@1.4.5)(mlly@1.8.2)(oxc-parser@0.141.0)(rolldown@1.2.15)(unplugin@3.5.0(esbuild@0.28.2)(rolldown@1.2.15)(rollup@4.65.1)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)))
       defu: 6.1.7
@@ -17877,7 +17877,8 @@ snapshots:
       '@nuxtjs/mcp-toolkit': 0.24.2(@nuxt/schema@4.6.3)(@vue/compiler-sfc@3.5.44)(confbox@0.2.4)(dotenv@17.4.2)(giget@3.3.1)(h3@1.15.11)(jiti@2.7.0)(magic-string@1.4.5)(mlly@1.8.2)(oxc-parser@0.141.0)(rolldown@1.2.15)(rollup@4.65.1)(supports-color@10.2.2)(unplugin@3.5.0(esbuild@0.28.2)(rolldown@1.2.15)(rollup@4.65.1)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)))(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))(vue@3.5.44(typescript@6.0.3))(zod@4.6.7)
       '@nuxtjs/robots': 6.2.4(422a117954549db6363e3119f40a3619)
       '@nuxtjs/sitemap': 8.6.2(6f54d9a8b9a88eb5627ac26ace1844bf)
-      nuxt-llms: 0.2.0(@nuxt/schema@4.6.3)(confbox@0.2.4)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magic-string@1.4.5)(mlly@1.8.2)(oxc-parser@0.141.0)(rolldown@1.2.15)(unplugin@3.5.0(esbuild@0.28.2)(rolldown@1.2.15)(rollup@4.65.1)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)))
+      comark: 0.7.0(shiki@4.5.0)
+      nuxt-llms: 0.3.1(@nuxt/schema@4.6.3)(confbox@0.2.4)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magic-string@1.4.5)(mlly@1.8.2)(oxc-parser@0.141.0)(rolldown@1.2.15)(unplugin@3.5.0(esbuild@0.28.2)(rolldown@1.2.15)(rollup@4.65.1)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)))
     transitivePeerDependencies:
       - '@nuxt/schema'
       - confbox
@@ -17944,7 +17945,7 @@ snapshots:
   nuxt-define@1.0.0:
     optional: true
 
-  nuxt-llms@0.2.0(@nuxt/schema@4.6.3)(confbox@0.2.4)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magic-string@1.4.5)(mlly@1.8.2)(oxc-parser@0.141.0)(rolldown@1.2.15)(unplugin@3.5.0(esbuild@0.28.2)(rolldown@1.2.15)(rollup@4.65.1)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))):
+  nuxt-llms@0.3.1(@nuxt/schema@4.6.3)(confbox@0.2.4)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magic-string@1.4.5)(mlly@1.8.2)(oxc-parser@0.141.0)(rolldown@1.2.15)(unplugin@3.5.0(esbuild@0.28.2)(rolldown@1.2.15)(rollup@4.65.1)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1))):
     dependencies:
       '@nuxt/kit': 4.6.3(@nuxt/schema@4.6.3)(confbox@0.2.4)(dotenv@17.4.2)(giget@3.3.1)(jiti@2.7.0)(magic-string@1.4.5)(mlly@1.8.2)(oxc-parser@0.141.0)(rolldown@1.2.15)(unplugin@3.5.0(esbuild@0.28.2)(rolldown@1.2.15)(rollup@4.65.1)(vite@8.3.5(@types/node@26.6.5)(esbuild@0.28.2)(jiti@2.7.0)(terser@5.51.2)(yaml@2.9.1)))
     transitivePeerDependencies:
