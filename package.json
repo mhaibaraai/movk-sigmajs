@@ -196,7 +196,7 @@
     "graphology-types": "^0.24.8",
     "happy-dom": "^20.14.5",
     "nuxt": "^4.6.2",
-    "release-it": "^21.0.3",
+    "release-it": "^21.1.2",
     "sigma": "4.0.0-beta.6",
     "typescript": "~6.0.3",
     "unbuild": "^3.6.1",
