@@ -8,8 +8,8 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^4.0.103",
-    "@ai-sdk/vue": "^4.0.154",
+    "@ai-sdk/openai": "^4.0.122",
+    "@ai-sdk/vue": "^4.0.179",
     "@comark/vue": "^0.7.0",
     "@iconify-json/lucide": "^1.2.133",
     "@movk/nuxt-docs": "^3.0.2",
@@ -24,7 +24,7 @@
     "@sigma/utils": "4.0.0-alpha.2",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
-    "ai": "^7.0.154",
+    "ai": "^7.0.179",
     "graphology": "^0.26.0",
     "graphology-communities-louvain": "^2.0.2",
     "graphology-layout": "^0.6.1",
