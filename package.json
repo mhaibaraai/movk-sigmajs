@@ -2,7 +2,7 @@
   "name": "@movk/sigma",
   "type": "module",
   "version": "0.3.1",
-  "packageManager": "pnpm@12.4.2",
+  "packageManager": "pnpm@12.23.0",
   "description": "基于 sigma v4 的知识图谱可视化 Nuxt 模块：SigmaGraph 等声明式组件与 composables，覆盖渲染、交互、布局、分析与 DOM 覆盖层，面向 1000+ 节点的大规模图谱。",
   "author": "YiXuan <mhaibaraai@gmail.com>",
   "license": "MIT",
@@ -116,7 +116,7 @@
     "dev:vite:build": "pnpm --filter playground-vite build"
   },
   "dependencies": {
-    "@movk/core": "^1.4.1",
+    "@movk/core": "^1.5.0",
     "@vueuse/core": "^15.0.0",
     "consola": "^3.4.2",
     "defu": "^6.1.7"
@@ -188,7 +188,7 @@
     "@nuxt/test-utils": "^4.3.2",
     "@release-it/conventional-changelog": "^12.0.2",
     "@types/node": "latest",
-    "@vitejs/plugin-vue": "^6.0.9",
+    "@vitejs/plugin-vue": "^6.0.11",
     "@vue/test-utils": "^2.5.1",
     "eslint": "^10.10.0",
     "eslint-plugin-better-tailwindcss": "^4.7.0",
@@ -197,15 +197,15 @@
     "happy-dom": "^20.14.5",
     "nuxt": "^4.6.2",
     "release-it": "^21.0.3",
-    "sigma": "4.0.0-beta.6",
+    "sigma": "4.0.6",
     "typescript": "~6.0.3",
     "unbuild": "^3.6.1",
-    "unplugin": "^3.4.0",
+    "unplugin": "^3.7.0",
     "unplugin-auto-import": "^21.1.0",
     "unplugin-vue-components": "^32.1.0",
-    "vite": "^8.3.0",
+    "vite": "^8.3.8",
     "vitest": "^5.0.1",
-    "vue": "^3.5.42",
-    "vue-tsc": "^3.3.11"
+    "vue": "^3.5.46",
+    "vue-tsc": "^3.3.14"
   }
 }
