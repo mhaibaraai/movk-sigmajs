@@ -1,12 +1,14 @@
 import pkg from '../package.json'
 
+const chatModel = process.env.NUXT_PUBLIC_AI_CHAT_MODEL || 'cloudflare/@cf/qwen/qwen3.8-27b'
+const localD1Id = '00000000-0000-0000-0000-000000000000'
+const databaseId = process.env.CLOUDFLARE_D1_DATABASE_ID || localD1Id
+
 export default defineNuxtConfig({
   extends: ['@movk/nuxt-docs'],
 
   modules: [
-    '../src/module',
-    '@vercel/analytics',
-    '@vercel/speed-insights'
+    '../src/module'
   ],
 
   $development: {
@@ -16,6 +18,42 @@ export default defineNuxtConfig({
   $production: {
     site: {
       url: 'https://sigma.mhaibaraai.cn'
+    },
+    content: {
+      database: { type: 'd1', bindingName: 'DB' }
+    },
+    nitro: {
+      preset: 'cloudflare_module',
+      cloudflare: {
+        deployConfig: true,
+        nodeCompat: true,
+        wrangler: {
+          d1_databases: [{
+            binding: 'DB',
+            database_name: 'movk-sigmajs-content',
+            database_id: databaseId
+          }]
+        }
+      },
+      // Cloudflare merges matching headers. Set these cache headers in public/_headers in override order.
+      routeRules: {
+        '/_nuxt/**': { cache: { maxAge: 0 } },
+        '/_nuxt/builds/**': { cache: { maxAge: 0 } },
+        '/_nuxt/builds/meta/**': { cache: { maxAge: 0 } }
+      }
+    },
+    hooks: {
+      'nitro:build:before'() {
+        if (process.env.WORKERS_CI === '1' && databaseId === localD1Id) {
+          throw new Error('Set CLOUDFLARE_D1_DATABASE_ID in Workers Builds before deploying.')
+        }
+      }
+    },
+    aiChat: {
+      enabled: true
+    },
+    ogImage: {
+      buildCache: { base: 'node_modules/.cache/nuxt/og-image' }
     }
   },
 
@@ -49,11 +87,8 @@ export default defineNuxtConfig({
   },
 
   aiChat: {
-    model: 'alibaba/qwen3.8-27b',
-    models: [
-      'alibaba/qwen3.8-27b',
-      'deepseek/deepseek-v4-pro-0813'
-    ]
+    model: chatModel,
+    models: [chatModel]
   },
 
   llms: {

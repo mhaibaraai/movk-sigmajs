@@ -9,12 +9,16 @@ minimumReleaseAge: 0
 
 overrides:
   h3: 1.15.11
+  nuxt-site-config: 5.0.3
+  site-config-stack: 5.0.3
   typescript: ^6.0.3
 
 allowBuilds:
   '@parcel/watcher': false
   better-sqlite3: false
+  core-js-pure: false
   esbuild: false
   sharp: true
   unrs-resolver: false
   vue-demi: false
+  workerd: false
