@@ -10,7 +10,7 @@
   "dependencies": {
     "@iconify-json/lucide": "^1.2.158",
     "@movk/sigma": "workspace:*",
-    "@nuxt/ui": "^4.13.0",
+    "@nuxt/ui": "^4.13.1",
     "@sigma/export-image": "4.0.0",
     "@sigma/node-border": "4.0.0",
     "@sigma/utils": "4.0.0",
@@ -20,7 +20,7 @@
     "graphology-layout-forceatlas2": "^0.10.1",
     "graphology-layout-noverlap": "^0.4.2",
     "graphology-metrics": "^2.4.2",
-    "nuxt": "^4.6.4",
+    "nuxt": "^4.7.0",
     "sigma": "4.0.6",
     "tailwindcss": "^4.3.5"
   },

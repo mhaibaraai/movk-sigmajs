@@ -9,7 +9,7 @@ minimumReleaseAge: 0
 
 overrides:
   h3: 1.15.11
-  nuxt-site-config: 5.0.3
+  nuxt-site-config: 5.1.1
   site-config-stack: 5.0.3
   typescript: ^6.0.3
 
